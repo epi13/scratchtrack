@@ -19,21 +19,19 @@ The fixed model is eight tracks:
 
 Each track owns **Scratches**, alternate versions of the part. A **Clip** is a lightweight reference to a Scratch placed on the timeline. Reusing, moving, repeating, copying, or snipping a Clip never duplicates its underlying recording.
 
-The Scratch cap is currently 24 per track. That is intentionally higher than the original six because loop recording can create several takes in one session, but the product still expects users to delete obvious misses and keep the drawer useful.
+The general Scratch cap is currently 36 per track. A single Auto Scratch loop session is independently capped at 12 new takes. The product still expects users to delete obvious misses and keep the drawer useful.
 
 ## Runtime layers
 
 ### UI / interaction
 
-React + Pointer Events. Primary timeline interactions are built around the same pointer model for mouse, finger, and pen:
+React + Pointer Events. Primary editing concepts are shared across mouse, finger, and pen, but the interaction mechanics deliberately differ where phones need ordinary scrolling.
 
-- drag a Scratch onto its lane;
-- select and drag a Clip to move it;
-- drag a Clip's right edge to resize it;
-- use large visible controls for snip/copy/paste/duplicate/delete;
-- set Loop In / Out from the playhead.
+Desktop can drag a clip body directly. On touch devices, clip bodies remain scroll-friendly and a dedicated **move handle** enters custom movement. Resize has its own dedicated edge handle. This keeps the majority of each timeline lane available to horizontal/vertical browser gestures instead of claiming every touch as an edit.
 
-The timeline and control banks are horizontally scrollable on small screens. Touch targets receive explicit minimum sizes instead of relying on desktop-sized controls.
+The bar ruler is the second playhead/loop control surface: tap sets the playhead; drag defines a custom contiguous loop range. Track lanes themselves do not seek the transport.
+
+Broad app, arrangement, clip, and Scratch surfaces allow pan/pinch browser gestures. Only small intentional editing handles opt into `touch-action: none`.
 
 ### Arrangement model
 
@@ -43,23 +41,39 @@ For drum and synth clips, extending `lengthBeats` past the source pattern length
 
 Snipping is non-destructive. The left side keeps its original source offset while the right side advances `sourceOffsetBeats` by the split amount.
 
-### Loop transport
+The editor Snap preference is local rather than project musical data. Snap On currently resolves clip movement to 0.125 beats; Snap Off keeps hundredth-beat placement. Movement is committed live so the toolbar and drag ghost can display the exact target and delta while editing.
+
+### Loop transport + recording
 
 The project stores one active loop range. When enabled, transport wraps from `loop.endBeat` back to `loop.startBeat` and the range is highlighted in the ruler and track lanes.
 
-On Bass/Audio tracks, **Take each pass** keeps recording armed while the loop repeats. Each completed pass is persisted as a separate Scratch. This is deliberately a take-generation workflow rather than an overdub/compositing system.
+Bass/Audio loop recording follows a fixed simple state machine:
+
+1. Record arms microphone/interface capture and starts the **main arrangement transport** from Loop In.
+2. The first full pass is always a **warm-up**. No `MediaRecorder` data is saved.
+3. At the first loop wrap, capture starts.
+4. If `autoScratch` is on (default), one `MediaRecorder` stays active and `requestData()` is called at each subsequent loop boundary.
+5. Each requested Blob becomes an independent Scratch.
+6. At 12 requested loop takes, the recorder stops automatically while arrangement playback may continue.
+7. If Auto Scratch is off, the recorder begins after warm-up but runs continuously until explicitly stopped, producing one Scratch.
+
+Using one recorder after warm-up avoids deliberately inserting a stop/restart gap between every pass. Browser event scheduling is still not sample-accurate, so real-device loop-boundary testing remains important.
+
+Pause or Stop on the main transport terminates an active recording session. Record is therefore part of the transport workflow rather than a disconnected microphone action.
 
 ### Audio
 
-The Web Audio API powers the synthesized drum kit, metronome, synth, and processed playback of recorded Scratches. `MediaRecorder` handles compact microphone/interface capture. Scratchtrack asks for mono capture and prefers Opus/WebM at roughly 96 kbps when supported.
+The Web Audio API powers the synthesized drum kit, metronome, synth, processed playback of recorded Scratches, and local waveform decoding. `MediaRecorder` handles compact microphone/interface capture. Scratchtrack asks for mono capture and prefers Opus/WebM at roughly 96 kbps when supported.
 
 Drum playback exposes swing/humanization and compact timbre controls. Synth playback exposes oscillator, filter, envelope, drive, and LFO settings. Recorded audio is kept clean in IndexedDB while track mix settings remain editable in project JSON.
+
+The selected audio Scratch waveform is derived on demand from the stored Blob. Peaks are display data only and are not persisted.
 
 ### Local-first persistence
 
 Project structure is JSON stored in `localStorage`. Recorded Blob data is kept separately in IndexedDB so binary audio never inflates the project document. Local save is immediate and does not depend on network access.
 
-Project format v2 is normalized at load/import time; v1 projects are upgraded in memory without requiring a manual migration step.
+Project format v3 is normalized at load/import time; v1 and v2 projects are upgraded in memory without a manual migration step. The migration intentionally enables Auto Scratch for older prototype projects to match the new default workflow.
 
 ### Google Drive
 
@@ -76,6 +90,7 @@ The next Drive milestone is Google Picker-based opening of collaborator-shared p
 - A Scratch can be reused by multiple Clips.
 - Audio is stored once per Scratch.
 - Moving/copying/repeating/snipping Clips only changes JSON references.
+- Waveforms are regenerated locally instead of stored as redundant media.
 - Musical edits update local state before any remote sync begins.
 - Remote sync errors must never discard the local copy.
 - Loop take capture creates new Scratches rather than destructively replacing prior takes.
