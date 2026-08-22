@@ -1,6 +1,6 @@
 # Scratchtrack architecture
 
-Scratchtrack is intentionally a **static application shell with private user-owned data**. GitHub Pages can serve the public code while the musical projects stay in the browser and, when enabled, in Google Drive.
+Scratchtrack is intentionally a **static application shell with private user-owned data**. GitHub Pages can serve the public code while musical projects stay in the browser and, when enabled, in Google Drive.
 
 ## Product boundary
 
@@ -17,21 +17,49 @@ The fixed model is eight tracks:
 7. Audio 4
 8. Audio 5
 
-Each track owns at most six **Scratches**, alternate versions of the part. A **Clip** is a reference to a Scratch placed on the timeline. Reusing a Scratch never duplicates its underlying audio.
+Each track owns **Scratches**, alternate versions of the part. A **Clip** is a lightweight reference to a Scratch placed on the timeline. Reusing, moving, repeating, copying, or snipping a Clip never duplicates its underlying recording.
+
+The Scratch cap is currently 24 per track. That is intentionally higher than the original six because loop recording can create several takes in one session, but the product still expects users to delete obvious misses and keep the drawer useful.
 
 ## Runtime layers
 
 ### UI / interaction
 
-React + Pointer Events. All primary interactions are designed so pointer input can come from a mouse, finger, or pen. The timeline is horizontally scrollable on small screens.
+React + Pointer Events. Primary timeline interactions are built around the same pointer model for mouse, finger, and pen:
+
+- drag a Scratch onto its lane;
+- select and drag a Clip to move it;
+- drag a Clip's right edge to resize it;
+- use large visible controls for snip/copy/paste/duplicate/delete;
+- set Loop In / Out from the playhead.
+
+The timeline and control banks are horizontally scrollable on small screens. Touch targets receive explicit minimum sizes instead of relying on desktop-sized controls.
+
+### Arrangement model
+
+A Clip stores `trackId`, `scratchId`, `startBeat`, `lengthBeats`, and `sourceOffsetBeats`.
+
+For drum and synth clips, extending `lengthBeats` past the source pattern length repeats the musical pattern modulo its natural length. For recorded audio, clip length is bounded by the remaining source duration; Scratchtrack does not time-stretch audio.
+
+Snipping is non-destructive. The left side keeps its original source offset while the right side advances `sourceOffsetBeats` by the split amount.
+
+### Loop transport
+
+The project stores one active loop range. When enabled, transport wraps from `loop.endBeat` back to `loop.startBeat` and the range is highlighted in the ruler and track lanes.
+
+On Bass/Audio tracks, **Take each pass** keeps recording armed while the loop repeats. Each completed pass is persisted as a separate Scratch. This is deliberately a take-generation workflow rather than an overdub/compositing system.
 
 ### Audio
 
-The Web Audio API powers the synthesized drum kit, metronome, and analog-style synth. `MediaRecorder` handles compressed microphone / interface capture. Scratchtrack currently asks for mono capture and prefers Opus/WebM at roughly 96 kbps when the browser exposes it.
+The Web Audio API powers the synthesized drum kit, metronome, synth, and processed playback of recorded Scratches. `MediaRecorder` handles compact microphone/interface capture. Scratchtrack asks for mono capture and prefers Opus/WebM at roughly 96 kbps when supported.
+
+Drum playback exposes swing/humanization and compact timbre controls. Synth playback exposes oscillator, filter, envelope, drive, and LFO settings. Recorded audio is kept clean in IndexedDB while track mix settings remain editable in project JSON.
 
 ### Local-first persistence
 
 Project structure is JSON stored in `localStorage`. Recorded Blob data is kept separately in IndexedDB so binary audio never inflates the project document. Local save is immediate and does not depend on network access.
+
+Project format v2 is normalized at load/import time; v1 projects are upgraded in memory without requiring a manual migration step.
 
 ### Google Drive
 
@@ -47,8 +75,10 @@ The next Drive milestone is Google Picker-based opening of collaborator-shared p
 - A timeline Clip references a Scratch ID.
 - A Scratch can be reused by multiple Clips.
 - Audio is stored once per Scratch.
+- Moving/copying/repeating/snipping Clips only changes JSON references.
 - Musical edits update local state before any remote sync begins.
 - Remote sync errors must never discard the local copy.
+- Loop take capture creates new Scratches rather than destructively replacing prior takes.
 
 ## GitHub Pages
 
