@@ -82,7 +82,8 @@ export interface LoopState {
   enabled: boolean;
   startBeat: number;
   endBeat: number;
-  captureEachPass: boolean;
+  /** Automatically make a new Scratch for each completed pass after the warm-up lap. */
+  autoScratch: boolean;
 }
 
 export interface DriveState {
@@ -93,7 +94,7 @@ export interface DriveState {
 
 export interface ScratchtrackProject {
   format: 'scratchtrack-project';
-  version: 2;
+  version: 3;
   id: string;
   title: string;
   bpm: number;
