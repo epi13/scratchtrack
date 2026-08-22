@@ -6,7 +6,6 @@ The roadmap is ordered around one question: **does this make exchanging a musica
 
 - [x] Fixed eight-track arrangement
 - [x] Contextual editor for track type
-- [x] Six-Scratch variation model
 - [x] Pointer-based Scratch drag to timeline
 - [x] Functional synthesized 16-step drum sequencer
 - [x] Accent velocity states in drum steps
@@ -25,7 +24,27 @@ The roadmap is ordered around one question: **does this make exchanging a musica
 - [x] GitHub Pages build/deploy workflow
 - [x] Mobile responsive layout
 
-## v0.2 — collaboration that stays simple
+## v0.2 — arrangement + focused looping
+
+- [x] Select and move timeline clips with pointer/touch
+- [x] Resize clips with a dedicated right-edge touch handle
+- [x] Drum/synth clip stretching repeats the underlying pattern
+- [x] Non-destructive clip snip at playhead
+- [x] Source offsets preserved after audio snips
+- [x] Copy, paste, duplicate and delete clip actions
+- [x] Desktop editing shortcuts without making them required
+- [x] Loop In / Out points
+- [x] Visible loop-region overlay in ruler and lanes
+- [x] Looping transport
+- [x] Continuous take capture: every completed loop can become a new Scratch
+- [x] Scratch safety cap raised to 24 for loop take workflows
+- [x] Persistent richer drum controls: swing, humanize, output, punch, brightness
+- [x] Expanded synth patch: detune, resonance, sustain, drive, LFO rate/depth
+- [x] Persistent audio-track trim/tone/compression/volume/pan/space controls
+- [x] Phone-oriented scrollable control banks and larger touch targets
+- [x] Project format v2 and v1 migration
+
+## v0.3 — collaboration that stays simple
 
 - [ ] Google Picker for intentionally opening a shared Scratchtrack project folder
 - [ ] Drive revision IDs and optimistic conflict checks
@@ -34,28 +53,29 @@ The roadmap is ordered around one question: **does this make exchanging a musica
 - [ ] Pull remote changes without replacing unsynced local work
 - [ ] Compact change journal: added Scratch, changed pattern, placed Clip
 
-## v0.3 — stronger capture
+## v0.4 — stronger capture
 
 - [ ] Input device selector
 - [ ] Real input meter from `AnalyserNode`
 - [ ] Count-in and punch recording
 - [ ] Waveform overview generation
-- [ ] Clip trim and short fade handles
-- [ ] Non-destructive bass/audio processing chain
+- [ ] Short audio fade handles
+- [ ] Better non-destructive bass/audio processing chain
 - [ ] Audio latency calibration per device
+- [ ] Tighten loop-boundary capture so adjacent loop takes have minimal boundary gaps across browsers
 
-## v0.4 — stronger musical structure
+## v0.5 — stronger musical structure
 
 - [ ] Named sections: Intro / Verse / Chorus / Bridge / Outro
 - [ ] Section duplication and rearrangement
 - [ ] Variable drum-pattern lengths
-- [ ] Swing and per-step microtiming
-- [ ] Drum probability / flam where musically useful
+- [ ] Per-step microtiming and probability / flam where musically useful
 - [ ] MIDI keyboard input
 - [ ] MIDI quantize strength rather than only hard quantize
 - [ ] Synth preset library and six macro controls
+- [ ] Optional clip fade and gain envelope without automation-lane complexity
 
-## v0.5 — sharing and preview
+## v0.6 — sharing and preview
 
 - [ ] Offline arrangement rendering to a compact preview file
 - [ ] “What changed?” collaborator comparison
