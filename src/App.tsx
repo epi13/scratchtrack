@@ -16,12 +16,18 @@ import {
   uid,
 } from './store';
 import type { Clip, DrumCell, DrumSettings, Scratch, ScratchtrackProject, SynthPatch, Track } from './types';
+import WaveformDisplay from './WaveformDisplay';
 
 const TOTAL_BEATS = 64;
-const MAX_SCRATCHES = 24;
+const MAX_SCRATCHES = 36;
+const MAX_LOOP_TAKES = 12;
+const SNAP_STEP = 0.125;
 const DRUM_NAMES = ['Kick', 'Snare', 'Hat', 'Open'];
 const SYNTH_KEYS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72];
-const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'D', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+
+type RecordMode = 'none' | 'single' | 'loop-single' | 'loop-auto';
+type RecordingPhase = 'idle' | 'warmup' | 'recording' | 'auto';
 
 function noteName(midi: number) {
   return `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
@@ -33,6 +39,10 @@ function activeScratch(track: Track) {
 
 function quantizeBeat(value: number, step = 0.25) {
   return Math.round(value / step) * step;
+}
+
+function clampBeat(value: number, max = TOTAL_BEATS) {
+  return Math.max(0, Math.min(max, value));
 }
 
 function scratchLengthBeats(track: Track, scratch: Scratch, bpm: number) {
@@ -54,6 +64,14 @@ function barsLabel(beat: number, beatsPerBar: number) {
   return `${Math.floor(beat / beatsPerBar) + 1}.${Math.floor(beat % beatsPerBar) + 1}`;
 }
 
+function precisePositionLabel(beat: number, beatsPerBar: number) {
+  const bar = Math.floor(beat / beatsPerBar) + 1;
+  const beatWithinBar = ((beat % beatsPerBar) + beatsPerBar) % beatsPerBar;
+  const wholeBeat = Math.floor(beatWithinBar) + 1;
+  const fraction = beatWithinBar - Math.floor(beatWithinBar);
+  return fraction > 0.001 ? `${bar}.${wholeBeat} +${fraction.toFixed(3)}b` : `${bar}.${wholeBeat}`;
+}
+
 export default function App() {
   const [project, setProject] = useState<ScratchtrackProject>(() => loadProject());
   const projectRef = useRef(project);
@@ -65,28 +83,42 @@ export default function App() {
   const [playheadBeat, setPlayheadBeat] = useState(0);
   const playheadRef = useRef(0);
   const [metronome, setMetronome] = useState(false);
+  const [snapEnabled, setSnapEnabled] = useState(() => localStorage.getItem('scratchtrack.snap') !== 'off');
   const [recordingTrackId, setRecordingTrackId] = useState<string | null>(null);
   const recordingTrackRef = useRef<string | null>(null);
+  const [recordingPhase, setRecordingPhase] = useState<RecordingPhase>('idle');
+  const [loopTakeCount, setLoopTakeCount] = useState(0);
   const [writeMotif, setWriteMotif] = useState(false);
   const [drivePanelOpen, setDrivePanelOpen] = useState(false);
   const [driveStatus, setDriveStatus] = useState<'local' | 'connecting' | 'connected' | 'syncing' | 'synced' | 'error'>('local');
   const [driveMessage, setDriveMessage] = useState('Saved locally');
   const [dragGhost, setDragGhost] = useState<{ x: number; y: number; label: string } | null>(null);
+  const [moveFeedback, setMoveFeedback] = useState<{ startBeat: number; delta: number } | null>(null);
+  const [loopDraft, setLoopDraft] = useState<{ startBeat: number; endBeat: number } | null>(null);
+
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recorderStreamRef = useRef<MediaStream | null>(null);
   const recorderStartedAtRef = useRef(0);
-  const loopCaptureActiveRef = useRef(false);
-  const loopTakeNumberRef = useRef(1);
+  const recordModeRef = useRef<RecordMode>('none');
+  const loopWarmupRef = useRef(false);
+  const loopRequestedTakeRef = useRef(0);
+  const loopSavedTakeRef = useRef(0);
   const activeAudioRef = useRef<AudioBufferSourceNode[]>([]);
 
   useEffect(() => { projectRef.current = project; }, [project]);
+  useEffect(() => { localStorage.setItem('scratchtrack.snap', snapEnabled ? 'on' : 'off'); }, [snapEnabled]);
 
   const selectedTrack = useMemo(
     () => project.tracks.find((track) => track.id === selectedTrackId) ?? project.tracks[0],
     [project.tracks, selectedTrackId],
   );
   const selectedClip = useMemo(() => project.clips.find((clip) => clip.id === selectedClipId) ?? null, [project.clips, selectedClipId]);
+
+  const editBeat = useCallback((value: number) => {
+    if (snapEnabled) return quantizeBeat(value, SNAP_STEP);
+    return Math.round(value * 100) / 100;
+  }, [snapEnabled]);
 
   const commitProject = useCallback((mutator: (current: ScratchtrackProject) => ScratchtrackProject) => {
     setProject((current) => {
@@ -110,17 +142,22 @@ export default function App() {
     updateTrack(trackId, (track) => ({ ...track, scratches: track.scratches.map((scratch) => scratch.id === scratchId ? mutator(scratch) : scratch) }));
   }, [updateTrack]);
 
+  const stopActiveSources = useCallback(() => {
+    activeAudioRef.current.forEach((source) => { try { source.stop(); } catch { /* already stopped */ } });
+    activeAudioRef.current = [];
+  }, []);
+
   const placeScratch = useCallback((trackId: string, scratchId: string, startBeat = playheadRef.current) => {
     const current = projectRef.current;
     const track = current.tracks.find((item) => item.id === trackId);
     const scratch = track?.scratches.find((item) => item.id === scratchId);
     if (!track || !scratch) return;
-    const snapped = Math.max(0, Math.min(TOTAL_BEATS - 0.25, quantizeBeat(startBeat)));
+    const snapped = clampBeat(editBeat(startBeat), TOTAL_BEATS - 0.25);
     const length = scratchLengthBeats(track, scratch, current.bpm);
     const clip: Clip = { id: uid(), trackId, scratchId, startBeat: snapped, lengthBeats: Math.min(length, TOTAL_BEATS - snapped), sourceOffsetBeats: 0 };
     commitProject((projectNow) => ({ ...projectNow, clips: [...projectNow.clips, clip] }));
     setSelectedClipId(clip.id);
-  }, [commitProject]);
+  }, [commitProject, editBeat]);
 
   const createScratch = useCallback((track: Track) => {
     if (track.scratches.length >= MAX_SCRATCHES) return;
@@ -189,8 +226,13 @@ export default function App() {
   }, []);
 
   const moveClip = useCallback((clipId: string, startBeat: number) => {
-    commitProject((current) => ({ ...current, clips: current.clips.map((clip) => clip.id === clipId ? { ...clip, startBeat: Math.max(0, Math.min(TOTAL_BEATS - clip.lengthBeats, quantizeBeat(startBeat))) } : clip) }));
-  }, [commitProject]);
+    commitProject((current) => ({
+      ...current,
+      clips: current.clips.map((clip) => clip.id === clipId
+        ? { ...clip, startBeat: clampBeat(editBeat(startBeat), TOTAL_BEATS - clip.lengthBeats) }
+        : clip),
+    }));
+  }, [commitProject, editBeat]);
 
   const resizeClip = useCallback((clipId: string, desiredLength: number) => {
     const current = projectRef.current;
@@ -201,14 +243,14 @@ export default function App() {
     if (!track || !scratch) return;
     let maxLength = TOTAL_BEATS - clip.startBeat;
     if (track.kind === 'audio' || track.kind === 'bass') maxLength = Math.min(maxLength, scratchLengthBeats(track, scratch, current.bpm) - (clip.sourceOffsetBeats ?? 0));
-    const lengthBeats = Math.max(0.25, Math.min(maxLength, quantizeBeat(desiredLength)));
+    const lengthBeats = Math.max(snapEnabled ? SNAP_STEP : 0.01, Math.min(maxLength, editBeat(desiredLength)));
     commitProject((projectNow) => ({ ...projectNow, clips: projectNow.clips.map((item) => item.id === clipId ? { ...item, lengthBeats } : item) }));
-  }, [commitProject]);
+  }, [commitProject, editBeat, snapEnabled]);
 
   const splitSelectedClip = useCallback(() => {
     const current = projectRef.current;
     const clip = current.clips.find((item) => item.id === selectedClipId);
-    const split = quantizeBeat(playheadRef.current);
+    const split = editBeat(playheadRef.current);
     if (!clip || split <= clip.startBeat || split >= clip.startBeat + clip.lengthBeats) return;
     const leftLength = split - clip.startBeat;
     const right: Clip = {
@@ -223,7 +265,7 @@ export default function App() {
       clips: [...projectNow.clips.map((item) => item.id === clip.id ? { ...item, lengthBeats: leftLength } : item), right],
     }));
     setSelectedClipId(right.id);
-  }, [commitProject, selectedClipId]);
+  }, [commitProject, editBeat, selectedClipId]);
 
   const copySelectedClip = useCallback(() => {
     const clip = projectRef.current.clips.find((item) => item.id === selectedClipId);
@@ -232,21 +274,21 @@ export default function App() {
 
   const pasteClip = useCallback(() => {
     if (!clipboard) return;
-    const startBeat = Math.max(0, Math.min(TOTAL_BEATS - clipboard.lengthBeats, quantizeBeat(playheadRef.current)));
+    const startBeat = clampBeat(editBeat(playheadRef.current), TOTAL_BEATS - clipboard.lengthBeats);
     const clip = { ...clipboard, id: uid(), startBeat };
     commitProject((current) => ({ ...current, clips: [...current.clips, clip] }));
     setSelectedClipId(clip.id);
     setSelectedTrackId(clip.trackId);
-  }, [clipboard, commitProject]);
+  }, [clipboard, commitProject, editBeat]);
 
   const duplicateSelectedClip = useCallback(() => {
     const clip = projectRef.current.clips.find((item) => item.id === selectedClipId);
     if (!clip) return;
-    const nextStart = Math.min(TOTAL_BEATS - clip.lengthBeats, clip.startBeat + clip.lengthBeats);
+    const nextStart = clampBeat(editBeat(clip.startBeat + clip.lengthBeats), TOTAL_BEATS - clip.lengthBeats);
     const duplicate = { ...clip, id: uid(), startBeat: nextStart };
     commitProject((current) => ({ ...current, clips: [...current.clips, duplicate] }));
     setSelectedClipId(duplicate.id);
-  }, [commitProject, selectedClipId]);
+  }, [commitProject, editBeat, selectedClipId]);
 
   const deleteSelectedClip = useCallback(() => {
     if (!selectedClipId) return;
@@ -308,23 +350,33 @@ export default function App() {
     if (metronome && Math.abs(beat - Math.round(beat)) < 0.02) playMetronome(Math.round(beat) % current.beatsPerBar === 0);
   }, [metronome]);
 
-  const saveRecordedTake = useCallback(async (trackId: string, blob: Blob, durationSeconds: number, loopTake: boolean) => {
+  const cleanupRecordingSession = useCallback(() => {
+    recorderStreamRef.current?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
+    recorderStreamRef.current = null;
+    recorderRef.current = null;
+    recordingTrackRef.current = null;
+    recordModeRef.current = 'none';
+    loopWarmupRef.current = false;
+    setRecordingTrackId(null);
+    setRecordingPhase('idle');
+  }, []);
+
+  const saveRecordedTake = useCallback(async (trackId: string, blob: Blob, durationSeconds: number, loopTake: boolean, takeNumber?: number) => {
     const current = projectRef.current;
     const track = current.tracks.find((item) => item.id === trackId);
-    if (!track) return;
+    if (!track) return false;
     if (track.scratches.length >= MAX_SCRATCHES) {
-      loopCaptureActiveRef.current = false;
       setDriveStatus('error');
-      setDriveMessage(`Scratch limit reached (${MAX_SCRATCHES}). Delete bad takes to keep recording.`);
-      return;
+      setDriveMessage(`Scratch limit reached (${MAX_SCRATCHES}). Delete bad takes before recording more.`);
+      return false;
     }
     const blobId = uid();
     await saveAudioBlob(blobId, blob);
-    const name = loopTake ? `Loop ${String(loopTakeNumberRef.current++).padStart(2, '0')}` : scratchName(track.scratches.length);
+    const name = loopTake && takeNumber ? `Loop ${String(takeNumber).padStart(2, '0')}` : scratchName(track.scratches.length);
     const scratch: Scratch = {
       id: uid(),
       name,
-      note: loopTake ? 'Loop-captured take' : 'Recorded in browser',
+      note: loopTake ? 'Auto Scratch loop take' : 'Recorded with arrangement playback',
       createdAt: new Date().toISOString(),
       audioBlobId: blobId,
       audioMimeType: blob.type,
@@ -332,40 +384,71 @@ export default function App() {
     };
     updateTrack(track.id, (freshTrack) => ({ ...freshTrack, activeScratchId: scratch.id, scratches: [...freshTrack.scratches, scratch] }));
     setDrawerTrackId(track.id);
+    return true;
   }, [updateTrack]);
 
-  const startRecorderPass = useCallback((trackId: string, stream: MediaStream, loopMode: boolean) => {
+  const recorderOptions = useCallback(() => {
     const mimeCandidates = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'];
     const mimeType = mimeCandidates.find((type) => MediaRecorder.isTypeSupported(type));
-    const recorder = new MediaRecorder(stream, mimeType ? { mimeType, audioBitsPerSecond: 96000 } : undefined);
+    return { mimeType, options: mimeType ? { mimeType, audioBitsPerSecond: 96000 } : undefined };
+  }, []);
+
+  const startSingleRecorder = useCallback((trackId: string, stream: MediaStream) => {
+    const { mimeType, options } = recorderOptions();
+    const recorder = new MediaRecorder(stream, options);
     recorderRef.current = recorder;
     recorderChunksRef.current = [];
     recorderStartedAtRef.current = performance.now();
     recorder.ondataavailable = (event) => { if (event.data.size) recorderChunksRef.current.push(event.data); };
     recorder.onstop = () => {
       const blob = new Blob(recorderChunksRef.current, { type: recorder.mimeType || mimeType || 'audio/webm' });
-      const current = projectRef.current;
-      const loopSeconds = Math.max(0.1, (current.loop.endBeat - current.loop.startBeat) * 60 / current.bpm);
       const elapsed = Math.max(0.1, (performance.now() - recorderStartedAtRef.current) / 1000);
-      void saveRecordedTake(trackId, blob, loopMode ? loopSeconds : elapsed, loopMode).then(() => {
-        if (loopCaptureActiveRef.current && recordingTrackRef.current === trackId && stream.active) {
-          window.setTimeout(() => startRecorderPass(trackId, stream, true), 25);
-        } else {
-          stream.getTracks().forEach((mediaTrack) => mediaTrack.stop());
-          recorderStreamRef.current = null;
-          recorderRef.current = null;
-          recordingTrackRef.current = null;
-          setRecordingTrackId(null);
-        }
-      });
+      void saveRecordedTake(trackId, blob, elapsed, false).finally(cleanupRecordingSession);
     };
     recorder.start(200);
-  }, [saveRecordedTake]);
+    setRecordingPhase('recording');
+  }, [cleanupRecordingSession, recorderOptions, saveRecordedTake]);
+
+  const startAutoLoopRecorder = useCallback((trackId: string, stream: MediaStream) => {
+    const { options } = recorderOptions();
+    const recorder = new MediaRecorder(stream, options);
+    recorderRef.current = recorder;
+    recorder.ondataavailable = (event) => {
+      if (!event.data.size) return;
+      if (loopSavedTakeRef.current >= loopRequestedTakeRef.current || loopSavedTakeRef.current >= MAX_LOOP_TAKES) return;
+      const takeNumber = loopSavedTakeRef.current + 1;
+      loopSavedTakeRef.current = takeNumber;
+      setLoopTakeCount(takeNumber);
+      const current = projectRef.current;
+      const loopSeconds = Math.max(0.1, (current.loop.endBeat - current.loop.startBeat) * 60 / current.bpm);
+      void saveRecordedTake(trackId, event.data, loopSeconds, true, takeNumber);
+    };
+    recorder.onstop = cleanupRecordingSession;
+    recorder.start();
+    setRecordingPhase('auto');
+  }, [cleanupRecordingSession, recorderOptions, saveRecordedTake]);
+
+  const stopRecordingSession = useCallback(() => {
+    loopWarmupRef.current = false;
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.stop();
+      return;
+    }
+    cleanupRecordingSession();
+  }, [cleanupRecordingSession]);
+
+  const beginPostWarmupCapture = useCallback(() => {
+    const trackId = recordingTrackRef.current;
+    const stream = recorderStreamRef.current;
+    if (!trackId || !stream?.active) return;
+    if (recordModeRef.current === 'loop-auto') startAutoLoopRecorder(trackId, stream);
+    else if (recordModeRef.current === 'loop-single') startSingleRecorder(trackId, stream);
+  }, [startAutoLoopRecorder, startSingleRecorder]);
 
   const toggleRecording = useCallback(async (track: Track) => {
     if (recordingTrackRef.current === track.id) {
-      loopCaptureActiveRef.current = false;
-      recorderRef.current?.stop();
+      stopRecordingSession();
       return;
     }
     if (recordingTrackRef.current) return;
@@ -373,24 +456,37 @@ export default function App() {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
+      stopActiveSources();
       recorderStreamRef.current = stream;
       recordingTrackRef.current = track.id;
       setRecordingTrackId(track.id);
+      setLoopTakeCount(0);
+      loopRequestedTakeRef.current = 0;
+      loopSavedTakeRef.current = 0;
       const current = projectRef.current;
-      const loopMode = current.loop.enabled && current.loop.captureEachPass;
-      loopCaptureActiveRef.current = loopMode;
-      loopTakeNumberRef.current = 1;
-      if (loopMode) {
+
+      if (current.loop.enabled) {
+        recordModeRef.current = current.loop.autoScratch ? 'loop-auto' : 'loop-single';
+        loopWarmupRef.current = true;
         playheadRef.current = current.loop.startBeat;
         setPlayheadBeat(current.loop.startBeat);
+        setRecordingPhase('warmup');
+        setDriveStatus('local');
+        setDriveMessage('Warm-up pass · playback only, nothing recorded yet');
         setIsPlaying(true);
+        return;
       }
-      startRecorderPass(track.id, stream, loopMode);
+
+      recordModeRef.current = 'single';
+      startSingleRecorder(track.id, stream);
+      setDriveStatus('local');
+      setDriveMessage('Recording with arrangement playback');
+      setIsPlaying(true);
     } catch (error) {
       setDriveMessage(error instanceof Error ? error.message : 'Microphone permission failed.');
       setDriveStatus('error');
     }
-  }, [startRecorderPass]);
+  }, [startSingleRecorder, stopActiveSources, stopRecordingSession]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -401,11 +497,30 @@ export default function App() {
       const loop = current.loop;
       let next = playheadRef.current + 0.25;
       const reachedLoopEnd = loop.enabled && next >= loop.endBeat;
+
       if (reachedLoopEnd) {
-        if (loopCaptureActiveRef.current && recorderRef.current?.state === 'recording') recorderRef.current.stop();
+        if (recordingTrackRef.current && (recordModeRef.current === 'loop-auto' || recordModeRef.current === 'loop-single')) {
+          if (loopWarmupRef.current) {
+            loopWarmupRef.current = false;
+            beginPostWarmupCapture();
+            setDriveMessage(recordModeRef.current === 'loop-auto' ? `Auto Scratch · capturing pass 1/${MAX_LOOP_TAKES}` : 'Warm-up complete · recording');
+          } else if (recordModeRef.current === 'loop-auto' && recorderRef.current?.state === 'recording') {
+            if (loopRequestedTakeRef.current < MAX_LOOP_TAKES) {
+              loopRequestedTakeRef.current += 1;
+              recorderRef.current.requestData();
+              const nextTake = Math.min(MAX_LOOP_TAKES, loopRequestedTakeRef.current + 1);
+              if (loopRequestedTakeRef.current < MAX_LOOP_TAKES) {
+                setDriveMessage(`Auto Scratch · capturing pass ${nextTake}/${MAX_LOOP_TAKES}`);
+              } else {
+                setDriveMessage(`${MAX_LOOP_TAKES} loop Scratches captured · recording stopped`);
+                const recorder = recorderRef.current;
+                window.setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 0);
+              }
+            }
+          }
+        }
         next = loop.startBeat;
-        activeAudioRef.current.forEach((source) => { try { source.stop(); } catch { /* already stopped */ } });
-        activeAudioRef.current = [];
+        stopActiveSources();
       } else if (next >= TOTAL_BEATS) {
         next = loop.enabled ? loop.startBeat : 0;
       }
@@ -414,30 +529,90 @@ export default function App() {
       performStep(next);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [isPlaying, performStep, project.bpm]);
+  }, [beginPostWarmupCapture, isPlaying, performStep, project.bpm, stopActiveSources]);
+
+  const toggleTransport = useCallback(() => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      stopActiveSources();
+      if (recordingTrackRef.current) stopRecordingSession();
+      return;
+    }
+    setIsPlaying(true);
+  }, [isPlaying, stopActiveSources, stopRecordingSession]);
 
   const stopTransport = useCallback(() => {
     setIsPlaying(false);
-    activeAudioRef.current.forEach((source) => { try { source.stop(); } catch { /* already stopped */ } });
-    activeAudioRef.current = [];
+    stopActiveSources();
+    if (recordingTrackRef.current) stopRecordingSession();
     const current = projectRef.current;
     const next = current.loop.enabled ? current.loop.startBeat : 0;
     playheadRef.current = next;
     setPlayheadBeat(next);
-  }, []);
+  }, [stopActiveSources, stopRecordingSession]);
 
   const setLoopIn = useCallback(() => {
-    const point = Math.max(0, Math.min(TOTAL_BEATS - 0.25, quantizeBeat(playheadRef.current)));
-    commitProject((current) => ({ ...current, loop: { ...current.loop, startBeat: Math.min(point, current.loop.endBeat - 0.25) } }));
-  }, [commitProject]);
+    const point = clampBeat(editBeat(playheadRef.current), TOTAL_BEATS - (snapEnabled ? SNAP_STEP : 0.01));
+    commitProject((current) => ({ ...current, loop: { ...current.loop, startBeat: Math.min(point, current.loop.endBeat - (snapEnabled ? SNAP_STEP : 0.01)) } }));
+  }, [commitProject, editBeat, snapEnabled]);
 
   const setLoopOut = useCallback(() => {
-    const point = Math.max(0.25, Math.min(TOTAL_BEATS, quantizeBeat(playheadRef.current)));
-    commitProject((current) => ({ ...current, loop: { ...current.loop, endBeat: Math.max(point, current.loop.startBeat + 0.25) } }));
-  }, [commitProject]);
+    const minimum = snapEnabled ? SNAP_STEP : 0.01;
+    const point = Math.max(minimum, clampBeat(editBeat(playheadRef.current)));
+    commitProject((current) => ({ ...current, loop: { ...current.loop, endBeat: Math.max(point, current.loop.startBeat + minimum) } }));
+  }, [commitProject, editBeat, snapEnabled]);
+
+  const setPlayhead = useCallback((beat: number) => {
+    const value = clampBeat(editBeat(beat));
+    playheadRef.current = value;
+    setPlayheadBeat(value);
+  }, [editBeat]);
+
+  const handleRulerPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const pointerToBeat = (clientX: number) => clampBeat(editBeat(((clientX - rect.left) / rect.width) * TOTAL_BEATS));
+    const startBeat = pointerToBeat(event.clientX);
+    const startX = event.clientX;
+    let endBeat = startBeat;
+    let moved = false;
+    const move = (pointer: PointerEvent) => {
+      if (pointer.pointerId !== event.pointerId) return;
+      endBeat = pointerToBeat(pointer.clientX);
+      if (Math.abs(pointer.clientX - startX) > 6) moved = true;
+      if (moved) {
+        const minimum = snapEnabled ? SNAP_STEP : 0.01;
+        const a = Math.min(startBeat, endBeat);
+        const b = Math.max(startBeat, endBeat);
+        setLoopDraft({ startBeat: a, endBeat: Math.max(a + minimum, b) });
+      }
+    };
+    const up = (pointer: PointerEvent) => {
+      if (pointer.pointerId !== event.pointerId) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      if (moved) {
+        const minimum = snapEnabled ? SNAP_STEP : 0.01;
+        const start = Math.min(startBeat, endBeat);
+        const end = Math.min(TOTAL_BEATS, Math.max(start + minimum, Math.max(startBeat, endBeat)));
+        commitProject((current) => ({ ...current, loop: { ...current.loop, enabled: true, startBeat: start, endBeat: end } }));
+        setPlayhead(start);
+      } else {
+        setPlayhead(startBeat);
+      }
+      setLoopDraft(null);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up, { once: true });
+    window.addEventListener('pointercancel', up, { once: true });
+  }, [commitProject, editBeat, setPlayhead, snapEnabled]);
 
   const handleScratchDrag = useCallback((event: ReactPointerEvent<HTMLElement>, track: Track, scratch: Scratch) => {
     event.preventDefault();
+    event.stopPropagation();
     setDragGhost({ x: event.clientX, y: event.clientY, label: scratch.name });
     const move = (pointer: PointerEvent) => setDragGhost({ x: pointer.clientX, y: pointer.clientY, label: scratch.name });
     const up = (pointer: PointerEvent) => {
@@ -461,29 +636,37 @@ export default function App() {
     event.preventDefault();
     event.stopPropagation();
     const startX = event.clientX;
-    let moved = false;
-    setSelectedClipId(clip.id);
-    setSelectedTrackId(clip.trackId);
     const lane = event.currentTarget.closest('.timeline-lane') as HTMLElement | null;
     if (!lane) return;
     const rect = lane.getBoundingClientRect();
     const original = clip.startBeat;
+    setSelectedClipId(clip.id);
+    setSelectedTrackId(clip.trackId);
     const move = (pointer: PointerEvent) => {
-      if (Math.abs(pointer.clientX - startX) > 3) moved = true;
-      setDragGhost({ x: pointer.clientX, y: pointer.clientY, label });
+      if (pointer.pointerId !== event.pointerId) return;
+      const deltaBeats = ((pointer.clientX - startX) / rect.width) * TOTAL_BEATS;
+      const next = clampBeat(editBeat(original + deltaBeats), TOTAL_BEATS - clip.lengthBeats);
+      moveClip(clip.id, next);
+      const delta = next - original;
+      setMoveFeedback({ startBeat: next, delta });
+      setDragGhost({
+        x: pointer.clientX,
+        y: pointer.clientY,
+        label: `${label} · ${precisePositionLabel(next, projectRef.current.beatsPerBar)} · ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}b`,
+      });
     };
     const up = (pointer: PointerEvent) => {
+      if (pointer.pointerId !== event.pointerId) return;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      if (moved) {
-        const deltaBeats = ((pointer.clientX - startX) / rect.width) * TOTAL_BEATS;
-        moveClip(clip.id, original + deltaBeats);
-      }
+      window.removeEventListener('pointercancel', up);
       setDragGhost(null);
+      window.setTimeout(() => setMoveFeedback(null), 850);
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up, { once: true });
-  }, [moveClip]);
+    window.addEventListener('pointercancel', up, { once: true });
+  }, [editBeat, moveClip]);
 
   const handleClipResize = useCallback((event: ReactPointerEvent<HTMLElement>, clip: Clip) => {
     event.preventDefault();
@@ -493,16 +676,20 @@ export default function App() {
     if (!lane) return;
     const rect = lane.getBoundingClientRect();
     const move = (pointer: PointerEvent) => {
-      const pointerBeat = Math.max(clip.startBeat + 0.25, Math.min(TOTAL_BEATS, ((pointer.clientX - rect.left) / rect.width) * TOTAL_BEATS));
+      if (pointer.pointerId !== event.pointerId) return;
+      const pointerBeat = Math.max(clip.startBeat + (snapEnabled ? SNAP_STEP : 0.01), Math.min(TOTAL_BEATS, ((pointer.clientX - rect.left) / rect.width) * TOTAL_BEATS));
       resizeClip(clip.id, pointerBeat - clip.startBeat);
     };
-    const up = () => {
+    const up = (pointer: PointerEvent) => {
+      if (pointer.pointerId !== event.pointerId) return;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up, { once: true });
-  }, [resizeClip]);
+    window.addEventListener('pointercancel', up, { once: true });
+  }, [resizeClip, snapEnabled]);
 
   const exportProject = useCallback(() => {
     const blob = new Blob([JSON.stringify(projectRef.current, null, 2)], { type: 'application/json' });
@@ -556,6 +743,8 @@ export default function App() {
     }
   }, [commitProject]);
 
+  const visibleLoop = loopDraft ?? project.loop;
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -577,7 +766,7 @@ export default function App() {
       )}
 
       <section className="transport">
-        <button className="transport-main" onClick={() => setIsPlaying((value) => !value)} aria-label={isPlaying ? 'Pause' : 'Play'}>{isPlaying ? 'Ⅱ' : '▶'}</button>
+        <button className="transport-main" onClick={toggleTransport} aria-label={isPlaying ? 'Pause' : 'Play'}>{isPlaying ? 'Ⅱ' : '▶'}</button>
         <button className="transport-stop" onClick={stopTransport} aria-label="Stop">■</button>
         <label className="bpm-control">BPM<input type="number" min="40" max="240" value={project.bpm} onChange={(event) => commitProject((current) => ({ ...current, bpm: Math.min(240, Math.max(40, Number(event.target.value) || 40)) }))} /></label>
         <button className={`toggle-button ${metronome ? 'active' : ''}`} onClick={() => setMetronome((value) => !value)}>Metronome</button>
@@ -585,10 +774,10 @@ export default function App() {
         <div className="loop-controls">
           <button onClick={setLoopIn}>Set In</button><span>{barsLabel(project.loop.startBeat, project.beatsPerBar)}</span>
           <button onClick={setLoopOut}>Set Out</button><span>{barsLabel(project.loop.endBeat, project.beatsPerBar)}</span>
-          <button className={`take-toggle ${project.loop.captureEachPass ? 'active' : ''}`} onClick={() => commitProject((current) => ({ ...current, loop: { ...current.loop, captureEachPass: !current.loop.captureEachPass } }))}>Take each pass</button>
+          <button className={`take-toggle ${project.loop.autoScratch ? 'active' : ''}`} onClick={() => commitProject((current) => ({ ...current, loop: { ...current.loop, autoScratch: !current.loop.autoScratch } }))}>Auto Scratch {project.loop.autoScratch ? 'On' : 'Off'}</button>
         </div>
-        <span className="position-readout">{barsLabel(playheadBeat, project.beatsPerBar)}</span>
-        <input className="transport-scrubber" aria-label="Playhead" type="range" min="0" max={TOTAL_BEATS} step="0.25" value={playheadBeat} onChange={(event) => { const value = Number(event.target.value); playheadRef.current = value; setPlayheadBeat(value); }} />
+        <span className="position-readout">{precisePositionLabel(playheadBeat, project.beatsPerBar)}</span>
+        <input className="transport-scrubber" aria-label="Playhead" type="range" min="0" max={TOTAL_BEATS} step={snapEnabled ? SNAP_STEP : 0.01} value={playheadBeat} onChange={(event) => setPlayhead(Number(event.target.value))} />
       </section>
 
       <section className="editor-panel">
@@ -598,27 +787,42 @@ export default function App() {
         </div>
         {selectedTrack.kind === 'drum' && <DrumEditor track={selectedTrack} updateScratch={updateScratch} onCreateScratch={() => createScratch(selectedTrack)} bpm={project.bpm} />}
         {selectedTrack.kind === 'synth' && <SynthEditor track={selectedTrack} updateScratch={updateScratch} writeMotif={writeMotif} setWriteMotif={setWriteMotif} />}
-        {(selectedTrack.kind === 'bass' || selectedTrack.kind === 'audio') && <AudioEditor track={selectedTrack} updateTrack={updateTrack} recording={recordingTrackId === selectedTrack.id} disabled={Boolean(recordingTrackId && recordingTrackId !== selectedTrack.id)} onRecord={() => void toggleRecording(selectedTrack)} loopCapture={project.loop.enabled && project.loop.captureEachPass} />}
+        {(selectedTrack.kind === 'bass' || selectedTrack.kind === 'audio') && (
+          <AudioEditor
+            track={selectedTrack}
+            updateTrack={updateTrack}
+            recording={recordingTrackId === selectedTrack.id}
+            recordingPhase={recordingTrackId === selectedTrack.id ? recordingPhase : 'idle'}
+            loopTakeCount={recordingTrackId === selectedTrack.id ? loopTakeCount : 0}
+            disabled={Boolean(recordingTrackId && recordingTrackId !== selectedTrack.id)}
+            onRecord={() => void toggleRecording(selectedTrack)}
+            loopEnabled={project.loop.enabled}
+            autoScratch={project.loop.autoScratch}
+          />
+        )}
       </section>
 
       <section className="timeline-section">
         <div className="timeline-title-row">
-          <div><h2>Arrangement</h2><span>Tap a clip to select it. Drag to move. Pull the right edge to resize or repeat.</span></div>
+          <div><h2>Arrangement</h2><span>Scroll the lanes freely. Tap a clip to select; use its move or resize handle to edit on touch.</span></div>
           <span>{project.clips.length} clip{project.clips.length === 1 ? '' : 's'} · {project.tracks.reduce((sum, track) => sum + track.scratches.length, 0)} scratches</span>
         </div>
         <div className="edit-toolbar" aria-label="Clip editing controls">
+          <button className={`snap-toggle ${snapEnabled ? 'active' : ''}`} onClick={() => setSnapEnabled((value) => !value)}>Snap {snapEnabled ? '1/32' : 'Off'}</button>
           <button disabled={!selectedClip} onClick={splitSelectedClip}>Snip @ playhead</button>
           <button disabled={!selectedClip} onClick={copySelectedClip}>Copy</button>
           <button disabled={!clipboard} onClick={pasteClip}>Paste</button>
           <button disabled={!selectedClip} onClick={duplicateSelectedClip}>Duplicate</button>
           <button disabled={!selectedClip} className="danger" onClick={deleteSelectedClip}>Delete</button>
-          <span className="edit-help">{selectedClip ? `Selected: ${barsLabel(selectedClip.startBeat, project.beatsPerBar)} · ${selectedClip.lengthBeats.toFixed(2)} beats` : 'Select a clip to edit'}</span>
+          <span className={`edit-help ${moveFeedback ? 'moving' : ''}`}>{moveFeedback
+            ? `Move → ${precisePositionLabel(moveFeedback.startBeat, project.beatsPerBar)} · ${moveFeedback.delta >= 0 ? '+' : ''}${moveFeedback.delta.toFixed(3)}b`
+            : selectedClip ? `Selected: ${precisePositionLabel(selectedClip.startBeat, project.beatsPerBar)} · ${selectedClip.lengthBeats.toFixed(3)} beats` : 'Select a clip to edit'}</span>
         </div>
         <div className="timeline-scroll">
           <div className="ruler-row">
-            <div className="ruler-label">Tracks</div>
-            <div className="ruler">
-              {project.loop.enabled && <div className="loop-region" style={{ left: `${(project.loop.startBeat / TOTAL_BEATS) * 100}%`, width: `${((project.loop.endBeat - project.loop.startBeat) / TOTAL_BEATS) * 100}%` }}><span>LOOP</span></div>}
+            <div className="ruler-label">Bars · tap = playhead · drag = loop</div>
+            <div className="ruler" onPointerDown={handleRulerPointerDown}>
+              {(project.loop.enabled || loopDraft) && <div className={`loop-region ${loopDraft ? 'draft' : ''}`} style={{ left: `${(visibleLoop.startBeat / TOTAL_BEATS) * 100}%`, width: `${((visibleLoop.endBeat - visibleLoop.startBeat) / TOTAL_BEATS) * 100}%` }}><span>LOOP</span></div>}
               {Array.from({ length: TOTAL_BEATS / 4 }, (_, index) => <span key={index} style={{ left: `${(index * 4 / TOTAL_BEATS) * 100}%` }}>{index + 1}</span>)}
               <div className="playhead" style={{ left: `${(playheadBeat / TOTAL_BEATS) * 100}%` }} />
             </div>
@@ -633,12 +837,7 @@ export default function App() {
                     <span className="track-number">{String(trackIndex + 1).padStart(2, '0')}</span><strong>{track.name}</strong>
                     <div className="track-mini-actions"><button className={track.muted ? 'active' : ''} onClick={(event) => { event.stopPropagation(); updateTrack(track.id, (current) => ({ ...current, muted: !current.muted })); }}>M</button><button className={track.solo ? 'active' : ''} onClick={(event) => { event.stopPropagation(); updateTrack(track.id, (current) => ({ ...current, solo: !current.solo })); }}>S</button></div>
                   </div>
-                  <div className="timeline-lane" data-track-id={track.id} onPointerDown={(event) => {
-                    if ((event.target as HTMLElement).closest('.timeline-clip')) return;
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const beat = quantizeBeat(((event.clientX - rect.left) / rect.width) * TOTAL_BEATS);
-                    playheadRef.current = Math.max(0, Math.min(TOTAL_BEATS, beat)); setPlayheadBeat(playheadRef.current); setSelectedTrackId(track.id); setSelectedClipId(null);
-                  }}>
+                  <div className="timeline-lane" data-track-id={track.id}>
                     <div className="beat-grid" />
                     {project.loop.enabled && <div className="lane-loop-region" style={{ left: `${(project.loop.startBeat / TOTAL_BEATS) * 100}%`, width: `${((project.loop.endBeat - project.loop.startBeat) / TOTAL_BEATS) * 100}%` }} />}
                     <div className="lane-playhead" style={{ left: `${(playheadBeat / TOTAL_BEATS) * 100}%` }} />
@@ -648,8 +847,20 @@ export default function App() {
                       const patternLength = scratchLengthBeats(track, scratch, project.bpm);
                       const repeatCount = (track.kind === 'drum' || track.kind === 'synth') ? Math.max(1, clip.lengthBeats / patternLength) : 1;
                       return (
-                        <div key={clip.id} className={`timeline-clip ${track.kind} ${selectedClipId === clip.id ? 'clip-selected' : ''} ${repeatCount > 1.01 ? 'repeating' : ''}`} style={{ left: `${(clip.startBeat / TOTAL_BEATS) * 100}%`, width: `${Math.max(1.5, (clip.lengthBeats / TOTAL_BEATS) * 100)}%` }} onPointerDown={(event) => handleClipMove(event, clip, scratch.name)} onDoubleClick={() => void auditionScratch(track, scratch)} title="Drag to move · pull right edge to resize · double-click to audition">
-                          <span>{scratch.name}</span><small>{repeatCount > 1.01 ? `${repeatCount.toFixed(repeatCount % 1 ? 1 : 0)}× pattern` : `${clip.lengthBeats.toFixed(1)}b`}</small>
+                        <div
+                          key={clip.id}
+                          className={`timeline-clip ${track.kind} ${selectedClipId === clip.id ? 'clip-selected' : ''} ${repeatCount > 1.01 ? 'repeating' : ''}`}
+                          style={{ left: `${(clip.startBeat / TOTAL_BEATS) * 100}%`, width: `${Math.max(1.5, (clip.lengthBeats / TOTAL_BEATS) * 100)}%` }}
+                          onPointerDown={(event) => {
+                            setSelectedClipId(clip.id);
+                            setSelectedTrackId(track.id);
+                            if (event.pointerType === 'mouse' && !(event.target as HTMLElement).closest('.clip-move,.clip-resize')) handleClipMove(event, clip, scratch.name);
+                          }}
+                          onDoubleClick={() => void auditionScratch(track, scratch)}
+                          title="Tap to select · use ↔ handle on touch · right edge resizes · double-click auditions"
+                        >
+                          <button className="clip-move" aria-label="Move clip" onPointerDown={(event) => handleClipMove(event, clip, scratch.name)}>↔</button>
+                          <span>{scratch.name}</span><small>{repeatCount > 1.01 ? `${repeatCount.toFixed(repeatCount % 1 ? 1 : 0)}× pattern` : `${clip.lengthBeats.toFixed(2)}b`}</small>
                           <button className="clip-resize" aria-label="Resize clip" onPointerDown={(event) => handleClipResize(event, clip)}><i /></button>
                         </div>
                       );
@@ -658,13 +869,18 @@ export default function App() {
                 </div>
                 {scratchesOpen && (
                   <div className="scratch-drawer">
-                    <div className="scratch-drawer-head"><strong>{track.name} scratches</strong><span>{track.scratches.length}/{MAX_SCRATCHES} · delete misses, keep the good takes</span></div>
+                    <div className="scratch-drawer-head"><strong>{track.name} scratches</strong><span>{track.scratches.length}/{MAX_SCRATCHES} · loop sessions add at most {MAX_LOOP_TAKES}</span></div>
                     <div className="scratch-list">
                       {track.scratches.map((scratch) => (
-                        <article className={`scratch-card ${track.activeScratchId === scratch.id ? 'active' : ''}`} key={scratch.id} onPointerDown={(event) => handleScratchDrag(event, track, scratch)}>
-                          <button className="scratch-name" onClick={(event) => { event.stopPropagation(); updateTrack(track.id, (current) => ({ ...current, activeScratchId: scratch.id })); setSelectedTrackId(track.id); }}>{scratch.name}</button>
-                          <input value={scratch.note} placeholder="Add a note…" onPointerDown={(event) => event.stopPropagation()} onChange={(event) => updateScratch(track.id, scratch.id, (current) => ({ ...current, note: event.target.value }))} />
-                          <div className="scratch-card-actions" onPointerDown={(event) => event.stopPropagation()}><button onClick={() => void auditionScratch(track, scratch)}>Hear</button><button onClick={() => placeScratch(track.id, scratch.id)}>Place</button><button className="danger" onClick={() => void deleteScratch(track, scratch)}>×</button></div>
+                        <article className={`scratch-card ${track.activeScratchId === scratch.id ? 'active' : ''}`} key={scratch.id}>
+                          <button className="scratch-name" onClick={() => { updateTrack(track.id, (current) => ({ ...current, activeScratchId: scratch.id })); setSelectedTrackId(track.id); }}>{scratch.name}</button>
+                          <input value={scratch.note} placeholder="Add a note…" onChange={(event) => updateScratch(track.id, scratch.id, (current) => ({ ...current, note: event.target.value }))} />
+                          <div className="scratch-card-actions">
+                            <button onClick={() => void auditionScratch(track, scratch)}>Hear</button>
+                            <button onClick={() => placeScratch(track.id, scratch.id)}>Place</button>
+                            <button className="scratch-drag" onPointerDown={(event) => handleScratchDrag(event, track, scratch)}>Drag</button>
+                            <button className="danger" onClick={() => void deleteScratch(track, scratch)}>×</button>
+                          </div>
                         </article>
                       ))}
                       {track.scratches.length < MAX_SCRATCHES && <button className="new-scratch-card" onClick={() => createScratch(track)}>+ New scratch</button>}
@@ -677,7 +893,7 @@ export default function App() {
         </div>
       </section>
 
-      <footer className="footer-line"><span>Local-first · audio stays in your browser until you sync it</span><span>Scratchtrack v0.2</span></footer>
+      <footer className="footer-line"><span>Local-first · audio stays in your browser until you sync it</span><span>Scratchtrack v0.3</span></footer>
       {dragGhost && <div className="drag-ghost" style={{ transform: `translate(${dragGhost.x + 14}px, ${dragGhost.y + 14}px)` }}>{dragGhost.label}</div>}
     </div>
   );
@@ -773,14 +989,56 @@ function SynthEditor({ track, updateScratch, writeMotif, setWriteMotif }: { trac
   );
 }
 
-function AudioEditor({ track, updateTrack, recording, disabled, onRecord, loopCapture }: { track: Track; updateTrack: (trackId: string, mutator: (track: Track) => Track) => void; recording: boolean; disabled: boolean; onRecord: () => void; loopCapture: boolean }) {
+function AudioEditor({
+  track,
+  updateTrack,
+  recording,
+  recordingPhase,
+  loopTakeCount,
+  disabled,
+  onRecord,
+  loopEnabled,
+  autoScratch,
+}: {
+  track: Track;
+  updateTrack: (trackId: string, mutator: (track: Track) => Track) => void;
+  recording: boolean;
+  recordingPhase: RecordingPhase;
+  loopTakeCount: number;
+  disabled: boolean;
+  onRecord: () => void;
+  loopEnabled: boolean;
+  autoScratch: boolean;
+}) {
   const settings = track.settings ?? defaultChannelSettings;
+  const scratch = activeScratch(track);
   const field = (key: keyof typeof settings, value: number | boolean) => updateTrack(track.id, (current) => ({ ...current, settings: { ...(current.settings ?? defaultChannelSettings), [key]: value } }));
+
+  const phaseTitle = recordingPhase === 'warmup'
+    ? 'Warm-up pass — playback only'
+    : recordingPhase === 'auto'
+      ? `Auto Scratch · ${loopTakeCount}/${MAX_LOOP_TAKES} saved`
+      : recordingPhase === 'recording'
+        ? 'Recording with the arrangement'
+        : loopEnabled && autoScratch
+          ? 'Warm-up first, then Auto Scratch'
+          : track.kind === 'bass' ? 'Clean DI first' : 'Capture first';
+
+  const phaseText = recordingPhase === 'warmup'
+    ? 'Nothing is recorded on the first trip through the loop. Capture starts automatically when the loop returns to the In point.'
+    : recordingPhase === 'auto'
+      ? `Every completed loop becomes a separate Scratch. This session stops automatically after ${MAX_LOOP_TAKES} takes.`
+      : recordingPhase === 'recording'
+        ? 'The Record button now drives the same playback transport, so you hear the arrangement while capturing.'
+        : loopEnabled && autoScratch
+          ? `Record starts the arrangement, gives you one warm-up pass, then can stack up to ${MAX_LOOP_TAKES} loop takes automatically.`
+          : track.kind === 'bass' ? 'Record a compact mono DI and shape it non-destructively for playback.' : 'Capture a compact mono source and keep the original recording untouched.';
+
   return (
     <div className="audio-editor">
       <div className="record-zone">
-        <button className={`record-button ${recording ? 'recording' : ''}`} disabled={disabled} onClick={onRecord}><i />{recording ? 'Stop recording' : loopCapture ? 'Record loop takes' : 'Record new scratch'}</button>
-        <div><strong>{loopCapture ? 'Every loop becomes a Scratch' : track.kind === 'bass' ? 'Clean DI first' : 'Capture first'}</strong><p>{loopCapture ? 'Recording stays armed. Each pass around the loop is saved separately until you stop or reach the scratch limit.' : track.kind === 'bass' ? 'Record a compact mono DI and shape it non-destructively for playback.' : 'Capture a compact mono source and keep the original recording untouched.'}</p></div>
+        <button className={`record-button ${recording ? 'recording' : ''}`} disabled={disabled} onClick={onRecord}><i />{recording ? recordingPhase === 'warmup' ? 'Cancel warm-up' : 'Stop recording' : loopEnabled ? 'Record loop' : 'Record new scratch'}</button>
+        <div><strong>{phaseTitle}</strong><p>{phaseText}</p></div>
       </div>
       <div className="control-bank audio-bank">
         <Control label="Trim" value={settings.inputGain} min={0} max={1} step={0.01} onChange={(value) => field('inputGain', value)} />
@@ -790,8 +1048,9 @@ function AudioEditor({ track, updateTrack, recording, disabled, onRecord, loopCa
         <Control label="Pan" value={settings.pan} min={-1} max={1} step={0.01} onChange={(value) => field('pan', value)} />
         <Control label="Space" value={settings.reverb} min={0} max={1} step={0.01} onChange={(value) => field('reverb', value)} />
       </div>
-      <div className={`input-meter ${recording ? 'live' : ''}`} aria-label="Input activity"><i /><i /><i /><i /><i /><i /><i /><i /></div>
-      <p className="editor-hint">Touch targets and sliders are sized for a phone. Playback uses the track mix controls while the stored source remains clean.</p>
+      <div className={`input-meter ${recordingPhase !== 'idle' ? 'live' : ''}`} aria-label="Input activity"><i /><i /><i /><i /><i /><i /><i /><i /></div>
+      <WaveformDisplay scratch={scratch} />
+      <p className="editor-hint">Select a Scratch in the drawer to inspect its waveform here. The stored source remains clean while track controls shape playback.</p>
     </div>
   );
 }

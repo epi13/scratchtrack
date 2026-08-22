@@ -1,4 +1,4 @@
-import type { ChannelSettings, DrumCell, DrumSettings, ScratchtrackProject, SynthPatch, Track } from './types';
+import type { ChannelSettings, DrumCell, DrumSettings, LoopState, ScratchtrackProject, SynthPatch, Track } from './types';
 
 const PROJECT_KEY = 'scratchtrack.project.v1';
 const DB_NAME = 'scratchtrack-audio';
@@ -37,6 +37,13 @@ export const defaultChannelSettings: ChannelSettings = {
   pan: 0,
   reverb: 0.08,
   monitor: false,
+};
+
+export const defaultLoopState: LoopState = {
+  enabled: false,
+  startBeat: 0,
+  endBeat: 16,
+  autoScratch: true,
 };
 
 function blankPattern(): DrumCell[][] {
@@ -112,7 +119,7 @@ export function createInitialProject(): ScratchtrackProject {
 
   return {
     format: 'scratchtrack-project',
-    version: 2,
+    version: 3,
     id: uid(),
     title: 'Untitled idea',
     bpm: 104,
@@ -121,7 +128,7 @@ export function createInitialProject(): ScratchtrackProject {
     updatedAt: now,
     tracks,
     clips: [{ id: uid(), trackId: drumTrackId, scratchId: drumScratchId, startBeat: 0, lengthBeats: 16, sourceOffsetBeats: 0 }],
-    loop: { enabled: false, startBeat: 0, endBeat: 16, captureEachPass: false },
+    loop: { ...defaultLoopState },
   };
 }
 
@@ -129,7 +136,21 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
   if (!input || typeof input !== 'object') return createInitialProject();
   const raw = input as Record<string, unknown>;
   if (raw.format !== 'scratchtrack-project') return createInitialProject();
-  const source = raw as unknown as Partial<ScratchtrackProject> & { version?: number; tracks?: Track[] };
+
+  const rawVersion = typeof raw.version === 'number' ? raw.version : 1;
+  const source = raw as unknown as {
+    id?: string;
+    title?: string;
+    bpm?: number;
+    beatsPerBar?: number;
+    createdAt?: string;
+    updatedAt?: string;
+    tracks?: Track[];
+    clips?: ScratchtrackProject['clips'];
+    loop?: Partial<LoopState> & { captureEachPass?: boolean };
+    drive?: ScratchtrackProject['drive'];
+  };
+
   const tracks = (source.tracks ?? []).map((track) => ({
     ...track,
     muted: Boolean(track.muted),
@@ -143,9 +164,18 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
   }));
   if (!tracks.length) return createInitialProject();
 
+  const sourceLoop = source.loop ?? {};
+  const loop: LoopState = {
+    enabled: Boolean(sourceLoop.enabled),
+    startBeat: typeof sourceLoop.startBeat === 'number' ? sourceLoop.startBeat : defaultLoopState.startBeat,
+    endBeat: typeof sourceLoop.endBeat === 'number' ? sourceLoop.endBeat : defaultLoopState.endBeat,
+    // v3 intentionally starts Auto Scratch ON. Older prototype projects are upgraded to the new simpler behavior.
+    autoScratch: rawVersion >= 3 ? sourceLoop.autoScratch !== false : true,
+  };
+
   return {
     format: 'scratchtrack-project',
-    version: 2,
+    version: 3,
     id: source.id ?? uid(),
     title: source.title ?? 'Untitled idea',
     bpm: source.bpm ?? 104,
@@ -154,7 +184,7 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
     updatedAt: source.updatedAt ?? new Date().toISOString(),
     tracks,
     clips: (source.clips ?? []).map((clip) => ({ ...clip, sourceOffsetBeats: clip.sourceOffsetBeats ?? 0 })),
-    loop: source.loop ?? { enabled: false, startBeat: 0, endBeat: 16, captureEachPass: false },
+    loop,
     drive: source.drive,
   };
 }

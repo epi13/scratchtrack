@@ -18,19 +18,25 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 - Expanded synth controls: detune, cutoff, resonance, ADSR-like envelope, drive, and filter LFO
 - Mono browser recording for bass and general audio tracks
 - Persisted audio-track mix settings for trim, tone, compression, volume, pan, and space
+- A decoded waveform for the **currently selected audio Scratch** directly below the track controls
 - Local-first project autosave plus IndexedDB audio blobs
-- Up to **24 Scratches** per track so repeated loop takes can be captured without silently replacing older ideas
-- Scratch audition, notes, placement, deletion, and pointer drag-to-timeline
+- Scratch audition, notes, placement, deletion, and deliberate drag-to-timeline controls
 - Timeline clips can be **selected, moved, resized, snipped, copied, pasted, duplicated, and deleted**
 - Drum and synth clips repeat their source pattern when stretched longer
 - Audio clips preserve source offsets when snipped so both halves play the correct portion of the original take
+- More granular clip movement with a **Snap 1/32 / Off** toggle and live position/delta feedback
 - Loop In / Out points with a visible loop region
-- Optional **Take each pass** recording mode: each trip around the active loop becomes a new Scratch until recording is stopped
-- Mute, solo, transport, playhead, metronome, and arrangement playback
-- Project JSON import/export with automatic v1 → v2 migration
+- Tap the bar ruler to set the playhead; drag across the ruler to create a custom multi-bar loop range
+- Loop recording always starts with one full **warm-up pass** where nothing is recorded
+- **Auto Scratch is on by default**; every completed pass after warm-up becomes a separate Scratch
+- Auto Scratch stops after **12 takes per loop recording session**
+- Record starts the same main playback transport, so the arrangement plays while a Scratch is being recorded
+- Pause/Stop on the main transport also ends an active recording session
+- Touch-safe timeline behavior: lane swipes scroll, clip bodies select, and dedicated move/resize handles perform edits on phones
+- Pinch zoom remains available through the primary arrangement and Scratch surfaces
+- Project JSON import/export with automatic v1/v2 → v3 migration
 - Optional Google Drive connection and direct project/audio sync scaffold
 - PWA manifest/service worker for installable phone/desktop use
-- Phone-oriented touch targets and horizontally scrollable control banks
 - GitHub Actions build and GitHub Pages deployment
 
 ## Tracks
@@ -48,22 +54,51 @@ A **Scratch** is an alternate take or variation. A **Clip** is a reference to a 
 
 ## Arrangement editing
 
-Tap a clip to select it. Drag the body to move it. Drag the right-edge handle to change its duration. Drum and synth clips loop their source pattern as they grow; recorded audio clips are trimmed rather than time-stretched.
+Tap a clip to select it. On desktop, drag the clip body to move it. On touch devices, use the dedicated **↔ move handle** so ordinary swipes on the arrangement remain available for scrolling. The right-edge handle changes clip duration.
+
+Drum and synth clips loop their source pattern as they grow. Recorded audio clips are trimmed rather than time-stretched.
 
 The edit toolbar supports:
 
+- **Snap 1/32 / Off**
 - **Snip @ playhead**
 - **Copy** / **Paste**
 - **Duplicate**
 - **Delete**
 
-Desktop shortcuts mirror the basic operations: `Cmd/Ctrl+C`, `Cmd/Ctrl+V`, `Cmd/Ctrl+D`, and Delete/Backspace. The visible buttons remain the primary interface so the same workflow works on a phone.
+While moving a clip, Scratchtrack displays the exact target position and movement delta. Desktop shortcuts mirror the basic operations: `Cmd/Ctrl+C`, `Cmd/Ctrl+V`, `Cmd/Ctrl+D`, and Delete/Backspace. Visible controls remain the primary interface so the workflow also works on a phone.
 
-## Loop recording
+## Loop selection
 
-Enable **Loop**, move the playhead to the desired start and choose **Set In**, then set the end with **Set Out**. Playback wraps inside the highlighted region.
+The main transport scrubber remains the primary fine playhead control. The bar/measure ruler above the tracks is also interactive:
 
-When **Take each pass** is enabled on a Bass or Audio track, recording stays armed across the loop. Each completed pass is written as its own `Loop 01`, `Loop 02`, etc. Scratch. Scratchtrack currently keeps a 24-Scratch safety limit per track; delete obvious misses as you go to keep the drawer useful.
+- **Tap** the ruler to place the playhead.
+- **Drag** across the ruler to define a contiguous custom loop range spanning one or many bars.
+- **Set In / Set Out** remain available in the transport for precise manual endpoints.
+
+Track lanes themselves no longer reposition the playhead when touched. That removes one of the biggest conflicts between timeline editing and normal phone scrolling.
+
+## Loop recording + Auto Scratch
+
+Loop recording is intentionally simple:
+
+1. Define a loop and leave **Auto Scratch On** (the default).
+2. Select Bass or an Audio track and press **Record loop**.
+3. The arrangement starts playing from Loop In.
+4. The **first full loop is warm-up only** — no file is created.
+5. Capture begins automatically when the transport returns to Loop In.
+6. Every completed loop becomes `Loop 01`, `Loop 02`, and so on.
+7. A single session can create up to **12 loop Scratches**, then recording stops automatically while playback may continue.
+
+Auto Scratch uses one continuous `MediaRecorder` and requests a data boundary at each loop completion rather than stopping and reconstructing the recorder on every pass. This reduces browser-dependent gaps between takes.
+
+Turn **Auto Scratch Off** for a simpler single recording after the same warm-up lap. The recorder then keeps running until you stop it rather than creating one Scratch per loop.
+
+The general per-track Scratch safety cap remains larger than one loop session so a 12-take session does not have to replace existing ideas. Delete obvious misses as you go to keep the drawer useful.
+
+## Selected Scratch waveform
+
+Bass and Audio editors show a waveform for the currently active Scratch. Selecting another Scratch in that track's drawer immediately switches the waveform. Waveform peaks are decoded locally from the stored IndexedDB audio; no upload is required.
 
 ## Run locally
 
@@ -99,8 +134,9 @@ The current Drive implementation creates a `Scratchtrack` folder and uploads `pr
 - Capture should be faster than setup.
 - Eight tracks are a feature, not a temporary limitation.
 - Scratches should encourage experiments without becoming an archive dump.
-- Loop-take capture may temporarily create many Scratches; deletion is the intended cleanup mechanism.
-- Touch, mouse, and pen should express the same interactions.
+- The first loop lap is preparation, not a take.
+- Auto Scratch should be automatic unless the musician explicitly turns it off.
+- Touch, mouse, and pen should express the same concepts without sacrificing ordinary phone scrolling or pinch zoom.
 - Musical data stays editable; audio is stored once and referenced.
 - Local work must survive a network or OAuth failure.
 - Arrangement editing should stay direct and tactile rather than growing into a DAW tool matrix.
