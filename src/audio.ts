@@ -170,10 +170,25 @@ export async function playAudioBlob(
 
   const pan = ctx.createStereoPanner();
   pan.pan.value = settings.pan;
+  const dry = ctx.createGain();
+  const wet = ctx.createGain();
+  const delay = ctx.createDelay(0.5);
+  const feedback = ctx.createGain();
   const output = ctx.createGain();
-  output.gain.value = settings.volume;
+  const space = Math.max(0, Math.min(1, settings.reverb));
 
-  source.connect(tone).connect(compressor).connect(pan).connect(output).connect(ctx.destination);
+  dry.gain.value = 1 - space * 0.25;
+  wet.gain.value = space * 0.32;
+  delay.delayTime.value = 0.075 + space * 0.07;
+  feedback.gain.value = Math.min(0.48, space * 0.42);
+  output.gain.value = settings.volume * (0.55 + settings.inputGain * 0.8);
+
+  source.connect(tone).connect(compressor).connect(pan);
+  pan.connect(dry).connect(output);
+  pan.connect(delay).connect(wet).connect(output);
+  delay.connect(feedback).connect(delay);
+  output.connect(ctx.destination);
+
   const offset = Math.max(0, Math.min(offsetSeconds, Math.max(0, buffer.duration - 0.01)));
   const available = Math.max(0.01, buffer.duration - offset);
   const duration = durationSeconds == null ? available : Math.max(0.01, Math.min(durationSeconds, available));
