@@ -2,13 +2,37 @@ export type TrackKind = 'drum' | 'synth' | 'bass' | 'audio';
 export type DrumCell = 0 | 1 | 2;
 export type Waveform = 'sine' | 'triangle' | 'square' | 'sawtooth';
 
+export interface DrumSettings {
+  swing: number;
+  humanize: number;
+  output: number;
+  punch: number;
+  brightness: number;
+}
+
 export interface SynthPatch {
   oscA: Waveform;
   oscB: Waveform;
   oscMix: number;
+  detune: number;
   cutoff: number;
+  resonance: number;
   attack: number;
+  sustain: number;
   release: number;
+  drive: number;
+  lfoRate: number;
+  lfoDepth: number;
+}
+
+export interface ChannelSettings {
+  inputGain: number;
+  tone: number;
+  compression: number;
+  volume: number;
+  pan: number;
+  reverb: number;
+  monitor: boolean;
 }
 
 export interface SynthNote {
@@ -26,6 +50,7 @@ export interface Scratch {
   author?: string;
   drumPattern?: DrumCell[][];
   drumKit?: string;
+  drumSettings?: DrumSettings;
   synthPatch?: SynthPatch;
   synthNotes?: SynthNote[];
   audioBlobId?: string;
@@ -41,6 +66,7 @@ export interface Track {
   solo: boolean;
   activeScratchId?: string;
   scratches: Scratch[];
+  settings: ChannelSettings;
 }
 
 export interface Clip {
@@ -49,6 +75,14 @@ export interface Clip {
   scratchId: string;
   startBeat: number;
   lengthBeats: number;
+  sourceOffsetBeats?: number;
+}
+
+export interface LoopState {
+  enabled: boolean;
+  startBeat: number;
+  endBeat: number;
+  captureEachPass: boolean;
 }
 
 export interface DriveState {
@@ -59,7 +93,7 @@ export interface DriveState {
 
 export interface ScratchtrackProject {
   format: 'scratchtrack-project';
-  version: 1;
+  version: 2;
   id: string;
   title: string;
   bpm: number;
@@ -68,5 +102,6 @@ export interface ScratchtrackProject {
   updatedAt: string;
   tracks: Track[];
   clips: Clip[];
+  loop: LoopState;
   drive?: DriveState;
 }
