@@ -16,18 +16,41 @@ import {
   uid,
 } from './store';
 import type { Clip, DrumCell, DrumSettings, Scratch, ScratchtrackProject, SynthPatch, Track } from './types';
+import DrumGeometry from './DrumGeometry';
 import WaveformDisplay from './WaveformDisplay';
 
 const TOTAL_BEATS = 64;
 const MAX_SCRATCHES = 36;
 const MAX_LOOP_TAKES = 12;
-const SNAP_STEP = 0.125;
 const DRUM_NAMES = ['Kick', 'Snare', 'Hat', 'Open'];
 const SYNTH_KEYS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72];
 const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'D', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 
 type RecordMode = 'none' | 'single' | 'loop-single' | 'loop-auto';
 type RecordingPhase = 'idle' | 'warmup' | 'recording' | 'auto';
+type SnapSetting = 'off' | '1/32' | '1/16' | '1/8' | '1/4' | '1/2' | 'bar';
+
+const SNAP_OPTIONS: Array<{ value: SnapSetting; label: string }> = [
+  { value: 'off', label: 'Off · free' },
+  { value: '1/32', label: '1/32 note' },
+  { value: '1/16', label: '1/16 note' },
+  { value: '1/8', label: '1/8 note' },
+  { value: '1/4', label: 'Beat · 1/4 note' },
+  { value: '1/2', label: '2 beats · 1/2 note' },
+  { value: 'bar', label: 'Whole bar' },
+];
+
+function snapStepFor(setting: SnapSetting, beatsPerBar: number): number | null {
+  switch (setting) {
+    case '1/32': return 0.125;
+    case '1/16': return 0.25;
+    case '1/8': return 0.5;
+    case '1/4': return 1;
+    case '1/2': return 2;
+    case 'bar': return Math.max(1, beatsPerBar);
+    default: return null;
+  }
+}
 
 function noteName(midi: number) {
   return `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
@@ -83,7 +106,11 @@ export default function App() {
   const [playheadBeat, setPlayheadBeat] = useState(0);
   const playheadRef = useRef(0);
   const [metronome, setMetronome] = useState(false);
-  const [snapEnabled, setSnapEnabled] = useState(() => localStorage.getItem('scratchtrack.snap') !== 'off');
+  const [snapSetting, setSnapSetting] = useState<SnapSetting>(() => {
+    const stored = localStorage.getItem('scratchtrack.snapDivision') as SnapSetting | null;
+    if (stored && SNAP_OPTIONS.some((option) => option.value === stored)) return stored;
+    return localStorage.getItem('scratchtrack.snap') === 'off' ? 'off' : '1/4';
+  });
   const [recordingTrackId, setRecordingTrackId] = useState<string | null>(null);
   const recordingTrackRef = useRef<string | null>(null);
   const [recordingPhase, setRecordingPhase] = useState<RecordingPhase>('idle');
@@ -107,18 +134,20 @@ export default function App() {
   const activeAudioRef = useRef<AudioBufferSourceNode[]>([]);
 
   useEffect(() => { projectRef.current = project; }, [project]);
-  useEffect(() => { localStorage.setItem('scratchtrack.snap', snapEnabled ? 'on' : 'off'); }, [snapEnabled]);
+  useEffect(() => { localStorage.setItem('scratchtrack.snapDivision', snapSetting); }, [snapSetting]);
 
   const selectedTrack = useMemo(
     () => project.tracks.find((track) => track.id === selectedTrackId) ?? project.tracks[0],
     [project.tracks, selectedTrackId],
   );
   const selectedClip = useMemo(() => project.clips.find((clip) => clip.id === selectedClipId) ?? null, [project.clips, selectedClipId]);
+  const snapStep = useMemo(() => snapStepFor(snapSetting, project.beatsPerBar), [project.beatsPerBar, snapSetting]);
+  const snapMinimum = snapStep ?? 0.01;
 
   const editBeat = useCallback((value: number) => {
-    if (snapEnabled) return quantizeBeat(value, SNAP_STEP);
+    if (snapStep) return quantizeBeat(value, snapStep);
     return Math.round(value * 100) / 100;
-  }, [snapEnabled]);
+  }, [snapStep]);
 
   const commitProject = useCallback((mutator: (current: ScratchtrackProject) => ScratchtrackProject) => {
     setProject((current) => {
@@ -243,9 +272,9 @@ export default function App() {
     if (!track || !scratch) return;
     let maxLength = TOTAL_BEATS - clip.startBeat;
     if (track.kind === 'audio' || track.kind === 'bass') maxLength = Math.min(maxLength, scratchLengthBeats(track, scratch, current.bpm) - (clip.sourceOffsetBeats ?? 0));
-    const lengthBeats = Math.max(snapEnabled ? SNAP_STEP : 0.01, Math.min(maxLength, editBeat(desiredLength)));
+    const lengthBeats = Math.max(snapMinimum, Math.min(maxLength, editBeat(desiredLength)));
     commitProject((projectNow) => ({ ...projectNow, clips: projectNow.clips.map((item) => item.id === clipId ? { ...item, lengthBeats } : item) }));
-  }, [commitProject, editBeat, snapEnabled]);
+  }, [commitProject, editBeat, snapMinimum]);
 
   const splitSelectedClip = useCallback(() => {
     const current = projectRef.current;
@@ -552,15 +581,14 @@ export default function App() {
   }, [stopActiveSources, stopRecordingSession]);
 
   const setLoopIn = useCallback(() => {
-    const point = clampBeat(editBeat(playheadRef.current), TOTAL_BEATS - (snapEnabled ? SNAP_STEP : 0.01));
-    commitProject((current) => ({ ...current, loop: { ...current.loop, startBeat: Math.min(point, current.loop.endBeat - (snapEnabled ? SNAP_STEP : 0.01)) } }));
-  }, [commitProject, editBeat, snapEnabled]);
+    const point = clampBeat(editBeat(playheadRef.current), TOTAL_BEATS - snapMinimum);
+    commitProject((current) => ({ ...current, loop: { ...current.loop, startBeat: Math.min(point, current.loop.endBeat - snapMinimum) } }));
+  }, [commitProject, editBeat, snapMinimum]);
 
   const setLoopOut = useCallback(() => {
-    const minimum = snapEnabled ? SNAP_STEP : 0.01;
-    const point = Math.max(minimum, clampBeat(editBeat(playheadRef.current)));
-    commitProject((current) => ({ ...current, loop: { ...current.loop, endBeat: Math.max(point, current.loop.startBeat + minimum) } }));
-  }, [commitProject, editBeat, snapEnabled]);
+    const point = Math.max(snapMinimum, clampBeat(editBeat(playheadRef.current)));
+    commitProject((current) => ({ ...current, loop: { ...current.loop, endBeat: Math.max(point, current.loop.startBeat + snapMinimum) } }));
+  }, [commitProject, editBeat, snapMinimum]);
 
   const setPlayhead = useCallback((beat: number) => {
     const value = clampBeat(editBeat(beat));
@@ -583,10 +611,9 @@ export default function App() {
       endBeat = pointerToBeat(pointer.clientX);
       if (Math.abs(pointer.clientX - startX) > 6) moved = true;
       if (moved) {
-        const minimum = snapEnabled ? SNAP_STEP : 0.01;
         const a = Math.min(startBeat, endBeat);
         const b = Math.max(startBeat, endBeat);
-        setLoopDraft({ startBeat: a, endBeat: Math.max(a + minimum, b) });
+        setLoopDraft({ startBeat: a, endBeat: Math.max(a + snapMinimum, b) });
       }
     };
     const up = (pointer: PointerEvent) => {
@@ -595,9 +622,8 @@ export default function App() {
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
       if (moved) {
-        const minimum = snapEnabled ? SNAP_STEP : 0.01;
         const start = Math.min(startBeat, endBeat);
-        const end = Math.min(TOTAL_BEATS, Math.max(start + minimum, Math.max(startBeat, endBeat)));
+        const end = Math.min(TOTAL_BEATS, Math.max(start + snapMinimum, Math.max(startBeat, endBeat)));
         commitProject((current) => ({ ...current, loop: { ...current.loop, enabled: true, startBeat: start, endBeat: end } }));
         setPlayhead(start);
       } else {
@@ -608,7 +634,7 @@ export default function App() {
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up, { once: true });
     window.addEventListener('pointercancel', up, { once: true });
-  }, [commitProject, editBeat, setPlayhead, snapEnabled]);
+  }, [commitProject, editBeat, setPlayhead, snapMinimum]);
 
   const handleScratchDrag = useCallback((event: ReactPointerEvent<HTMLElement>, track: Track, scratch: Scratch) => {
     event.preventDefault();
@@ -677,7 +703,7 @@ export default function App() {
     const rect = lane.getBoundingClientRect();
     const move = (pointer: PointerEvent) => {
       if (pointer.pointerId !== event.pointerId) return;
-      const pointerBeat = Math.max(clip.startBeat + (snapEnabled ? SNAP_STEP : 0.01), Math.min(TOTAL_BEATS, ((pointer.clientX - rect.left) / rect.width) * TOTAL_BEATS));
+      const pointerBeat = Math.max(clip.startBeat + snapMinimum, Math.min(TOTAL_BEATS, ((pointer.clientX - rect.left) / rect.width) * TOTAL_BEATS));
       resizeClip(clip.id, pointerBeat - clip.startBeat);
     };
     const up = (pointer: PointerEvent) => {
@@ -689,7 +715,7 @@ export default function App() {
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up, { once: true });
     window.addEventListener('pointercancel', up, { once: true });
-  }, [resizeClip, snapEnabled]);
+  }, [resizeClip, snapMinimum]);
 
   const exportProject = useCallback(() => {
     const blob = new Blob([JSON.stringify(projectRef.current, null, 2)], { type: 'application/json' });
@@ -777,7 +803,7 @@ export default function App() {
           <button className={`take-toggle ${project.loop.autoScratch ? 'active' : ''}`} onClick={() => commitProject((current) => ({ ...current, loop: { ...current.loop, autoScratch: !current.loop.autoScratch } }))}>Auto Scratch {project.loop.autoScratch ? 'On' : 'Off'}</button>
         </div>
         <span className="position-readout">{precisePositionLabel(playheadBeat, project.beatsPerBar)}</span>
-        <input className="transport-scrubber" aria-label="Playhead" type="range" min="0" max={TOTAL_BEATS} step={snapEnabled ? SNAP_STEP : 0.01} value={playheadBeat} onChange={(event) => setPlayhead(Number(event.target.value))} />
+        <input className="transport-scrubber" aria-label="Playhead" type="range" min="0" max={TOTAL_BEATS} step={snapMinimum} value={playheadBeat} onChange={(event) => setPlayhead(Number(event.target.value))} />
       </section>
 
       <section className="editor-panel">
@@ -808,7 +834,12 @@ export default function App() {
           <span>{project.clips.length} clip{project.clips.length === 1 ? '' : 's'} · {project.tracks.reduce((sum, track) => sum + track.scratches.length, 0)} scratches</span>
         </div>
         <div className="edit-toolbar" aria-label="Clip editing controls">
-          <button className={`snap-toggle ${snapEnabled ? 'active' : ''}`} onClick={() => setSnapEnabled((value) => !value)}>Snap {snapEnabled ? '1/32' : 'Off'}</button>
+          <label className="snap-control">
+            <span>Snap</span>
+            <select value={snapSetting} onChange={(event) => setSnapSetting(event.target.value as SnapSetting)} aria-label="Snap resolution">
+              {SNAP_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
           <button disabled={!selectedClip} onClick={splitSelectedClip}>Snip @ playhead</button>
           <button disabled={!selectedClip} onClick={copySelectedClip}>Copy</button>
           <button disabled={!clipboard} onClick={pasteClip}>Paste</button>
@@ -893,7 +924,7 @@ export default function App() {
         </div>
       </section>
 
-      <footer className="footer-line"><span>Local-first · audio stays in your browser until you sync it</span><span>Scratchtrack v0.3</span></footer>
+      <footer className="footer-line"><span>Local-first · audio stays in your browser until you sync it</span><span>Scratchtrack v0.4</span></footer>
       {dragGhost && <div className="drag-ghost" style={{ transform: `translate(${dragGhost.x + 14}px, ${dragGhost.y + 14}px)` }}>{dragGhost.label}</div>}
     </div>
   );
@@ -906,12 +937,14 @@ function Control({ label, value, min, max, step, onChange, suffix = '' }: { labe
 function DrumEditor({ track, updateScratch, onCreateScratch, bpm }: { track: Track; updateScratch: (trackId: string, scratchId: string, mutator: (scratch: Scratch) => Scratch) => void; onCreateScratch: () => void; bpm: number }) {
   const scratch = activeScratch(track);
   const [previewing, setPreviewing] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'geometry'>(() => localStorage.getItem('scratchtrack.drumView') === 'geometry' ? 'geometry' : 'grid');
   const timerRef = useRef<number | null>(null);
   const stepRef = useRef(0);
   const pattern = scratch?.drumPattern ?? makeBlankPattern();
   const settings = scratch?.drumSettings ?? defaultDrumSettings;
 
   useEffect(() => () => { if (timerRef.current) window.clearInterval(timerRef.current); }, []);
+  useEffect(() => { localStorage.setItem('scratchtrack.drumView', viewMode); }, [viewMode]);
   if (!scratch) return <button className="empty-editor" onClick={onCreateScratch}>Create the first drum scratch</button>;
 
   const cycle = (row: number, step: number) => updateScratch(track.id, scratch.id, (current) => {
@@ -935,7 +968,16 @@ function DrumEditor({ track, updateScratch, onCreateScratch, bpm }: { track: Tra
 
   return (
     <div className="drum-editor">
-      <div className="editor-toolbar"><label>Kit<select value={scratch.drumKit ?? 'Pocket'} onChange={(event) => updateScratch(track.id, scratch.id, (current) => ({ ...current, drumKit: event.target.value }))}><option>Pocket</option><option>Dust</option><option>Machine</option></select></label><button className={previewing ? 'active' : ''} onClick={preview}>{previewing ? 'Stop pattern' : 'Preview pattern'}</button><button onClick={() => updateScratch(track.id, scratch.id, (current) => ({ ...current, drumPattern: makeBlankPattern() }))}>Clear</button><button onClick={onCreateScratch}>Duplicate → scratch</button></div>
+      <div className="editor-toolbar">
+        <label>Kit<select value={scratch.drumKit ?? 'Pocket'} onChange={(event) => updateScratch(track.id, scratch.id, (current) => ({ ...current, drumKit: event.target.value }))}><option>Pocket</option><option>Dust</option><option>Machine</option></select></label>
+        <div className="drum-view-toggle" role="group" aria-label="Drum sequencer view">
+          <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>Grid</button>
+          <button className={viewMode === 'geometry' ? 'active' : ''} onClick={() => setViewMode('geometry')}>Geometry</button>
+        </div>
+        <button className={previewing ? 'active' : ''} onClick={preview}>{previewing ? 'Stop pattern' : 'Preview pattern'}</button>
+        <button onClick={() => updateScratch(track.id, scratch.id, (current) => ({ ...current, drumPattern: makeBlankPattern() }))}>Clear</button>
+        <button onClick={onCreateScratch}>Duplicate → scratch</button>
+      </div>
       <div className="control-bank drum-bank">
         <Control label="Swing" value={settings.swing} min={0} max={1} step={0.01} onChange={(value) => settingsField('swing', value)} />
         <Control label="Human" value={settings.humanize} min={0} max={1} step={0.01} onChange={(value) => settingsField('humanize', value)} />
@@ -943,8 +985,10 @@ function DrumEditor({ track, updateScratch, onCreateScratch, bpm }: { track: Tra
         <Control label="Punch" value={settings.punch} min={0} max={1} step={0.01} onChange={(value) => settingsField('punch', value)} />
         <Control label="Bright" value={settings.brightness} min={0} max={1} step={0.01} onChange={(value) => settingsField('brightness', value)} />
       </div>
-      <div className="step-grid">{DRUM_NAMES.map((name, row) => <div className="step-row" key={name}><span>{name}</span><div className="steps">{pattern[row].map((cell, step) => <button key={step} aria-label={`${name} step ${step + 1}`} className={`step level-${cell} ${step % 4 === 0 ? 'bar-step' : ''}`} onPointerDown={(event) => { event.preventDefault(); cycle(row, step); }}><i /></button>)}</div></div>)}</div>
-      <p className="editor-hint">Stretch a drum clip on the timeline to repeat this four-beat pattern. Tap steps to cycle hit → accent → clear.</p>
+      {viewMode === 'grid'
+        ? <div className="step-grid">{DRUM_NAMES.map((name, row) => <div className="step-row" key={name}><span>{name}</span><div className="steps">{pattern[row].map((cell, step) => <button key={step} aria-label={`${name} step ${step + 1}`} className={`step level-${cell} ${step % 4 === 0 ? 'bar-step' : ''}`} onPointerDown={(event) => { event.preventDefault(); cycle(row, step); }}><i /></button>)}</div></div>)}</div>
+        : <DrumGeometry names={DRUM_NAMES} pattern={pattern} onCycle={cycle} />}
+      <p className="editor-hint">Grid and Geometry edit the exact same pattern. Tap a step/node to cycle hit → accent → clear; switch views whenever a different way of seeing the rhythm helps.</p>
     </div>
   );
 }
