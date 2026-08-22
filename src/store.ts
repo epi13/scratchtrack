@@ -1,4 +1,4 @@
-import type { DrumCell, ScratchtrackProject, SynthPatch, Track } from './types';
+import type { ChannelSettings, DrumCell, DrumSettings, ScratchtrackProject, SynthPatch, Track } from './types';
 
 const PROJECT_KEY = 'scratchtrack.project.v1';
 const DB_NAME = 'scratchtrack-audio';
@@ -6,13 +6,37 @@ const STORE_NAME = 'blobs';
 
 export const uid = () => crypto.randomUUID();
 
+export const defaultDrumSettings: DrumSettings = {
+  swing: 0,
+  humanize: 0,
+  output: 0.88,
+  punch: 0.55,
+  brightness: 0.58,
+};
+
 export const defaultPatch: SynthPatch = {
   oscA: 'sawtooth',
   oscB: 'square',
   oscMix: 0.35,
+  detune: 7,
   cutoff: 2200,
+  resonance: 1.1,
   attack: 0.015,
+  sustain: 0.72,
   release: 0.28,
+  drive: 0.08,
+  lfoRate: 2.2,
+  lfoDepth: 0,
+};
+
+export const defaultChannelSettings: ChannelSettings = {
+  inputGain: 0.72,
+  tone: 0.54,
+  compression: 0.38,
+  volume: 0.82,
+  pan: 0,
+  reverb: 0.08,
+  monitor: false,
 };
 
 function blankPattern(): DrumCell[][] {
@@ -28,6 +52,18 @@ function starterPattern(): DrumCell[][] {
   return pattern;
 }
 
+function makeTrack(name: string, kind: Track['kind']): Track {
+  return {
+    id: uid(),
+    name,
+    kind,
+    muted: false,
+    solo: false,
+    scratches: [],
+    settings: { ...defaultChannelSettings },
+  };
+}
+
 export function createInitialProject(): ScratchtrackProject {
   const now = new Date().toISOString();
   const drumTrackId = uid();
@@ -41,6 +77,7 @@ export function createInitialProject(): ScratchtrackProject {
       kind: 'drum',
       muted: false,
       solo: false,
+      settings: { ...defaultChannelSettings },
       activeScratchId: drumScratchId,
       scratches: [{
         id: drumScratchId,
@@ -49,6 +86,7 @@ export function createInitialProject(): ScratchtrackProject {
         createdAt: now,
         drumPattern: starterPattern(),
         drumKit: 'Pocket',
+        drumSettings: { ...defaultDrumSettings },
       }],
     },
     {
@@ -57,6 +95,7 @@ export function createInitialProject(): ScratchtrackProject {
       kind: 'synth',
       muted: false,
       solo: false,
+      settings: { ...defaultChannelSettings },
       activeScratchId: synthScratchId,
       scratches: [{
         id: synthScratchId,
@@ -67,20 +106,13 @@ export function createInitialProject(): ScratchtrackProject {
         synthNotes: [],
       }],
     },
-    { id: uid(), name: 'Bass', kind: 'bass', muted: false, solo: false, scratches: [] },
-    ...Array.from({ length: 5 }, (_, i) => ({
-      id: uid(),
-      name: `Audio ${i + 1}`,
-      kind: 'audio' as const,
-      muted: false,
-      solo: false,
-      scratches: [],
-    })),
+    makeTrack('Bass', 'bass'),
+    ...Array.from({ length: 5 }, (_, i) => makeTrack(`Audio ${i + 1}`, 'audio')),
   ];
 
   return {
     format: 'scratchtrack-project',
-    version: 1,
+    version: 2,
     id: uid(),
     title: 'Untitled idea',
     bpm: 104,
@@ -88,7 +120,42 @@ export function createInitialProject(): ScratchtrackProject {
     createdAt: now,
     updatedAt: now,
     tracks,
-    clips: [{ id: uid(), trackId: drumTrackId, scratchId: drumScratchId, startBeat: 0, lengthBeats: 16 }],
+    clips: [{ id: uid(), trackId: drumTrackId, scratchId: drumScratchId, startBeat: 0, lengthBeats: 16, sourceOffsetBeats: 0 }],
+    loop: { enabled: false, startBeat: 0, endBeat: 16, captureEachPass: false },
+  };
+}
+
+export function normalizeProject(input: unknown): ScratchtrackProject {
+  if (!input || typeof input !== 'object') return createInitialProject();
+  const raw = input as Record<string, unknown>;
+  if (raw.format !== 'scratchtrack-project') return createInitialProject();
+  const source = raw as unknown as Partial<ScratchtrackProject> & { version?: number; tracks?: Track[] };
+  const tracks = (source.tracks ?? []).map((track) => ({
+    ...track,
+    muted: Boolean(track.muted),
+    solo: Boolean(track.solo),
+    settings: { ...defaultChannelSettings, ...(track.settings ?? {}) },
+    scratches: (track.scratches ?? []).map((scratch) => ({
+      ...scratch,
+      drumSettings: scratch.drumPattern ? { ...defaultDrumSettings, ...(scratch.drumSettings ?? {}) } : scratch.drumSettings,
+      synthPatch: scratch.synthPatch ? { ...defaultPatch, ...scratch.synthPatch } : scratch.synthPatch,
+    })),
+  }));
+  if (!tracks.length) return createInitialProject();
+
+  return {
+    format: 'scratchtrack-project',
+    version: 2,
+    id: source.id ?? uid(),
+    title: source.title ?? 'Untitled idea',
+    bpm: source.bpm ?? 104,
+    beatsPerBar: source.beatsPerBar ?? 4,
+    createdAt: source.createdAt ?? new Date().toISOString(),
+    updatedAt: source.updatedAt ?? new Date().toISOString(),
+    tracks,
+    clips: (source.clips ?? []).map((clip) => ({ ...clip, sourceOffsetBeats: clip.sourceOffsetBeats ?? 0 })),
+    loop: source.loop ?? { enabled: false, startBeat: 0, endBeat: 16, captureEachPass: false },
+    drive: source.drive,
   };
 }
 
@@ -96,9 +163,7 @@ export function loadProject(): ScratchtrackProject {
   const raw = localStorage.getItem(PROJECT_KEY);
   if (!raw) return createInitialProject();
   try {
-    const parsed = JSON.parse(raw) as ScratchtrackProject;
-    if (parsed.format !== 'scratchtrack-project' || parsed.version !== 1) return createInitialProject();
-    return parsed;
+    return normalizeProject(JSON.parse(raw));
   } catch {
     return createInitialProject();
   }
