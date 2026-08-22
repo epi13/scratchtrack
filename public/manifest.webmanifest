@@ -1,0 +1,13 @@
+{
+  "name": "Scratchtrack",
+  "short_name": "Scratchtrack",
+  "description": "A shared 8-track musical scratchpad.",
+  "start_url": "/scratchtrack/",
+  "scope": "/scratchtrack/",
+  "display": "standalone",
+  "background_color": "#0d0e10",
+  "theme_color": "#101113",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
