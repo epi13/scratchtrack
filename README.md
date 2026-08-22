@@ -13,6 +13,8 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 - Fixed **8-track** arrangement: Drums, Synth, Bass, Audio 1–5
 - Context-sensitive editor above the timeline
 - Expressive 16-step drum sequencer with accent velocity and three compact synthesized kits
+- Switchable **Grid / Geometry** drum creation views that edit the exact same pattern data
+- Circular geometric drum sequencing with connected rhythmic shapes for Kick, Snare, Hat, and Open Hat
 - Drum controls for swing, humanize, output, punch, and brightness
 - Two-oscillator analog-style Web Audio synth with editable motifs
 - Expanded synth controls: detune, cutoff, resonance, ADSR-like envelope, drive, and filter LFO
@@ -24,7 +26,9 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 - Timeline clips can be **selected, moved, resized, snipped, copied, pasted, duplicated, and deleted**
 - Drum and synth clips repeat their source pattern when stretched longer
 - Audio clips preserve source offsets when snipped so both halves play the correct portion of the original take
-- More granular clip movement with a **Snap 1/32 / Off** toggle and live position/delta feedback
+- Adjustable arrangement snapping: **Off, 1/32, 1/16, 1/8, Beat (1/4), 2 beats (1/2), or Whole bar**
+- The same selected snap resolution applies to clip edits, playhead stepping, Set In/Out, and ruler-drag loop selection
+- Live position/delta feedback while moving clips
 - Loop In / Out points with a visible loop region
 - Tap the bar ruler to set the playhead; drag across the ruler to create a custom multi-bar loop range
 - Loop recording always starts with one full **warm-up pass** where nothing is recorded
@@ -52,21 +56,34 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 
 A **Scratch** is an alternate take or variation. A **Clip** is a reference to a Scratch placed on the arrangement timeline, so repeating or editing an idea does not duplicate its underlying recording.
 
+## Drum creation views
+
+The drum editor has two interchangeable ways to create the same four-voice, 16-step pattern:
+
+- **Grid** — the direct step-sequencer view.
+- **Geometry** — each drum voice is arranged around a circular 16-step orbit. Active hits are connected in sequence, turning the rhythm into a geometric figure. Accents are visually stronger nodes.
+
+Nothing is converted when switching views. A Kick hit placed at step 5 in Grid is the same Kick hit at node 5 in Geometry, and edits made in either view appear immediately in the other. The preferred drum view is remembered locally in the browser.
+
 ## Arrangement editing
 
 Tap a clip to select it. On desktop, drag the clip body to move it. On touch devices, use the dedicated **↔ move handle** so ordinary swipes on the arrangement remain available for scrolling. The right-edge handle changes clip duration.
 
 Drum and synth clips loop their source pattern as they grow. Recorded audio clips are trimmed rather than time-stretched.
 
-The edit toolbar supports:
+The edit toolbar supports an adjustable **Snap** selector with:
 
-- **Snap 1/32 / Off**
-- **Snip @ playhead**
-- **Copy** / **Paste**
-- **Duplicate**
-- **Delete**
+- **Off** — free movement to hundredth-beat precision
+- **1/32 note**
+- **1/16 note**
+- **1/8 note**
+- **Beat / 1/4 note** — the practical default
+- **2 beats / 1/2 note**
+- **Whole bar** — follows the project's beats-per-bar setting
 
-While moving a clip, Scratchtrack displays the exact target position and movement delta. Desktop shortcuts mirror the basic operations: `Cmd/Ctrl+C`, `Cmd/Ctrl+V`, `Cmd/Ctrl+D`, and Delete/Backspace. Visible controls remain the primary interface so the workflow also works on a phone.
+The chosen resolution applies consistently to clip placement, movement, resizing, playhead stepping, Set In / Set Out, and ruler-drag loop selection. While moving a clip, Scratchtrack displays the exact target position and movement delta.
+
+The rest of the edit toolbar supports **Snip @ playhead**, **Copy / Paste**, **Duplicate**, and **Delete**. Desktop shortcuts mirror the basic operations: `Cmd/Ctrl+C`, `Cmd/Ctrl+V`, `Cmd/Ctrl+D`, and Delete/Backspace. Visible controls remain the primary interface so the workflow also works on a phone.
 
 ## Loop selection
 
@@ -75,6 +92,7 @@ The main transport scrubber remains the primary fine playhead control. The bar/m
 - **Tap** the ruler to place the playhead.
 - **Drag** across the ruler to define a contiguous custom loop range spanning one or many bars.
 - **Set In / Set Out** remain available in the transport for precise manual endpoints.
+- The current **Snap** setting determines how finely or coarsely the selection locks to musical time.
 
 Track lanes themselves no longer reposition the playhead when touched. That removes one of the biggest conflicts between timeline editing and normal phone scrolling.
 
@@ -136,6 +154,7 @@ The current Drive implementation creates a `Scratchtrack` folder and uploads `pr
 - Scratches should encourage experiments without becoming an archive dump.
 - The first loop lap is preparation, not a take.
 - Auto Scratch should be automatic unless the musician explicitly turns it off.
+- Multiple visual interfaces may edit the same musical data when the alternate view adds a genuinely different creative way to think about the music.
 - Touch, mouse, and pen should express the same concepts without sacrificing ordinary phone scrolling or pinch zoom.
 - Musical data stays editable; audio is stored once and referenced.
 - Local work must survive a network or OAuth failure.
