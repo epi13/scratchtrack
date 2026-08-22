@@ -1,0 +1,206 @@
+/* Scratchtrack v0.4 — adjustable snapping + geometric drum sequencing */
+
+.snap-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 39px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #151719;
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.snap-control select {
+  min-height: 31px;
+  padding: 4px 26px 4px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: #0f1113;
+  color: var(--text);
+  font: 10px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.snap-control strong {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.drum-view-toggle {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #0e1012;
+}
+.drum-view-toggle button {
+  min-height: 34px;
+  padding: 5px 11px;
+  border-color: transparent;
+  background: transparent;
+}
+.drum-view-toggle button.active {
+  border-color: #786344;
+  background: var(--accent-soft);
+  color: #ffd7a9;
+}
+
+.geometry-drum-bank {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(205px, 1fr));
+  gap: 10px;
+  padding: 12px 14px 15px;
+  overflow-x: auto;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+.geometry-drum-card {
+  min-width: 205px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 42%, rgba(229,164,95,.045), transparent 55%), #101214;
+  overflow: hidden;
+}
+.geometry-orbit {
+  position: relative;
+  width: min(100%, var(--geometry-size));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  touch-action: manipulation;
+  user-select: none;
+}
+.geometry-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.geometry-ring,
+.geometry-inner-ring,
+.geometry-quadrants,
+.geometry-spoke,
+.geometry-pattern {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.geometry-ring {
+  stroke: #3a3f47;
+  stroke-width: 1.5;
+}
+.geometry-inner-ring {
+  stroke: rgba(255,255,255,.055);
+  stroke-width: 1;
+}
+.geometry-quadrants {
+  stroke: rgba(229,164,95,.12);
+  stroke-width: 1;
+}
+.geometry-spoke {
+  stroke: rgba(255,255,255,.04);
+  stroke-width: 1;
+}
+.geometry-pattern {
+  stroke: #d9b33f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(217,179,63,.18));
+}
+.geometry-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 76px;
+  height: 76px;
+  transform: translate(-50%, -50%);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 3px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 50%;
+  background: rgba(15,17,19,.88);
+  pointer-events: none;
+}
+.geometry-center strong {
+  color: var(--text);
+  font-size: 11px;
+}
+.geometry-center span {
+  color: var(--muted);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.geometry-step {
+  position: absolute;
+  z-index: 3;
+  width: 29px;
+  min-height: 29px;
+  height: 29px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 1px solid #606875;
+  border-radius: 50%;
+  background: #171a1e;
+  color: #717984;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.geometry-step span {
+  display: block;
+  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1;
+}
+.geometry-step.quarter {
+  border-color: #8b774d;
+}
+.geometry-step.level-1 {
+  border-color: #c8a833;
+  background: #d9b33f;
+  color: #18150b;
+  box-shadow: 0 0 0 3px rgba(217,179,63,.08);
+}
+.geometry-step.level-2 {
+  border-color: #ffe06c;
+  background: #ffe05d;
+  color: #161308;
+  box-shadow: 0 0 0 4px rgba(255,224,93,.14), 0 0 13px rgba(255,224,93,.18);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+.geometry-step:focus-visible {
+  outline: 2px solid #fff0b8;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .geometry-drum-bank {
+    grid-template-columns: repeat(4, 215px);
+    scroll-snap-type: x proximity;
+  }
+  .geometry-drum-card { scroll-snap-align: start; }
+}
+
+@media (max-width: 600px) {
+  .snap-control {
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+  .snap-control select { min-height: 36px; font-size: 11px; }
+  .drum-view-toggle button { min-height: 42px; }
+  .geometry-drum-bank {
+    grid-template-columns: repeat(4, 225px);
+    padding: 10px 8px 13px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .geometry-step {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+  }
+}
