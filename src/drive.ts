@@ -48,9 +48,11 @@ export async function connectDrive(clientId: string): Promise<void> {
   });
 }
 
-function authHeaders(extra?: HeadersInit): HeadersInit {
+function authHeaders(extra?: HeadersInit): Headers {
   if (!token) throw new Error('Connect Google Drive first.');
-  return { Authorization: `Bearer ${token}`, ...extra };
+  const headers = new Headers(extra);
+  headers.set('Authorization', `Bearer ${token}`);
+  return headers;
 }
 
 async function driveJson(url: string, init?: RequestInit) {
