@@ -21,84 +21,99 @@ Each track owns **Scratches**, alternate versions of the part. A **Clip** is a l
 
 The general Scratch cap is currently 36 per track. A single Auto Scratch loop session is independently capped at 12 new takes. The product still expects users to delete obvious misses and keep the drawer useful.
 
+## Module layout (v0.5)
+
+| Module | Responsibility |
+| --- | --- |
+| `src/types.ts` | Project document types (format v4) |
+| `src/music.ts` | Pure musical math: time signatures, subdivisions, the 1/24-beat tick model, position formatting/parsing, scale library and pad layouts |
+| `src/project.ts` | Project construction + migration (v1/v2/v3 → v4), Scratch factories (`makeScratch`, `duplicateScratch`, `cloneScratch`) — the single authoritative place where Scratches are created or copied |
+| `src/store.ts` | Persistence only: localStorage project autosave, IndexedDB audio blobs |
+| `src/audio.ts` | Web Audio: kit voice profiles (five kits), synth, metronome, compression routes (single/multi-stage), decoded-buffer cache |
+| `src/drive.ts` | Google Identity/Picker integration, Drive sync/open flows, share-link parsing |
+| `src/App.tsx` | Transport (tick-scheduled), arrangement UI, drawers, Drive panel |
+| `src/components/` | Track editors (Drum/Synth/Audio), motif composer piano roll, shared controls |
+
+Musical invariants live in pure modules so they are unit-testable without a browser; React components only orchestrate state updates through immutable commit helpers.
+
 ## Runtime layers
 
 ### UI / interaction
 
 React + Pointer Events. Primary editing concepts are shared across mouse, finger, and pen, but the interaction mechanics deliberately differ where phones need ordinary scrolling.
 
-Desktop can drag a clip body directly. On touch devices, clip bodies remain scroll-friendly and a dedicated **move handle** enters custom movement. Resize has its own dedicated edge handle. This keeps the majority of each timeline lane available to horizontal/vertical browser gestures instead of claiming every touch as an edit.
+Every track editor leads with a common **Scratch action strip** — ＋ New Scratch, Duplicate Scratch, Place @ Playhead — so the core workflow (select track → create idea → edit/record → place at playhead) is identical for Drums, Synth, Bass, and Audio.
 
-The bar ruler is the second playhead/loop control surface: tap sets the playhead; drag defines a custom contiguous loop range. Track lanes themselves do not seek the transport.
+Desktop can drag a clip body directly. On touch devices, clip bodies remain scroll-friendly and a dedicated **move handle** enters custom movement. Resize has its own dedicated edge handle. The bar ruler handles tap-to-seek and drag-for-loop. Only small intentional editing handles opt into `touch-action: none`; broad surfaces keep browser pan/pinch gestures.
 
-Broad app, arrangement, clip, and Scratch surfaces allow pan/pinch browser gestures. Only small intentional editing handles opt into `touch-action: none`.
+The Scratch drawer toggle shows **＋** closed and **−** open with matching `aria-expanded` state.
+
+### Musical time model
+
+- Timeline positions are quarter-note beats; one bar = `numerator × (4/denominator)` beats.
+- Playback advances a fixed grid of **24 ticks per beat**, which divides every supported drum subdivision value exactly (quarters 24 … triplet-eighths 8, triplet-sixteenths 4, 1/32s 3).
+- Drum patterns store their own subdivision; row length equals steps-per-bar derived from meter × subdivision.
+- Metronome accents bar starts and clicks quarters in any meter.
+- Loop In/Out are absolute beats; the transport wraps at whole ticks. Editing uses `bar.beat[.sixteenth]` strings parsed by `music.ts`.
+- Changing meter re-maps existing drum hits to nearest equivalent positions (stronger hits win collisions).
 
 ### Arrangement model
 
 A Clip stores `trackId`, `scratchId`, `startBeat`, `lengthBeats`, and `sourceOffsetBeats`.
 
-For drum and synth clips, extending `lengthBeats` past the source pattern length repeats the musical pattern modulo its natural length. For recorded audio, clip length is bounded by the remaining source duration; Scratchtrack does not time-stretch audio.
+For drum and synth clips, extending `lengthBeats` past the source pattern length repeats the pattern modulo its natural length (one bar of drums; the motif's declared bar count). Recorded audio clips are bounded by remaining source duration; audio is never time-stretched.
 
-Snipping is non-destructive. The left side keeps its original source offset while the right side advances `sourceOffsetBeats` by the split amount.
+Snipping is non-destructive via source offsets. Snap resolution applies to placement, movement, resize, stepping, loop endpoints, and ruler drags.
 
-The editor Snap preference is local rather than project musical data. Snap On currently resolves clip movement to 0.125 beats; Snap Off keeps hundredth-beat placement. Movement is committed live so the toolbar and drag ghost can display the exact target and delta while editing.
+### Synth composer
+
+`MotifEditor` renders notes as absolutely-positioned elements over a CSS grid canvas. Background taps add notes (tap-vs-scroll disambiguation by movement threshold); note bodies and resize edges use dedicated pointer handlers with `touch-action: none`. An inspector exposes exact pitch/start/length plus deletion. Keyboard quick-entry writes at a moving cursor using the selected note length; **Rest ›** advances the cursor without writing.
+
+Scale presets generate pad layouts from root + intervals + octave; per-pad overrides (`keyLayout`) pin exact MIDI notes and persist on the Scratch.
 
 ### Loop transport + recording
 
-The project stores one active loop range. When enabled, transport wraps from `loop.endBeat` back to `loop.startBeat` and the range is highlighted in the ruler and track lanes.
+Unchanged state machine: warm-up lap → capture marks at loop boundaries → Auto Scratch slices the continuous PCM stream into independent WAV takes (max 12/session). Record outside loops fills the selected blank recording slot if one exists.
 
-Bass/Audio loop recording follows a fixed simple state machine:
-
-1. Record arms microphone/interface capture and starts the **main arrangement transport** from Loop In.
-2. PCM capture starts immediately so the audio graph is already running, but the first full pass is always a **warm-up** and those samples are discarded.
-3. At the first loop wrap, a capture mark is set and saving begins.
-4. If `autoScratch` is on (default), each later loop boundary slices the continuous PCM stream and encodes that slice as its own 16-bit WAV Scratch.
-5. Every saved Blob is a complete, independently decodable audio file. Auto Scratch does **not** use `MediaRecorder.requestData()` fragments.
-6. At 12 loop takes, capture stops automatically while arrangement playback may continue.
-7. If Auto Scratch is off, capture still begins after warm-up and runs until explicitly stopped, producing one Scratch.
-
-Continuous PCM capture avoids both inter-take gaps and the WebM/MP4 fragment problem where later `requestData()` chunks are missing container headers and cannot be decoded. Browser transport scheduling is still not sample-accurate, so real-device loop-boundary testing remains important.
-
-Pause or Stop on the main transport terminates an active recording session. Record is therefore part of the transport workflow rather than a disconnected microphone action.
+Pause/Stop ends an active session. Browser event scheduling is not sample-accurate; real-device boundary testing remains important.
 
 ### Audio
 
-The Web Audio API powers the synthesized drum kit, metronome, synth, processed playback of recorded Scratches, and local waveform decoding. Live input is captured as PCM (AudioWorklet with ScriptProcessor fallback) and each Scratch is stored as a standalone 16-bit mono WAV. That format decodes on both desktop Chromium and iPhone Safari. Waveform and Hear/arrangement playback share the same decoder; a missing header or failed decode surfaces a clear error instead of failing silently.
+Web Audio powers kits, metronome, synth, processed playback of recordings, and waveform decoding.
 
-Drum playback exposes swing/humanization and compact timbre controls. Synth playback exposes oscillator, filter, envelope, drive, and LFO settings. Recorded audio is kept clean in IndexedDB while track mix settings remain editable in project JSON.
+- **Kits** are data-driven voice profiles (`KIT_PROFILES`); Club and Modern join Pocket/Dust/Machine. All synthesis, no samples.
+- **Compression**: single-stage route preserved; multi-stage route = fast peak stage → glue stage → safety limiter, all scaled by the existing Compression amount (+ modest makeup). Route composition is described by a pure function (`compressionRouteStages`) shared/tested independently of Web Audio.
+- **Decoded-buffer cache** keyed by blob ID avoids repeated decoding of the same take during waveforms/audition/arrangement playback (LRU-ish, 32 entries).
 
-The selected audio Scratch waveform is derived on demand from the stored Blob. Peaks are display data only and are not persisted.
+Processing is strictly playback-time; stored recordings remain clean.
 
 ### Local-first persistence
 
-Project structure is JSON stored in `localStorage`. Recorded Blob data is kept separately in IndexedDB so binary audio never inflates the project document. Local save is immediate and does not depend on network access.
-
-Project format v3 is normalized at load/import time; v1 and v2 projects are upgraded in memory without a manual migration step. The migration intentionally enables Auto Scratch for older prototype projects to match the new default workflow.
+Project JSON in `localStorage` (debounced autosave); audio blobs in IndexedDB. `normalizeProject()` migrates v1/v2/v3 documents to v4 at load/import/Drive-open time and falls back to a fresh project for malformed input. Migration preserves synth notes, audio blob IDs, Drive references, and clips; legacy `beatsPerBar` becomes an explicit time signature and drum rows are resized/re-mapped to the new steps-per-bar.
 
 ### Google Drive
 
-Drive is an optional durable copy. The app loads Google Identity Services in the browser and requests only `drive.file`. A configured `VITE_GOOGLE_CLIENT_ID` is public application configuration baked in at build time — not a client secret. No OAuth client secret belongs in the repository.
+Optional durable copy using only `drive.file`. Flows:
 
-Because `drive.file` cannot silently open someone else’s files from an ID alone, sharing is:
+1. **Sync** creates/updates `project.json`, audio files, and `scratchtrack.pack` under a per-project folder.
+2. **Share project** copies a Scratchtrack link containing only the folder ID and opens Drive for permission management.
+3. **Open Drive link** accepts *standard* Google folder share links (`drive.google.com/drive/folders/<id>…`), multi-account/mobile variants, Scratchtrack links, or bare IDs (`parseDriveFolderLink`). After connecting the user's own account, Scratchtrack tries direct access; if Google has not yet granted `drive.file` access to that shared folder, the Picker opens pre-positioned at that folder for a one-time confirmation.
 
-1. Owner connects Google Drive and syncs. Scratchtrack creates a project folder containing `project.json`, individual audio files, and a single `scratchtrack.pack` zip.
-2. Owner shares that Drive folder with the collaborator using normal Google Drive permissions, then sends a Scratchtrack link that contains only the folder ID.
-3. The collaborator signs in with their own Google account and uses Google Picker to explicitly open the shared folder or pack. That is the Google-supported way to grant this static app access under `drive.file`.
+Standard Google sharing decides human access. Scratchtrack never requests broader OAuth scope and holds no accounts.
 
-Token expiry shows a reconnect state. Local work is never discarded on a Drive failure.
+Token expiry surfaces a reconnect state; local work is never discarded on Drive failure.
 
 ## Project data rules
 
 - Project JSON never embeds audio.
-- A timeline Clip references a Scratch ID.
-- A Scratch can be reused by multiple Clips.
+- A timeline Clip references a Scratch ID; multiple Clips may share a Scratch.
 - Audio is stored once per Scratch.
 - Moving/copying/repeating/snipping Clips only changes JSON references.
 - Waveforms are regenerated locally instead of stored as redundant media.
-- Musical edits update local state before any remote sync begins.
-- Remote sync errors must never discard the local copy.
+- Musical edits update local state before any remote sync begins; remote errors never discard local copies.
 - Loop take capture creates new Scratches rather than destructively replacing prior takes.
+- Scratch creation/duplication always allocates fresh nested containers (see `project.ts`).
 
 ## GitHub Pages
 
-Vite is configured with `/scratchtrack/` as the base URL. The service worker, manifest, and Pages workflow use the same path. The GitHub Actions workflow typechecks and builds on pull requests, then deploys only from `main`.
+Vite is configured with `/scratchtrack/` as the base URL. The service worker, manifest, and Pages workflow use the same path. The GitHub Actions workflow typechecks, tests, and builds on pull requests, then deploys only from `main`.

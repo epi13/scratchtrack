@@ -1,7 +1,7 @@
 {
   "name": "scratchtrack",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,9 +15,11 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
+    "jsdom": "^30.0.1",
     "typescript": "latest",
     "vite": "latest",
     "vitest": "latest"
