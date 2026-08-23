@@ -42,10 +42,10 @@ export default function WaveformDisplay({ scratch }: { scratch?: Scratch }) {
 
     setStatus('loading');
     setErrorText('');
-    void loadAudioBlob(scratch.audioBlobId)
-      .then(async (blob) => {
-        if (!blob) throw new AudioPlaybackError('Audio is not available in this browser.');
-        const buffer = await decodeAudioBlob(blob);
+        void loadAudioBlob(scratch.audioBlobId)
+          .then(async (blob) => {
+            if (!blob) throw new AudioPlaybackError('Audio is not available in this browser.');
+            const buffer = await decodeAudioBlob(blob, scratch.audioBlobId);
         if (!cancelled) {
           setPeaks(samplePeaks(buffer));
           setStatus('ready');

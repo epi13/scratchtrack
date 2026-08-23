@@ -97,6 +97,28 @@ export function sharedProjectIdFromLocation() {
   }
 }
 
+/**
+ * Extract a Drive folder ID from anything a collaborator might paste:
+ * standard share links (`https://drive.google.com/drive/folders/<id>?usp=sharing`),
+ * multi-account/mobile variants of that URL, Scratchtrack's own `?project=<id>`
+ * links, or a bare folder ID.
+ */
+export function parseDriveFolderLink(input: string): string | null {
+  const text = input.trim();
+  if (!text) return null;
+  const folderMatch = text.match(/drive\.google\.com\/drive\/(?:u\/\d+\/)?(?:mobile\/)?folders\/([A-Za-z0-9_-]{10,})/);
+  if (folderMatch?.[1]) return folderMatch[1];
+  try {
+    const url = new URL(text);
+    const project = url.searchParams.get('project')?.trim();
+    if (project && /^[A-Za-z0-9_-]{10,}$/.test(project)) return project;
+  } catch {
+    /* Not an absolute URL — fall through to raw-ID detection. */
+  }
+  if (/^[A-Za-z0-9_-]{15,}$/.test(text)) return text;
+  return null;
+}
+
 export function projectShareUrl(folderId: string) {
   const url = new URL(import.meta.env.BASE_URL, window.location.origin);
   url.searchParams.set('project', folderId);
