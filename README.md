@@ -18,7 +18,7 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 - Drum controls for swing, humanize, output, punch, and brightness
 - Two-oscillator analog-style Web Audio synth with editable motifs
 - Expanded synth controls: detune, cutoff, resonance, ADSR-like envelope, drive, and filter LFO
-- Mono browser recording for bass and general audio tracks
+- Mono browser recording for bass and general audio tracks, stored as independently playable WAV files
 - Persisted audio-track mix settings for trim, tone, compression, volume, pan, and space
 - A decoded waveform for the **currently selected audio Scratch** directly below the track controls
 - Local-first project autosave plus IndexedDB audio blobs
@@ -39,7 +39,7 @@ Scratchtrack deliberately sits between a voice memo and a DAW. It should be stru
 - Touch-safe timeline behavior: lane swipes scroll, clip bodies select, and dedicated move/resize handles perform edits on phones
 - Pinch zoom remains available through the primary arrangement and Scratch surfaces
 - Project JSON import/export with automatic v1/v2 → v3 migration
-- Optional Google Drive connection and direct project/audio sync scaffold
+- Optional Google Drive connection, Sync, Share project, and Open shared project (Google Picker)
 - PWA manifest/service worker for installable phone/desktop use
 - GitHub Actions build and GitHub Pages deployment
 
@@ -108,7 +108,7 @@ Loop recording is intentionally simple:
 6. Every completed loop becomes `Loop 01`, `Loop 02`, and so on.
 7. A single session can create up to **12 loop Scratches**, then recording stops automatically while playback may continue.
 
-Auto Scratch uses one continuous `MediaRecorder` and requests a data boundary at each loop completion rather than stopping and reconstructing the recorder on every pass. This reduces browser-dependent gaps between takes.
+Auto Scratch captures a continuous PCM stream and encodes each completed loop as its own WAV file. Takes stay gapless at the capture layer and each Scratch is independently decodable on Chromium and Safari.
 
 Turn **Auto Scratch Off** for a simpler single recording after the same warm-up lap. The recorder then keeps running until you stop it rather than creating one Scratch per loop.
 
@@ -129,23 +129,73 @@ Production checks:
 
 ```bash
 npm run typecheck
+npm test
 npm run build
 ```
 
 The Vite base path is configured for GitHub Pages at `/scratchtrack/`.
 
-## Google Drive setup
+## Using Google Drive with a collaborator
 
-Scratchtrack works without Drive. When Drive is enabled, the browser talks directly to Google — there is no Scratchtrack server holding music or credentials.
+Scratchtrack works without Drive. When Drive is connected, the browser talks directly to Google — there is no Scratchtrack server holding music or credentials.
 
-1. Create a Google Cloud OAuth **Web application** client for the site.
-2. Add the deployed GitHub Pages origin to its authorized JavaScript origins.
-3. Paste the OAuth client ID into Scratchtrack's Drive panel.
-4. Connect and sync.
+Normal musician flow (after the owner setup below):
 
-The client ID is stored in that browser's local storage. Do **not** add a client secret to this public repository.
+1. Click **Connect Google Drive** and sign in with your own Google account.
+2. Click **Sync** to save this idea to Drive.
+3. Click **Share project**. Scratchtrack copies a share link (it contains only a Drive folder ID, never a password or token) and opens the Drive folder.
+4. In Google Drive, share that folder with your collaborator as an **Editor** if you both want to save changes.
+5. Send them the Scratchtrack link.
+6. They open the link, click **Connect Google Drive** with *their* Google account, then **Open this shared project**. Google Picker asks them to choose the shared folder once. That is required: a static website using Google’s narrow `drive.file` permission cannot silently open someone else’s files from an ID alone.
 
-The current Drive implementation creates a `Scratchtrack` folder and uploads `project.json` plus each recorded audio Scratch. Google Picker and revision-aware two-person collaboration remain the next major collaboration milestone.
+Reconnect if the top bar says Google Drive needs you to reconnect — access tokens expire after about an hour.
+
+## Owner setup (once): Google Cloud + GitHub Pages
+
+A Google OAuth **client ID** is public configuration, not a secret. Never create or commit a Google **client secret** for Scratchtrack.
+
+### A. Google Cloud
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
+2. APIs & Services → Library: enable **Google Drive API** and **Google Picker API**.
+3. APIs & Services → OAuth consent screen:
+   - User type **External**.
+   - App name `Scratchtrack`.
+   - Add your email as developer contact.
+   - Scopes: `https://www.googleapis.com/auth/drive.file` only.
+   - Until Google verifies the app, add your Google account and your collaborator’s account as **Test users**.
+4. APIs & Services → Credentials → Create credentials → **OAuth client ID** → application type **Web application**.
+   - Name it `Scratchtrack web`.
+   - Authorized JavaScript origins (no path):
+     - `https://epi13.github.io`
+     - `http://localhost:5173`
+     - `http://127.0.0.1:5173`
+   - Authorized redirect URIs are not required for this token flow.
+   - Copy the **Client ID** (`….apps.googleusercontent.com`). Ignore or delete any client secret if Google shows one — do not put it in GitHub.
+5. Credentials → Create credentials → **API key**. Restrict it:
+   - Application restrictions: HTTP referrers, same origins as above.
+   - API restrictions: Google Picker API and Google Drive API.
+6. Optional: Project Settings → copy the numeric **project number**. Google Picker can use it as `VITE_GOOGLE_APP_ID`.
+
+### B. GitHub Pages build settings
+
+1. In the `epi13/scratchtrack` GitHub repo: Settings → Secrets and variables → Actions → New repository secret.
+2. Add:
+   - `VITE_GOOGLE_CLIENT_ID` = the OAuth client ID from step A.4
+   - `VITE_GOOGLE_API_KEY` = the browser API key from step A.5
+   - `VITE_GOOGLE_APP_ID` = the project number from step A.6 (optional)
+3. Redeploy by pushing to `main` or running the **Build and deploy Scratchtrack** workflow. Vite inlines these values at build time.
+4. After deploy, confirm `https://epi13.github.io/scratchtrack/` shows **Connect Google Drive** rather than asking musicians to paste OAuth configuration.
+
+### C. Local development
+
+```bash
+cp .env.example .env.local
+```
+
+Put the same three `VITE_` values in `.env.local`. That file is gitignored.
+
+The current Drive implementation creates a `Scratchtrack` folder, one subfolder per project, `project.json`, one audio file per recorded Scratch, and `scratchtrack.pack` for collaborator open-via-Picker.
 
 ## Design rules
 

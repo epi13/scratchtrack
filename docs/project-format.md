@@ -73,7 +73,9 @@ The Snap toggle is an editor preference rather than musical project data. It is 
 
 ## Binary audio
 
-Local audio is stored in IndexedDB under `audioBlobId`. Drive sync writes it as a sibling file in the project folder. Musical arrangement edits only mutate small JSON references, so moving, copying, repeating, or snipping clips does not duplicate the recording.
+Local audio is stored in IndexedDB under `audioBlobId`. New recordings are standalone 16-bit mono WAV files. Drive sync writes `project.json`, one audio file per Scratch, and a `scratchtrack.pack` zip so a collaborator can grant access to the whole project with Google Picker. Musical arrangement edits only mutate small JSON references, so moving, copying, repeating, or snipping clips does not duplicate the recording.
+
+Older MediaRecorder fragments already saved locally cannot be reconstructed if they lack a container header. Playback and waveforms report that clearly; re-record those takes.
 
 Waveform previews are generated locally by decoding the selected Scratch's IndexedDB audio and sampling display peaks. The waveform itself is not stored in project JSON.
 

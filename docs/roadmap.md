@@ -65,7 +65,9 @@ The roadmap is ordered around one question: **does this make exchanging a musica
 
 ## v0.4 — collaboration that stays simple
 
-- [ ] Google Picker for intentionally opening a shared Scratchtrack project folder
+- [x] Google Picker for intentionally opening a shared Scratchtrack project folder
+- [x] Share-project link that carries only a Drive folder ID
+- [x] Auto Scratch loop takes encoded as independent WAV files instead of MediaRecorder fragments
 - [ ] Drive revision IDs and optimistic conflict checks
 - [ ] “Collaborator changed this while you were working” conflict screen rather than silent overwrite
 - [ ] Author identity on Scratches

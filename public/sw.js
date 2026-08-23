@@ -1,4 +1,4 @@
-const CACHE = 'scratchtrack-v1';
+const CACHE = 'scratchtrack-v2';
 const APP_SHELL = ['/scratchtrack/'];
 
 self.addEventListener('install', (event) => {

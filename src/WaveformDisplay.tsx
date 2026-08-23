@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { audioContext } from './audio';
+import { AudioPlaybackError, decodeAudioBlob } from './audio';
 import { loadAudioBlob } from './store';
 import type { Scratch } from './types';
 
@@ -30,6 +30,7 @@ function samplePeaks(buffer: AudioBuffer) {
 export default function WaveformDisplay({ scratch }: { scratch?: Scratch }) {
   const [peaks, setPeaks] = useState<number[]>([]);
   const [status, setStatus] = useState<'empty' | 'loading' | 'ready' | 'error'>('empty');
+  const [errorText, setErrorText] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -40,16 +41,21 @@ export default function WaveformDisplay({ scratch }: { scratch?: Scratch }) {
     }
 
     setStatus('loading');
+    setErrorText('');
     void loadAudioBlob(scratch.audioBlobId)
       .then(async (blob) => {
-        if (!blob) throw new Error('Audio is not available in this browser.');
-        const buffer = await audioContext().decodeAudioData(await blob.arrayBuffer());
+        if (!blob) throw new AudioPlaybackError('Audio is not available in this browser.');
+        const buffer = await decodeAudioBlob(blob);
         if (!cancelled) {
           setPeaks(samplePeaks(buffer));
           setStatus('ready');
         }
       })
-      .catch(() => { if (!cancelled) setStatus('error'); });
+      .catch((error) => {
+        if (cancelled) return;
+        setStatus('error');
+        setErrorText(error instanceof Error ? error.message : 'Waveform unavailable on this device.');
+      });
 
     return () => { cancelled = true; };
   }, [scratch?.audioBlobId]);
@@ -74,7 +80,7 @@ export default function WaveformDisplay({ scratch }: { scratch?: Scratch }) {
           </svg>
         ) : (
           <div className="waveform-placeholder">
-            {status === 'loading' ? 'Drawing waveform…' : status === 'error' ? 'Waveform unavailable on this device.' : 'Record or select an audio Scratch to see its waveform.'}
+            {status === 'loading' ? 'Drawing waveform…' : status === 'error' ? (errorText || 'Waveform unavailable on this device.') : 'Record or select an audio Scratch to see its waveform.'}
           </div>
         )}
       </div>

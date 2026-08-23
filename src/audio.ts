@@ -1,3 +1,4 @@
+import { inspectMediaBytes, playbackErrorMessage } from './media';
 import type { ChannelSettings, DrumCell, DrumSettings, SynthPatch } from './types';
 
 let context: AudioContext | null = null;
@@ -144,6 +145,33 @@ export function playSynthNote(midi: number, patch: SynthPatch, duration = 0.32) 
   lfo.stop(stopAt);
 }
 
+export class AudioPlaybackError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message);
+    this.name = 'AudioPlaybackError';
+    if (options?.cause !== undefined) this.cause = options.cause;
+  }
+}
+
+export async function decodeAudioBlob(blob: Blob): Promise<AudioBuffer> {
+  if (!blob || blob.size < 16) {
+    throw new AudioPlaybackError(playbackErrorMessage('empty'));
+  }
+  const header = new Uint8Array(await blob.slice(0, 64).arrayBuffer());
+  const kind = inspectMediaBytes(header, blob.type);
+  if (kind === 'empty' || kind === 'fragment') {
+    throw new AudioPlaybackError(playbackErrorMessage(kind));
+  }
+  const ctx = audioContext();
+  const bytes = await blob.arrayBuffer();
+  try {
+    return await ctx.decodeAudioData(bytes.slice(0));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'decode failed';
+    throw new AudioPlaybackError(playbackErrorMessage(kind === 'unknown' ? 'unknown' : kind, reason), { cause: error });
+  }
+}
+
 export async function playAudioBlob(
   blob: Blob,
   settings: ChannelSettings,
@@ -151,7 +179,7 @@ export async function playAudioBlob(
   durationSeconds?: number,
 ): Promise<AudioBufferSourceNode> {
   const ctx = audioContext();
-  const buffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+  const buffer = await decodeAudioBlob(blob);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
 

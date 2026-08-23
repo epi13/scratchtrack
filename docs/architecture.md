@@ -50,20 +50,20 @@ The project stores one active loop range. When enabled, transport wraps from `lo
 Bass/Audio loop recording follows a fixed simple state machine:
 
 1. Record arms microphone/interface capture and starts the **main arrangement transport** from Loop In.
-2. The first full pass is always a **warm-up**. No `MediaRecorder` data is saved.
-3. At the first loop wrap, capture starts.
-4. If `autoScratch` is on (default), one `MediaRecorder` stays active and `requestData()` is called at each subsequent loop boundary.
-5. Each requested Blob becomes an independent Scratch.
-6. At 12 requested loop takes, the recorder stops automatically while arrangement playback may continue.
-7. If Auto Scratch is off, the recorder begins after warm-up but runs continuously until explicitly stopped, producing one Scratch.
+2. PCM capture starts immediately so the audio graph is already running, but the first full pass is always a **warm-up** and those samples are discarded.
+3. At the first loop wrap, a capture mark is set and saving begins.
+4. If `autoScratch` is on (default), each later loop boundary slices the continuous PCM stream and encodes that slice as its own 16-bit WAV Scratch.
+5. Every saved Blob is a complete, independently decodable audio file. Auto Scratch does **not** use `MediaRecorder.requestData()` fragments.
+6. At 12 loop takes, capture stops automatically while arrangement playback may continue.
+7. If Auto Scratch is off, capture still begins after warm-up and runs until explicitly stopped, producing one Scratch.
 
-Using one recorder after warm-up avoids deliberately inserting a stop/restart gap between every pass. Browser event scheduling is still not sample-accurate, so real-device loop-boundary testing remains important.
+Continuous PCM capture avoids both inter-take gaps and the WebM/MP4 fragment problem where later `requestData()` chunks are missing container headers and cannot be decoded. Browser transport scheduling is still not sample-accurate, so real-device loop-boundary testing remains important.
 
 Pause or Stop on the main transport terminates an active recording session. Record is therefore part of the transport workflow rather than a disconnected microphone action.
 
 ### Audio
 
-The Web Audio API powers the synthesized drum kit, metronome, synth, processed playback of recorded Scratches, and local waveform decoding. `MediaRecorder` handles compact microphone/interface capture. Scratchtrack asks for mono capture and prefers Opus/WebM at roughly 96 kbps when supported.
+The Web Audio API powers the synthesized drum kit, metronome, synth, processed playback of recorded Scratches, and local waveform decoding. Live input is captured as PCM (AudioWorklet with ScriptProcessor fallback) and each Scratch is stored as a standalone 16-bit mono WAV. That format decodes on both desktop Chromium and iPhone Safari. Waveform and Hear/arrangement playback share the same decoder; a missing header or failed decode surfaces a clear error instead of failing silently.
 
 Drum playback exposes swing/humanization and compact timbre controls. Synth playback exposes oscillator, filter, envelope, drive, and LFO settings. Recorded audio is kept clean in IndexedDB while track mix settings remain editable in project JSON.
 
@@ -77,11 +77,15 @@ Project format v3 is normalized at load/import time; v1 and v2 projects are upgr
 
 ### Google Drive
 
-Drive is an optional durable copy. The prototype loads Google Identity Services in the browser and requests `drive.file`, then creates a `Scratchtrack` folder, one subfolder per project, `project.json`, and one compressed audio file per recorded Scratch.
+Drive is an optional durable copy. The app loads Google Identity Services in the browser and requests only `drive.file`. A configured `VITE_GOOGLE_CLIENT_ID` is public application configuration baked in at build time — not a client secret. No OAuth client secret belongs in the repository.
 
-The OAuth **client ID is not a secret** and is configured at runtime. No OAuth client secret belongs in the repository.
+Because `drive.file` cannot silently open someone else’s files from an ID alone, sharing is:
 
-The next Drive milestone is Google Picker-based opening of collaborator-shared project folders and revision-aware conflict handling. That keeps the narrow `drive.file` scope while allowing two collaborators to intentionally grant the app access to the same files.
+1. Owner connects Google Drive and syncs. Scratchtrack creates a project folder containing `project.json`, individual audio files, and a single `scratchtrack.pack` zip.
+2. Owner shares that Drive folder with the collaborator using normal Google Drive permissions, then sends a Scratchtrack link that contains only the folder ID.
+3. The collaborator signs in with their own Google account and uses Google Picker to explicitly open the shared folder or pack. That is the Google-supported way to grant this static app access under `drive.file`.
+
+Token expiry shows a reconnect state. Local work is never discarded on a Drive failure.
 
 ## Project data rules
 
