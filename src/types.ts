@@ -90,6 +90,7 @@ export interface DriveState {
   rootFolderId?: string;
   projectFolderId?: string;
   lastSyncedAt?: string;
+  packFileId?: string;
 }
 
 export interface ScratchtrackProject {

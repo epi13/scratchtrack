@@ -49,7 +49,7 @@ Scratchtrack should be tested as a musical notebook, not only as a static page.
 5. During the first complete lap, confirm the UI says **Warm-up** and no Scratch is created.
 6. At the first wrap back to Loop In, confirm capture begins automatically.
 7. Let three more loops complete and verify `Loop 01`, `Loop 02`, and `Loop 03` exist independently.
-8. Confirm each take can be selected, auditioned, and viewed as a separate waveform.
+8. Confirm each take can be selected, **Hear**’d, and viewed as a separate waveform. A failed take must show a playback/format error rather than silence.
 9. Let the session run to 12 captured loops and confirm it stops creating/recording takes after `Loop 12` without deleting older Scratches.
 10. Confirm arrangement playback may continue after the 12-take recorder stops.
 11. Start another loop recording session, then press the main Pause or Stop control and confirm the recording session also ends.
@@ -79,18 +79,20 @@ Test on a current iPhone/Safari device or the closest available WebKit mobile en
 
 ## Drive smoke test
 
-Drive testing requires a Google OAuth Web application client whose authorized JavaScript origins include the deployed GitHub Pages origin.
+Drive testing requires the owner one-time Google Cloud + GitHub Pages setup in the README. Musicians should not paste OAuth client IDs during normal use.
 
-1. Add the OAuth client ID in the Drive panel.
-2. Connect and grant the requested `drive.file` scope.
-3. Sync a project with at least one recorded audio Scratch.
-4. In Drive, confirm a `Scratchtrack` folder exists with a per-project folder, `project.json`, and the audio file.
-5. Edit locally and sync again; existing named files should update rather than multiply.
+1. Click **Connect Google Drive** and sign in with your Google account.
+2. Confirm the panel shows a connected status, then **Sync**.
+3. In Drive, confirm a `Scratchtrack` folder exists with a per-project folder, `project.json`, audio files, and `scratchtrack.pack`.
+4. **Share project**: the Scratchtrack link is copied (folder ID only) and the Drive folder opens so you can invite a collaborator as an editor.
+5. As the collaborator, open that link, connect with a *different* Google account, and **Open this shared project**. Complete the Google Picker prompt.
+6. Edit locally and sync again; existing named files should update rather than multiply.
+7. Wait for the access token to expire (or disconnect and reconnect) and confirm **Reconnect Google Drive** restores access.
 
 Never place an OAuth client secret in this public repository.
 
 ## Browser targets
 
-The useful compatibility floor is current Chrome/Edge desktop, current Safari desktop, Chrome on Android, and Safari on iPhone. Recording format is selected at runtime because MediaRecorder containers differ between browsers.
+The useful compatibility floor is current Chrome/Edge desktop, current Safari desktop, Chrome on Android, and Safari on iPhone. Recordings are stored as standalone 16-bit WAV files so Hear, waveforms, and arrangement playback do not depend on WebM/MP4 fragment decoding.
 
-Auto Scratch now keeps one `MediaRecorder` running after warm-up and calls `requestData()` at loop boundaries. This should reduce gaps compared with stopping/restarting a recorder every pass, but loop boundary timing still deserves real-device testing because browser event scheduling is not sample-accurate.
+Auto Scratch slices a continuous PCM capture at loop boundaries, then encodes each take independently. Loop boundary timing still deserves real-device testing because browser event scheduling is not sample-accurate.

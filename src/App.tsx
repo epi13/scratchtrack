@@ -1,7 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { playAudioBlob, playDrumStep, playMetronome, playSynthNote } from './audio';
-import { connectDrive, isDriveConnected, syncProjectToDrive } from './drive';
+import { AudioPlaybackError, playAudioBlob, playDrumStep, playMetronome, playSynthNote } from './audio';
+import { PcmCapture } from './capture';
+import {
+  connectDrive,
+  disconnectDrive,
+  DriveAuthError,
+  driveFolderWebUrl,
+  googleClientId,
+  isDriveConfigured,
+  isDriveConnected,
+  isPickerConfigured,
+  loadProjectFromDriveFolder,
+  openSharedProjectWithPicker,
+  projectShareUrl,
+  sharedProjectIdFromLocation,
+  syncProjectToDrive,
+} from './drive';
+import { encodeWavPcm16 } from './media';
 import {
   defaultChannelSettings,
   defaultDrumSettings,
@@ -116,22 +132,24 @@ export default function App() {
   const [recordingPhase, setRecordingPhase] = useState<RecordingPhase>('idle');
   const [loopTakeCount, setLoopTakeCount] = useState(0);
   const [writeMotif, setWriteMotif] = useState(false);
-  const [drivePanelOpen, setDrivePanelOpen] = useState(false);
+  const [drivePanelOpen, setDrivePanelOpen] = useState(() => Boolean(sharedProjectIdFromLocation()));
   const [driveStatus, setDriveStatus] = useState<'local' | 'connecting' | 'connected' | 'syncing' | 'synced' | 'error'>('local');
   const [driveMessage, setDriveMessage] = useState('Saved locally');
+  const [driveConnected, setDriveConnected] = useState(false);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
+  const [invitedFolderId] = useState(() => sharedProjectIdFromLocation());
   const [dragGhost, setDragGhost] = useState<{ x: number; y: number; label: string } | null>(null);
   const [moveFeedback, setMoveFeedback] = useState<{ startBeat: number; delta: number } | null>(null);
   const [loopDraft, setLoopDraft] = useState<{ startBeat: number; endBeat: number } | null>(null);
 
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const recorderChunksRef = useRef<Blob[]>([]);
+  const captureRef = useRef<PcmCapture | null>(null);
   const recorderStreamRef = useRef<MediaStream | null>(null);
-  const recorderStartedAtRef = useRef(0);
   const recordModeRef = useRef<RecordMode>('none');
   const loopWarmupRef = useRef(false);
-  const loopRequestedTakeRef = useRef(0);
   const loopSavedTakeRef = useRef(0);
+  const saveQueueRef = useRef(Promise.resolve());
   const activeAudioRef = useRef<AudioBufferSourceNode[]>([]);
+  const playbackErrorRef = useRef<string | null>(null);
 
   useEffect(() => { projectRef.current = project; }, [project]);
   useEffect(() => { localStorage.setItem('scratchtrack.snapDivision', snapSetting); }, [snapSetting]);
@@ -174,6 +192,16 @@ export default function App() {
   const stopActiveSources = useCallback(() => {
     activeAudioRef.current.forEach((source) => { try { source.stop(); } catch { /* already stopped */ } });
     activeAudioRef.current = [];
+  }, []);
+
+  const reportAudioError = useCallback((error: unknown) => {
+    const message = error instanceof AudioPlaybackError || error instanceof Error
+      ? error.message
+      : 'Playback failed.';
+    if (playbackErrorRef.current === message) return;
+    playbackErrorRef.current = message;
+    setDriveStatus('error');
+    setDriveMessage(message);
   }, []);
 
   const placeScratch = useCallback((trackId: string, scratchId: string, startBeat = playheadRef.current) => {
@@ -246,13 +274,17 @@ export default function App() {
       return;
     }
     if (scratch.audioBlobId) {
-      const blob = await loadAudioBlob(scratch.audioBlobId);
-      if (!blob) return;
-      const source = await playAudioBlob(blob, track.settings ?? defaultChannelSettings);
-      activeAudioRef.current.push(source);
-      source.onended = () => { activeAudioRef.current = activeAudioRef.current.filter((item) => item !== source); };
+      try {
+        const blob = await loadAudioBlob(scratch.audioBlobId);
+        if (!blob) throw new AudioPlaybackError('This Scratch has no audio in this browser.');
+        const source = await playAudioBlob(blob, track.settings ?? defaultChannelSettings);
+        activeAudioRef.current.push(source);
+        source.onended = () => { activeAudioRef.current = activeAudioRef.current.filter((item) => item !== source); };
+      } catch (error) {
+        reportAudioError(error);
+      }
     }
-  }, []);
+  }, [reportAudioError]);
 
   const moveClip = useCallback((clipId: string, startBeat: number) => {
     commitProject((current) => ({
@@ -366,23 +398,24 @@ export default function App() {
           }
         } else if (scratch.audioBlobId && Math.abs(localBeat) < 0.02) {
           void loadAudioBlob(scratch.audioBlobId).then(async (blob) => {
-            if (!blob) return;
+            if (!blob) throw new AudioPlaybackError(`${scratch.name} has no audio in this browser.`);
             const offsetSeconds = (clip.sourceOffsetBeats ?? 0) * 60 / current.bpm;
             const durationSeconds = clip.lengthBeats * 60 / current.bpm;
             const source = await playAudioBlob(blob, track.settings ?? defaultChannelSettings, offsetSeconds, durationSeconds);
             activeAudioRef.current.push(source);
             source.onended = () => { activeAudioRef.current = activeAudioRef.current.filter((item) => item !== source); };
-          });
+          }).catch(reportAudioError);
         }
       }
     }
     if (metronome && Math.abs(beat - Math.round(beat)) < 0.02) playMetronome(Math.round(beat) % current.beatsPerBar === 0);
-  }, [metronome]);
+  }, [metronome, reportAudioError]);
 
   const cleanupRecordingSession = useCallback(() => {
+    captureRef.current?.stop();
+    captureRef.current = null;
     recorderStreamRef.current?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
     recorderStreamRef.current = null;
-    recorderRef.current = null;
     recordingTrackRef.current = null;
     recordModeRef.current = 'none';
     loopWarmupRef.current = false;
@@ -408,72 +441,85 @@ export default function App() {
       note: loopTake ? 'Auto Scratch loop take' : 'Recorded with arrangement playback',
       createdAt: new Date().toISOString(),
       audioBlobId: blobId,
-      audioMimeType: blob.type,
+      audioMimeType: blob.type || 'audio/wav',
       audioDuration: durationSeconds,
     };
+    playbackErrorRef.current = null;
     updateTrack(track.id, (freshTrack) => ({ ...freshTrack, activeScratchId: scratch.id, scratches: [...freshTrack.scratches, scratch] }));
     setDrawerTrackId(track.id);
     return true;
   }, [updateTrack]);
 
-  const recorderOptions = useCallback(() => {
-    const mimeCandidates = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'];
-    const mimeType = mimeCandidates.find((type) => MediaRecorder.isTypeSupported(type));
-    return { mimeType, options: mimeType ? { mimeType, audioBitsPerSecond: 96000 } : undefined };
-  }, []);
+  const enqueueSaveTake = useCallback((trackId: string, samples: Float32Array, sampleRate: number, loopTake: boolean, takeNumber?: number) => {
+    if (samples.length < Math.floor(sampleRate * 0.05)) return Promise.resolve(false);
+    const blob = encodeWavPcm16(samples, sampleRate);
+    const durationSeconds = samples.length / sampleRate;
+    const task = saveQueueRef.current.then(() => saveRecordedTake(trackId, blob, durationSeconds, loopTake, takeNumber));
+    saveQueueRef.current = task.then(() => undefined, () => undefined);
+    return task;
+  }, [saveRecordedTake]);
 
-  const startSingleRecorder = useCallback((trackId: string, stream: MediaStream) => {
-    const { mimeType, options } = recorderOptions();
-    const recorder = new MediaRecorder(stream, options);
-    recorderRef.current = recorder;
-    recorderChunksRef.current = [];
-    recorderStartedAtRef.current = performance.now();
-    recorder.ondataavailable = (event) => { if (event.data.size) recorderChunksRef.current.push(event.data); };
-    recorder.onstop = () => {
-      const blob = new Blob(recorderChunksRef.current, { type: recorder.mimeType || mimeType || 'audio/webm' });
-      const elapsed = Math.max(0.1, (performance.now() - recorderStartedAtRef.current) / 1000);
-      void saveRecordedTake(trackId, blob, elapsed, false).finally(cleanupRecordingSession);
-    };
-    recorder.start(200);
-    setRecordingPhase('recording');
-  }, [cleanupRecordingSession, recorderOptions, saveRecordedTake]);
-
-  const startAutoLoopRecorder = useCallback((trackId: string, stream: MediaStream) => {
-    const { options } = recorderOptions();
-    const recorder = new MediaRecorder(stream, options);
-    recorderRef.current = recorder;
-    recorder.ondataavailable = (event) => {
-      if (!event.data.size) return;
-      if (loopSavedTakeRef.current >= loopRequestedTakeRef.current || loopSavedTakeRef.current >= MAX_LOOP_TAKES) return;
-      const takeNumber = loopSavedTakeRef.current + 1;
-      loopSavedTakeRef.current = takeNumber;
-      setLoopTakeCount(takeNumber);
-      const current = projectRef.current;
-      const loopSeconds = Math.max(0.1, (current.loop.endBeat - current.loop.startBeat) * 60 / current.bpm);
-      void saveRecordedTake(trackId, event.data, loopSeconds, true, takeNumber);
-    };
-    recorder.onstop = cleanupRecordingSession;
-    recorder.start();
-    setRecordingPhase('auto');
-  }, [cleanupRecordingSession, recorderOptions, saveRecordedTake]);
-
-  const stopRecordingSession = useCallback(() => {
+  const finishRecordingSession = useCallback((saveTrailing: boolean) => {
+    const trackId = recordingTrackRef.current;
+    const capture = captureRef.current;
+    const mode = recordModeRef.current;
+    const wasWarmup = loopWarmupRef.current;
     loopWarmupRef.current = false;
-    const recorder = recorderRef.current;
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.stop();
+    if (!saveTrailing || wasWarmup || !trackId || !capture || mode === 'none') {
+      cleanupRecordingSession();
       return;
     }
-    cleanupRecordingSession();
-  }, [cleanupRecordingSession]);
+    if (mode === 'loop-auto') {
+      if (loopSavedTakeRef.current < MAX_LOOP_TAKES) {
+        const samples = capture.peekSinceMark();
+        if (samples.length >= capture.sampleRate * 0.25) {
+          const takeNumber = loopSavedTakeRef.current + 1;
+          loopSavedTakeRef.current = takeNumber;
+          setLoopTakeCount(takeNumber);
+          void enqueueSaveTake(trackId, capture.takeSinceMark(), capture.sampleRate, true, takeNumber).finally(cleanupRecordingSession);
+          return;
+        }
+      }
+      cleanupRecordingSession();
+      return;
+    }
+    const samples = capture.takeSinceMark();
+    void enqueueSaveTake(trackId, samples, capture.sampleRate, false).finally(cleanupRecordingSession);
+  }, [cleanupRecordingSession, enqueueSaveTake]);
+
+  const stopRecordingSession = useCallback(() => {
+    finishRecordingSession(true);
+  }, [finishRecordingSession]);
 
   const beginPostWarmupCapture = useCallback(() => {
+    const capture = captureRef.current;
+    if (!capture) return;
+    capture.markBoundary();
+    if (recordModeRef.current === 'loop-auto') setRecordingPhase('auto');
+    else setRecordingPhase('recording');
+  }, []);
+
+  const captureAutoTake = useCallback(() => {
     const trackId = recordingTrackRef.current;
-    const stream = recorderStreamRef.current;
-    if (!trackId || !stream?.active) return;
-    if (recordModeRef.current === 'loop-auto') startAutoLoopRecorder(trackId, stream);
-    else if (recordModeRef.current === 'loop-single') startSingleRecorder(trackId, stream);
-  }, [startAutoLoopRecorder, startSingleRecorder]);
+    const capture = captureRef.current;
+    if (!trackId || !capture || loopSavedTakeRef.current >= MAX_LOOP_TAKES) return;
+    const samples = capture.takeSinceMark();
+    const takeNumber = loopSavedTakeRef.current + 1;
+    loopSavedTakeRef.current = takeNumber;
+    setLoopTakeCount(takeNumber);
+    void enqueueSaveTake(trackId, samples, capture.sampleRate, true, takeNumber);
+    if (takeNumber >= MAX_LOOP_TAKES) {
+      setDriveMessage(`${MAX_LOOP_TAKES} loop Scratches captured · recording stopped`);
+      capture.stop();
+      captureRef.current = null;
+      recorderStreamRef.current?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
+      recorderStreamRef.current = null;
+      recordingTrackRef.current = null;
+      recordModeRef.current = 'none';
+      setRecordingTrackId(null);
+      setRecordingPhase('idle');
+    }
+  }, [enqueueSaveTake]);
 
   const toggleRecording = useCallback(async (track: Track) => {
     if (recordingTrackRef.current === track.id) {
@@ -486,11 +532,12 @@ export default function App() {
         audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
       stopActiveSources();
+      const capture = await PcmCapture.start(stream);
+      captureRef.current = capture;
       recorderStreamRef.current = stream;
       recordingTrackRef.current = track.id;
       setRecordingTrackId(track.id);
       setLoopTakeCount(0);
-      loopRequestedTakeRef.current = 0;
       loopSavedTakeRef.current = 0;
       const current = projectRef.current;
 
@@ -507,15 +554,17 @@ export default function App() {
       }
 
       recordModeRef.current = 'single';
-      startSingleRecorder(track.id, stream);
+      capture.markBoundary();
+      setRecordingPhase('recording');
       setDriveStatus('local');
       setDriveMessage('Recording with arrangement playback');
       setIsPlaying(true);
     } catch (error) {
+      cleanupRecordingSession();
       setDriveMessage(error instanceof Error ? error.message : 'Microphone permission failed.');
       setDriveStatus('error');
     }
-  }, [startSingleRecorder, stopActiveSources, stopRecordingSession]);
+  }, [cleanupRecordingSession, stopActiveSources, stopRecordingSession]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -533,18 +582,11 @@ export default function App() {
             loopWarmupRef.current = false;
             beginPostWarmupCapture();
             setDriveMessage(recordModeRef.current === 'loop-auto' ? `Auto Scratch · capturing pass 1/${MAX_LOOP_TAKES}` : 'Warm-up complete · recording');
-          } else if (recordModeRef.current === 'loop-auto' && recorderRef.current?.state === 'recording') {
-            if (loopRequestedTakeRef.current < MAX_LOOP_TAKES) {
-              loopRequestedTakeRef.current += 1;
-              recorderRef.current.requestData();
-              const nextTake = Math.min(MAX_LOOP_TAKES, loopRequestedTakeRef.current + 1);
-              if (loopRequestedTakeRef.current < MAX_LOOP_TAKES) {
-                setDriveMessage(`Auto Scratch · capturing pass ${nextTake}/${MAX_LOOP_TAKES}`);
-              } else {
-                setDriveMessage(`${MAX_LOOP_TAKES} loop Scratches captured · recording stopped`);
-                const recorder = recorderRef.current;
-                window.setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 0);
-              }
+          } else if (recordModeRef.current === 'loop-auto' && captureRef.current) {
+            const nextTake = loopSavedTakeRef.current + 1;
+            captureAutoTake();
+            if (nextTake < MAX_LOOP_TAKES) {
+              setDriveMessage(`Auto Scratch · capturing pass ${nextTake + 1}/${MAX_LOOP_TAKES}`);
             }
           }
         }
@@ -558,7 +600,7 @@ export default function App() {
       performStep(next);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [beginPostWarmupCapture, isPlaying, performStep, project.bpm, stopActiveSources]);
+  }, [beginPostWarmupCapture, captureAutoTake, isPlaying, performStep, project.bpm, stopActiveSources]);
 
   const toggleTransport = useCallback(() => {
     if (isPlaying) {
@@ -743,31 +785,125 @@ export default function App() {
     });
   }, []);
 
-  const syncDrive = useCallback(async () => {
-    const clientId = localStorage.getItem('scratchtrack.googleClientId')?.trim();
-    if (!clientId) {
+  const applyRemoteProject = useCallback(async (remote: ScratchtrackProject, folderId?: string) => {
+    const next = normalizeProject({
+      ...remote,
+      drive: {
+        ...remote.drive,
+        projectFolderId: folderId ?? remote.drive?.projectFolderId,
+      },
+    });
+    setProject(next);
+    projectRef.current = next;
+    saveProject(next);
+    setSelectedTrackId(next.tracks[0].id);
+    setDrawerTrackId(next.tracks[0].id);
+    setSelectedClipId(null);
+    playheadRef.current = 0;
+    setPlayheadBeat(0);
+  }, []);
+
+  const handleDriveError = useCallback((error: unknown) => {
+    const message = error instanceof Error ? error.message : 'Google Drive failed.';
+    setDriveStatus('error');
+    setDriveMessage(message);
+    if (error instanceof DriveAuthError) setDriveConnected(false);
+  }, []);
+
+  const connectGoogle = useCallback(async () => {
+    if (!isDriveConfigured()) {
       setDrivePanelOpen(true);
-      setDriveMessage('Add a Google OAuth client ID first.');
+      setDriveStatus('error');
+      setDriveMessage('This site still needs a one-time Google setup by the owner.');
+      return;
+    }
+    try {
+      setDriveStatus('connecting');
+      setDriveMessage('Connecting Google Drive…');
+      await connectDrive(true);
+      setDriveConnected(true);
+      setDriveStatus('connected');
+      setDriveMessage('Google Drive connected');
+    } catch (error) {
+      handleDriveError(error);
+    }
+  }, [handleDriveError]);
+
+  const syncDrive = useCallback(async () => {
+    if (!isDriveConfigured()) {
+      setDrivePanelOpen(true);
+      setDriveStatus('error');
+      setDriveMessage('This site still needs a one-time Google setup by the owner.');
       return;
     }
     try {
       if (!isDriveConnected()) {
         setDriveStatus('connecting');
         setDriveMessage('Connecting Google Drive…');
-        await connectDrive(clientId);
+        await connectDrive(true);
+        setDriveConnected(true);
       }
       setDriveStatus('syncing');
-      setDriveMessage('Syncing project and audio…');
+      setDriveMessage('Saving project to Google Drive…');
       const result = await syncProjectToDrive(projectRef.current, loadAudioBlob);
       const now = new Date().toISOString();
       commitProject((current) => ({ ...current, drive: { ...current.drive, ...result, lastSyncedAt: now } }));
       setDriveStatus('synced');
-      setDriveMessage(`Drive synced · ${result.uploadedAudio} audio file${result.uploadedAudio === 1 ? '' : 's'}`);
+      setDriveMessage(`Saved to Drive · ${result.uploadedAudio} audio file${result.uploadedAudio === 1 ? '' : 's'}`);
     } catch (error) {
-      setDriveStatus('error');
-      setDriveMessage(error instanceof Error ? error.message : 'Drive sync failed.');
+      handleDriveError(error);
     }
-  }, [commitProject]);
+  }, [commitProject, handleDriveError]);
+
+  const openSharedProject = useCallback(async (folderId?: string) => {
+    if (!isDriveConfigured()) {
+      setDrivePanelOpen(true);
+      setDriveStatus('error');
+      setDriveMessage('This site still needs a one-time Google setup by the owner.');
+      return;
+    }
+    try {
+      if (!isDriveConnected()) {
+        setDriveStatus('connecting');
+        setDriveMessage('Connecting Google Drive…');
+        await connectDrive(true);
+        setDriveConnected(true);
+      }
+      setDriveStatus('syncing');
+      setDriveMessage('Opening shared project…');
+      if (folderId) {
+        const remote = await loadProjectFromDriveFolder(folderId, saveAudioBlob);
+        await applyRemoteProject(remote, folderId);
+      } else {
+        const opened = await openSharedProjectWithPicker(saveAudioBlob);
+        await applyRemoteProject(opened.project, opened.folderId);
+      }
+      setDriveStatus('synced');
+      setDriveMessage('Opened shared Scratchtrack project');
+    } catch (error) {
+      handleDriveError(error);
+    }
+  }, [applyRemoteProject, handleDriveError]);
+
+  const shareProject = useCallback(async () => {
+    try {
+      let folderId = projectRef.current.drive?.projectFolderId;
+      if (!folderId) {
+        await syncDrive();
+        folderId = projectRef.current.drive?.projectFolderId;
+      }
+      if (!folderId) throw new Error('Save the project to Google Drive before sharing it.');
+      const link = projectShareUrl(folderId);
+      await navigator.clipboard.writeText(link);
+      setShareLinkCopied(true);
+      window.setTimeout(() => setShareLinkCopied(false), 2500);
+      window.open(driveFolderWebUrl(folderId), '_blank', 'noopener,noreferrer');
+      setDriveStatus('connected');
+      setDriveMessage('Share link copied · share the Drive folder with your collaborator');
+    } catch (error) {
+      handleDriveError(error);
+    }
+  }, [handleDriveError, syncDrive]);
 
   const visibleLoop = loopDraft ?? project.loop;
 
@@ -778,16 +914,63 @@ export default function App() {
         <input className="project-title" value={project.title} aria-label="Project title" onChange={(event) => commitProject((current) => ({ ...current, title: event.target.value }))} />
         <div className="topbar-actions">
           <span className={`save-state ${driveStatus === 'error' ? 'error' : ''}`}>{driveMessage}</span>
-          <button className="quiet-button" onClick={() => setDrivePanelOpen((value) => !value)}>Drive</button>
+          <button className="quiet-button" onClick={() => setDrivePanelOpen((value) => !value)}>
+            {driveConnected ? 'Drive' : 'Connect Google Drive'}
+          </button>
           <button className="primary-button" onClick={() => void syncDrive()}>Sync</button>
         </div>
       </header>
 
       {drivePanelOpen && (
         <section className="drive-panel">
-          <div><strong>Google Drive</strong><p>The application is public; your music is not. OAuth stays in this browser and project data is uploaded directly to your Drive.</p></div>
-          <label>Google OAuth client ID<input defaultValue={localStorage.getItem('scratchtrack.googleClientId') ?? ''} placeholder="000000000000-…apps.googleusercontent.com" onBlur={(event) => localStorage.setItem('scratchtrack.googleClientId', event.target.value.trim())} /></label>
-          <div className="drive-actions"><button className="quiet-button" onClick={exportProject}>Export project</button><label className="quiet-button file-button">Import project<input type="file" accept="application/json,.json" onChange={(event) => event.target.files?.[0] && importProject(event.target.files[0])} /></label><button className="primary-button" onClick={() => void syncDrive()}>Connect & sync</button></div>
+          <div>
+            <strong>Google Drive</strong>
+            <p>
+              Scratchtrack is a public website. Your recordings stay private in your own Google Drive.
+              You and a collaborator each sign in with your own Google account — never share a password.
+            </p>
+            <p className={`drive-status-line ${driveConnected ? 'connected' : driveStatus === 'error' ? 'error' : ''}`}>
+              {driveConnected ? 'Connected to Google Drive' : driveStatus === 'connecting' ? 'Connecting…' : driveStatus === 'error' ? driveMessage : 'Not connected'}
+            </p>
+          </div>
+          <div className="drive-copy">
+            {invitedFolderId
+              ? <p><strong>Someone shared a Scratchtrack project with you.</strong> Connect Google Drive, then open the shared project. Google will ask you to choose that folder once so Scratchtrack can read it.</p>
+              : (
+                <ol>
+                  <li>Connect Google Drive with your Google account.</li>
+                  <li>Sync to create or update this project in Drive.</li>
+                  <li>Share project copies a Scratchtrack link and opens the Drive folder so you can invite a collaborator as an editor.</li>
+                  <li>They open the link, sign in with their own Google account, and choose the shared folder.</li>
+                </ol>
+              )}
+            {!isDriveConfigured() && (
+              <p className="drive-setup-note">This deployed app still needs a one-time Google Cloud / GitHub Pages setup by the site owner. Musicians should not have to paste OAuth details.</p>
+            )}
+            {isDriveConfigured() && !isPickerConfigured() && (
+              <p className="drive-setup-note">Saving to your own Drive works. Opening a folder someone shared with you also needs the site owner’s Google Picker API key.</p>
+            )}
+            {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+              <label>Advanced · Google client ID for this browser only
+                <input defaultValue={googleClientId()} placeholder="000000000000-…apps.googleusercontent.com" onBlur={(event) => localStorage.setItem('scratchtrack.googleClientId', event.target.value.trim())} />
+              </label>
+            )}
+          </div>
+          <div className="drive-actions">
+            {driveConnected
+              ? <button className="quiet-button" onClick={() => { disconnectDrive(); setDriveConnected(false); setDriveStatus('local'); setDriveMessage('Disconnected from Google Drive'); }}>Disconnect</button>
+              : <button className="primary-button" onClick={() => void connectGoogle()}>Connect Google Drive</button>}
+            {driveStatus === 'error' && driveMessage.includes('reconnect') && (
+              <button className="primary-button" onClick={() => void connectGoogle()}>Reconnect Google Drive</button>
+            )}
+            <button className="quiet-button" onClick={() => void openSharedProject(invitedFolderId || undefined)}>
+              {invitedFolderId ? 'Open this shared project' : 'Open shared project'}
+            </button>
+            <button className="quiet-button" onClick={() => void shareProject()}>{shareLinkCopied ? 'Share link copied' : 'Share project'}</button>
+            <button className="primary-button" onClick={() => void syncDrive()}>Sync</button>
+            <button className="quiet-button" onClick={exportProject}>Export project</button>
+            <label className="quiet-button file-button">Import project<input type="file" accept="application/json,.json" onChange={(event) => event.target.files?.[0] && importProject(event.target.files[0])} /></label>
+          </div>
         </section>
       )}
 

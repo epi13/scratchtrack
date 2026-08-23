@@ -41,11 +41,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .primary-button:hover { background: #3e2c19; border-color: #936c40; }
 .quiet-button { background: transparent; }
 
-.drive-panel { margin: 12px clamp(16px, 3vw, 42px) 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #121416; display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, 1.2fr) auto; gap: 22px; align-items: end; }
+.drive-panel { margin: 12px clamp(16px, 3vw, 42px) 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #121416; display: grid; grid-template-columns: minmax(220px, .9fr) minmax(280px, 1.3fr) minmax(220px, 1fr); gap: 22px; align-items: start; }
 .drive-panel p { margin: 5px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-.drive-panel label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; }
+.drive-panel label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; margin-top: 10px; }
 .drive-panel input { background: #0d0f11; border: 1px solid var(--line); color: var(--text); border-radius: 7px; padding: 9px 10px; min-width: 0; }
-.drive-actions { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+.drive-copy ol { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.5; display: grid; gap: 6px; }
+.drive-status-line { font-size: 12px; color: var(--muted); }
+.drive-status-line.connected { color: var(--green); }
+.drive-status-line.error { color: var(--red); }
+.drive-setup-note { color: #d7b48a; }
+.drive-actions { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; align-content: start; }
 .file-button { display: inline-flex; align-items: center; }
 .file-button input { display: none; }
 
@@ -160,7 +165,7 @@ select { background: #0e1012; border: 1px solid var(--line); color: var(--text);
   .topbar { grid-template-columns: auto 1fr; }
   .project-title { grid-row: 2; grid-column: 1 / -1; text-align: left; padding-left: 0; }
   .topbar-actions { min-width: 0; }
-  .save-state { display: none; }
+  .save-state { max-width: min(190px, 42vw); }
   .drive-panel { grid-template-columns: 1fr; }
   .drive-actions { justify-content: flex-start; }
   .synth-controls { grid-template-columns: repeat(3, 1fr); }
