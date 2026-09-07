@@ -16,7 +16,7 @@
  *
  * MNCS is the semantic authority: `mncs/meter.mncs` plus
  * `mncs/meter-corpus.json` define the contract, `src/mncsMeter.test.ts`
- * pins every corpus vector in this suite, and `scripts/mncs-meter-evidence.sh`
+ * pins every corpus vector in this suite, and `scripts/mncs-evidence.sh`
  * replays the proof through the MNCS toolchain (source-study + portable-WASM
  * and research-bytecode execution, plus live calls into the compiled WASM).
  * This file must agree with the MNCS module function-for-function; any

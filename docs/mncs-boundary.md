@@ -14,7 +14,7 @@ toolchain to a real WebAssembly MVP binary:
 - scalars pass directly (`i64` <-> BigInt, `bool` <-> 0/1),
 - **zero host imports** — the module instantiates with `{}`.
 
-Replay: `scripts/mncs-meter-evidence.sh`. It runs source-study, executes
+Replay: `scripts/mncs-evidence.sh`. It runs source-study, executes
 `mncs/meter-corpus.json` (33 cases) on the portable-WASM and
 research-bytecode backends, checks cross-backend agreement, and performs
 live calls into the compiled WASM module. All green as of this writing.
@@ -55,10 +55,26 @@ live calls into the compiled WASM module. All green as of this writing.
 
 ## What is NOT a boundary
 
-- `music.ts` tick/subdivision/step math: now delegated to the MNCS
-  projection (`src/mncsMeter.ts`). The old float-division-plus-epsilon
-  formulation is gone.
+- `music.ts` tick/subdivision/step math: delegated to the MNCS projection
+  (`src/mncsMeter.ts`). The old float-division-plus-epsilon formulation is
+  gone.
+- Transport tick math in `App.tsx fireTick`: bar length, clip
+  activation/length, bar/pattern/motif wraps, drum step index, and motif
+  sizing all delegate to the MNCS arrangement projection
+  (`src/mncsArrange.ts`). The beats→ticks `Math.round` stays at the edge.
+- Session policy: loop-take and Scratch-count guards delegate to
+  `mncsLoopTakeAllowed` / `mncsScratchAllowed`; tempo normalization in
+  `project.ts` delegates to `mncsNormalizeBpm`.
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local
   workaround layer.
+
+## Still beats-space (deferred with reason, see P-007)
+
+- Clip move/resize/snip and loop-range editing in `App.tsx` / `project.ts`
+  stay in beats: arrangement snap grids (e.g. 1/32 beat = 0.75 ticks) are
+  finer than the transport tick grid, so those edits are not
+  whole-tick-exact. Their tick kernels are specified, proven, and tested
+  (`mncsSnipValid`, `mncsSnipHalves`, `mncsMoveStart`, `mncsResizeLength`,
+  `mncsLoopStartTick`, `mncsLoopEndTick`) and waiting for tick-exact snap.

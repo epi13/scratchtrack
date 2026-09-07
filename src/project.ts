@@ -13,6 +13,7 @@ import type {
   Track,
 } from './types';
 import { barBeats, normalizeSubdivision, normalizeTimeSignature, stepsPerBar } from './music';
+import { mncsNormalizeBpm } from './mncsArrange';
 
 export const uid = () => crypto.randomUUID();
 
@@ -410,7 +411,8 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
       version: 4,
       id: typeof source.id === 'string' && source.id ? source.id : uid(),
       title: typeof source.title === 'string' ? source.title : 'Untitled idea',
-      bpm: typeof source.bpm === 'number' && source.bpm >= 20 && source.bpm <= 300 ? source.bpm : 104,
+      // Tempo policy owned by the MNCS arrangement model (`normalize_bpm`).
+      bpm: mncsNormalizeBpm(source.bpm as number),
       timeSignature: meter,
       createdAt: typeof source.createdAt === 'string' ? source.createdAt : new Date().toISOString(),
       updatedAt: typeof source.updatedAt === 'string' ? source.updatedAt : new Date().toISOString(),

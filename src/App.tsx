@@ -33,6 +33,17 @@ import {
   stepTicks,
   stepsPerBar,
 } from './music';
+import { mncsBarTicks } from './mncsMeter';
+import {
+  mncsClampMotifBars,
+  mncsClipActive,
+  mncsClipLengthTicks,
+  mncsLoopTakeAllowed,
+  mncsMotifTicks,
+  mncsScratchAllowed,
+  mncsStepIndex,
+  mncsWrapTick,
+} from './mncsArrange';
 import {
   activeScratch,
   duplicateScratch,
@@ -277,7 +288,7 @@ export default function App() {
 
   /** New Scratch: independent section keeping useful sound configuration only. */
   const createNewScratch = useCallback((track: Track) => {
-    if (track.scratches.length >= MAX_SCRATCHES) {
+    if (!mncsScratchAllowed(track.scratches.length)) {
       setDriveStatus('error');
       setDriveMessage(`Scratch limit reached (${MAX_SCRATCHES}). Delete misses before adding more.`);
       return;
@@ -288,7 +299,7 @@ export default function App() {
   /** Duplicate Scratch: deliberate deep copy of the current idea. */
   const duplicateActiveScratch = useCallback((track: Track) => {
     const source = activeScratch(track);
-    if (!source || track.scratches.length >= MAX_SCRATCHES) return;
+    if (!source || !mncsScratchAllowed(track.scratches.length)) return;
     activateNewScratch(track, duplicateScratch(source));
   }, [activateNewScratch]);
 
@@ -452,9 +463,14 @@ export default function App() {
 
   const fireTick = useCallback((tick: number) => {
     const current = projectRef.current;
-    const barTicksValue = Math.round(barBeats(current.timeSignature) * TICKS_PER_BEAT);
+    // Tick-space transport math owned by the MNCS arrangement model
+    // (`scratchtrack.arrange.v1` / `mncsArrange.ts`); the float boundary
+    // (`Math.round(beats * TICKS_PER_BEAT)`) stays at the edge.
+    const meter = normalizeTimeSignature(current.timeSignature);
+    const barTicksValue = mncsBarTicks(meter.numerator, meter.denominator)
+      ?? Math.round(barBeats(current.timeSignature) * TICKS_PER_BEAT);
     if (metronome && barTicksValue > 0) {
-      const posInBar = ((tick % barTicksValue) + barTicksValue) % barTicksValue;
+      const posInBar = mncsWrapTick(tick, barTicksValue);
       if (posInBar % 6 === 0) playMetronome(posInBar === 0);
     }
     const anySolo = current.tracks.some((track) => track.solo);
@@ -463,9 +479,9 @@ export default function App() {
       for (const clip of current.clips) {
         if (clip.trackId !== track.id) continue;
         const clipStartTick = Math.round(clip.startBeat * TICKS_PER_BEAT);
-        const clipLengthTicks = Math.max(1, Math.round(clip.lengthBeats * TICKS_PER_BEAT));
+        const clipLengthTicks = mncsClipLengthTicks(Math.round(clip.lengthBeats * TICKS_PER_BEAT));
         const localTick = tick - clipStartTick;
-        if (localTick < 0 || localTick >= clipLengthTicks) continue;
+        if (!mncsClipActive(localTick, clipLengthTicks)) continue;
         const scratch = track.scratches.find((item) => item.id === clip.scratchId);
         if (!scratch) continue;
         const sourceTick = Math.round((clip.sourceOffsetBeats ?? 0) * TICKS_PER_BEAT) + localTick;
@@ -476,20 +492,23 @@ export default function App() {
           if (!steps) continue;
           const stepLengthTicks = stepTicks(subdivision);
           const patternTicks = steps * stepLengthTicks;
-          const position = ((sourceTick % patternTicks) + patternTicks) % patternTicks;
-          if (position % stepLengthTicks !== 0) continue;
-          const stepIndex = position / stepLengthTicks;
+          const position = mncsWrapTick(sourceTick, patternTicks);
+          const stepIndex = mncsStepIndex(position, stepLengthTicks);
+          if (stepIndex < 0) continue;
           const settings = scratch.drumSettings ?? defaultDrumSettings;
           const secondsPerStep = (60 / current.bpm) * stepBeats(subdivision);
           const swingDelay = swingApplies(subdivision, stepIndex) ? secondsPerStep * 480 * settings.swing : 0;
           const humanDelay = settings.humanize * Math.random() * 13;
           window.setTimeout(() => playDrumStep(scratch.drumPattern!, stepIndex, scratch.drumKit, settings), swingDelay + humanDelay);
         } else if (track.kind === 'synth' && scratch.synthPatch) {
-          const motifBars = Math.min(8, Math.max(1, Math.round(scratch.motifBars ?? 1)));
-          const motifTicks = Math.max(1, Math.round(motifBars * barBeats(current.timeSignature) * TICKS_PER_BEAT));
-          const position = ((sourceTick % motifTicks) + motifTicks) % motifTicks;
+          const motifBars = mncsClampMotifBars(Math.round(scratch.motifBars ?? 1));
+          const motifTicks = mncsMotifTicks(barTicksValue, motifBars);
+          const position = mncsWrapTick(sourceTick, motifTicks);
           for (const note of scratch.synthNotes ?? []) {
-            const noteTick = Math.round(note.startBeat * TICKS_PER_BEAT) % motifTicks;
+            const rawNoteTick = Math.round(note.startBeat * TICKS_PER_BEAT);
+            // Negative note offsets keep the JS remainder path: wrapping
+            // them would change which (if any) position they match.
+            const noteTick = rawNoteTick < 0 ? rawNoteTick % motifTicks : mncsWrapTick(rawNoteTick, motifTicks);
             if (noteTick === position) {
               playSynthNote(note.midi, scratch.synthPatch, (60 / current.bpm) * note.lengthBeats * 0.9);
             }
@@ -524,7 +543,7 @@ export default function App() {
     const current = projectRef.current;
     const track = current.tracks.find((item) => item.id === trackId);
     if (!track) return false;
-    if (!loopTake && track.scratches.length >= MAX_SCRATCHES) {
+    if (!loopTake && !mncsScratchAllowed(track.scratches.length)) {
       setDriveStatus('error');
       setDriveMessage(`Scratch limit reached (${MAX_SCRATCHES}). Delete bad takes before recording more.`);
       return false;
@@ -548,7 +567,7 @@ export default function App() {
       }
     }
 
-    if (track.scratches.length >= MAX_SCRATCHES) {
+    if (!mncsScratchAllowed(track.scratches.length)) {
       setDriveStatus('error');
       setDriveMessage(`Scratch limit reached (${MAX_SCRATCHES}).`);
       return false;
@@ -589,7 +608,7 @@ export default function App() {
       return;
     }
     if (mode === 'loop-auto') {
-      if (loopSavedTakeRef.current < MAX_LOOP_TAKES) {
+      if (mncsLoopTakeAllowed(loopSavedTakeRef.current)) {
         const samples = capture.peekSinceMark();
         if (samples.length >= capture.sampleRate * 0.25) {
           const takeNumber = loopSavedTakeRef.current + 1;
@@ -621,13 +640,13 @@ export default function App() {
   const captureAutoTake = useCallback(() => {
     const trackId = recordingTrackRef.current;
     const capture = captureRef.current;
-    if (!trackId || !capture || loopSavedTakeRef.current >= MAX_LOOP_TAKES) return;
+    if (!trackId || !capture || !mncsLoopTakeAllowed(loopSavedTakeRef.current)) return;
     const samples = capture.takeSinceMark();
     const takeNumber = loopSavedTakeRef.current + 1;
     loopSavedTakeRef.current = takeNumber;
     setLoopTakeCount(takeNumber);
     void enqueueSaveTake(trackId, samples, capture.sampleRate, true, takeNumber);
-    if (takeNumber >= MAX_LOOP_TAKES) {
+    if (!mncsLoopTakeAllowed(takeNumber)) {
       setDriveMessage(`${MAX_LOOP_TAKES} loop Scratches captured · recording stopped`);
       capture.stop();
       captureRef.current = null;
@@ -709,7 +728,7 @@ export default function App() {
           } else if (recordModeRef.current === 'loop-auto' && captureRef.current) {
             const nextTake = loopSavedTakeRef.current + 1;
             captureAutoTake();
-            if (nextTake < MAX_LOOP_TAKES) {
+            if (mncsLoopTakeAllowed(nextTake)) {
               setDriveMessage(`Auto Scratch · capturing pass ${nextTake + 1}/${MAX_LOOP_TAKES}`);
             }
           }
@@ -1355,7 +1374,7 @@ export default function App() {
                           </div>
                         </article>
                       ))}
-                      {track.scratches.length < MAX_SCRATCHES && <button className="new-scratch-card" onClick={() => createNewScratch(track)}>＋ New scratch</button>}
+                      {mncsScratchAllowed(track.scratches.length) && <button className="new-scratch-card" onClick={() => createNewScratch(track)}>＋ New scratch</button>}
                     </div>
                   </div>
                 )}
