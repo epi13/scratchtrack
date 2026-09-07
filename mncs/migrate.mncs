@@ -1,0 +1,96 @@
+mncs 0.8;
+
+// scratchtrack.migrate.v1 — exact integer project-migration kernels.
+//
+// Machine-native representation of ScratchTrack's v1/v2/v3 → v4 document
+// migration math. Migration inputs are untrusted JSON, so every kernel is
+// total over its input domain with explicit degenerate handling; the host
+// keeps string/structure traversal (track kinds, pattern arrays, settings
+// objects) while positions, counts, and policy live here.
+//
+// Remap rule (drum subdivision/meter changes): a hit at step `s` of a
+// `from`-step bar lands at round-half-up(s * to / from), clamped into
+// [0, to - 1]; colliding hits keep the stronger velocity (max). All
+// operands are array indices and lengths — non-negative integers — and the
+// exact form `(2*s*to + denom) / (2*denom)` replaces the legacy float
+// `floor(s / max(1, from) * to + 0.5)`. The two agree everywhere except
+// exact .5 ties (160 out of 1048385 grid combos over steps 2..128): the
+// legacy two-step float computation lets dust decide those ties (measured:
+// always down), while this rule rounds ties up deterministically. That is
+// an intentional normalization toward exactness — see
+// docs/mncs-pressure.md D-003 — not silent drift.
+//
+// `content_bars` is specified and proven here but NOT yet delegated on the
+// migration path: content ends arrive as float beat sums whose dust near a
+// bar boundary can flip `ceil` after tick rounding. See P-007.
+//
+// Division obligations (divisor nonzero) stay UNKNOWN: each divisor is
+// guarded by control flow, but no prover discharges them yet — see
+// docs/mncs-pressure.md item P-003. Multiplication uses the explicit
+// wrapping intent (`*%`); product magnitudes keep the wrap path
+// unreachable.
+module scratchtrack.migrate.v1;
+
+// Legacy v<=3 meter: integer beatsPerBar 1..32 maps to numerator over 4/4;
+// anything else reports -1 and the host falls back to the 4/4 default.
+// Precondition: beats already rounded (the host keeps Math.round at the
+// float edge, mirroring the legacy Math.round(legacyBeatsPerBar)).
+fn legacy_numerator(beats: i64) -> (result: i64) {
+    if beats >= 1 && beats <= 32 {
+        return beats;
+    }
+    return 0 - 1;
+}
+
+// Remap target index for step `s` moving from a `from`-step bar to a
+// `to`-step bar. Degenerate grids (from < 1) behave as from = 1, mirroring
+// the legacy Math.max(1, fromSteps); the result clamps into [0, to - 1]
+// for to >= 1 and to 0 for degenerate targets.
+fn remap_index(step: i64, from_steps: i64, to_steps: i64) -> (result: i64) {
+    let denom: i64 = select(from_steps < 1, 1, from_steps);
+    let scaled: i64 = ((2 *% step) *% to_steps +% denom) / (2 *% denom);
+    if to_steps < 1 {
+        return 0;
+    }
+    let cap: i64 = to_steps -% 1;
+    return select(scaled < 0, 0, select(scaled > cap, cap, scaled));
+}
+
+// Collision rule: the stronger hit wins when two hits collapse onto one
+// step. Velocities are DrumCells 0..2; the host skips 0 cells before
+// calling, so this is max over 1..2 in practice.
+fn remap_cell(existing: i64, incoming: i64) -> (result: i64) {
+    return select(existing >= incoming, existing, incoming);
+}
+
+// Bars spanned by content ending at `content_ticks` under a bar of
+// `meter_ticks`: ceil(content / meter), 0 for empty content, 1 for a
+// degenerate meter. The caller clamps via arrange `clamp_motif_bars`.
+fn content_bars(content_ticks: i64, meter_ticks: i64) -> (result: i64) {
+    if meter_ticks <= 0 {
+        return 1;
+    }
+    if content_ticks <= 0 {
+        return 0;
+    }
+    return (content_ticks +% meter_ticks -% 1) / meter_ticks;
+}
+
+// Scale-root normalization into pitch class 0..11.
+fn normalize_root(root: i64) -> (result: i64) {
+    return ((root % 12) +% 12) % 12;
+}
+
+// Key-octave clamp into the 1..6 product range.
+fn normalize_octave(octave: i64) -> (result: i64) {
+    return select(octave < 1, 1, select(octave > 6, 6, octave));
+}
+
+// Auto Scratch upgrade rule: v3+ documents respect the stored flag;
+// older prototypes upgrade to Auto Scratch ON.
+fn auto_scratch_upgrade(is_v3_or_later: bool, stored_flag: bool) -> (result: bool) {
+    if is_v3_or_later {
+        return stored_flag;
+    }
+    return true;
+}

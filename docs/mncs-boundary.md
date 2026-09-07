@@ -65,6 +65,11 @@ live calls into the compiled WASM module. All green as of this writing.
 - Session policy: loop-take and Scratch-count guards delegate to
   `mncsLoopTakeAllowed` / `mncsScratchAllowed`; tempo normalization in
   `project.ts` delegates to `mncsNormalizeBpm`.
+- Migration math in `project.ts` / `music.ts`: legacy meter mapping, drum
+  remap (one MNCS rule replacing two float copies), key normalization,
+  motif-bar clamping, and the Auto Scratch version rule delegate to the
+  MNCS migration projection (`src/mncsMigrate.ts`). Exact ties now round
+  up deterministically (evidenced normalization, see D-003).
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local

@@ -1,5 +1,6 @@
 import type { Subdivision, TimeSignature } from './types';
 import { STEP_TICKS, mncsStepsPerBar } from './mncsMeter';
+import { mncsRemapCell, mncsRemapIndex } from './mncsMigrate';
 
 /** Re-exported from the MNCS projection so grid code shares one table. */
 export { STEP_TICKS } from './mncsMeter';
@@ -93,9 +94,10 @@ export function remapPattern(
     const target = nextRows[rowIndex] ?? [];
     row.forEach((cell, step) => {
       if (!cell) return;
-      const beat = (step / Math.max(1, fromSteps)) * toSteps;
-      const index = Math.min(toSteps - 1, Math.max(0, Math.floor(beat + 0.5)));
-      target[index] = Math.max(target[index] ?? 0, cell) as never;
+      // Remap rule owned by the MNCS migration model (`remap_index` /
+      // `remap_cell`); exact on array indices (see mncsMigrate.ts).
+      const index = mncsRemapIndex(step, fromSteps, toSteps);
+      target[index] = mncsRemapCell(target[index] ?? 0, cell) as never;
     });
   });
   return nextRows as never;

@@ -1,0 +1,1529 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-migrate-kernels",
+ "cases": [
+  {
+   "id": "legacy-4",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-3",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-32",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 32,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 32,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-0",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-33",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 33,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "legacy_numerator"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-start",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-mid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 8,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 6,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-half-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-end",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 15,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 11,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-odd",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 14,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 6,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-clamp",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-degenerate-from",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 8,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 7,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "remap-tie-rounds-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 15,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 22,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 11,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 8,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cell-stronger-wins",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cell-keeps-stronger",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cell-tie",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cell-empty",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "remap_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bars-two",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "content_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 192,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bars-exact",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "content_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 84,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 84,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bars-rounds-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "content_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 97,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bars-empty",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "content_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bars-degenerate-meter",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "content_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 50,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "root-c",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_root"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "root-d",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_root"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 14,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "root-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_root"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 11,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "root-neg-octave",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_root"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -13,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 11,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "root-high",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_root"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 25,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "octave-low",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_octave"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "octave-mid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_octave"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "octave-high",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_octave"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 6,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "octave-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "normalize_octave"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "auto-v3-on",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "auto_scratch_upgrade"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": true
+      }
+     },
+     {
+      "boolean": {
+       "value": true
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "auto-v3-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "auto_scratch_upgrade"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": true
+      }
+     },
+     {
+      "boolean": {
+       "value": false
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "auto-old-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "auto_scratch_upgrade"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": false
+      }
+     },
+     {
+      "boolean": {
+       "value": false
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "auto-old-on",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.migrate.v1",
+     "function": "auto_scratch_upgrade"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": false
+      }
+     },
+     {
+      "boolean": {
+       "value": true
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  }
+ ]
+}
