@@ -80,6 +80,10 @@ live calls into the compiled WASM module. All green as of this writing.
   header field reads at MNCS-owned offsets, decodability gates, and encode
   size laws delegate to the MNCS container projection (`src/mncsWav.ts`).
   Byte access and per-sample float scaling stay host-side at the boundary.
+- Pack layout math in `pack.ts`: record sizes, signature checks, central
+  entry parsing, and directory walk steps delegate to the MNCS pack
+  projection (`src/mncsPack.ts`). The EOCD backward scan, per-entry
+  loops, CRC32 streaming, and text coding stay host-side (see P-009).
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local
