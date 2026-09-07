@@ -1,0 +1,21 @@
+mncs 0.7;
+
+// PRESSURE PROBE (expected failure): CRC32's bitwise core needs u32
+// shifts and XOR, which the type checker refuses (MNE115/MNE103).
+// Shifts on u64 exist and `%`/`/` substitute for masking, so the
+// precise gap is integer XOR/AND/OR — routed around by per-bit
+// arithmetic in mncs/crc.mncs. The 256-entry byte table additionally
+// exceeds the 64-element sequence bound (mncs_model MAX_SEQUENCE_BOUND),
+// routed around by the 16-entry nibble table.
+// Reproduce: mncs-cli source-study mncs/probes/crc32_u32_attempt.mncs
+// Pressure ledger: P-009 (integer bitwise ops + sequence bound).
+module scratchtrack.probes.crc32_u32_attempt;
+
+fn crc32_bit(crc: u32, bit: u32) -> (result: u32) {
+    let mixed: u32 = crc ^ bit;
+    let shifted: u32 = mixed >> (1 as u64);
+    if mixed % (2 as u32) == (1 as u32) {
+        return (3988292384 as u32) ^ shifted;
+    }
+    return shifted;
+}

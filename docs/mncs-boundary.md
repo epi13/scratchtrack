@@ -6,18 +6,21 @@ application. The boundary is small, explicit, typed, and measurable.
 
 ## Proven shape (2026-09)
 
-`mncs/meter.mncs` (`scratchtrack.meter.v1`) compiles through the MNCS
-toolchain to a real WebAssembly MVP binary:
+Eight MNCS modules (`meter`, `arrange`, `migrate`, `geometry`, `wav`,
+`pack`, `text`, `crc`) compile through the MNCS toolchain to real
+WebAssembly MVP binaries under `public/mncs/`:
 
-- one exported WASM function per MNCS function (`bar_ticks`,
-  `steps_per_bar`, `quantize_tick`, `pad_midi`, ...),
-- scalars pass directly (`i64` <-> BigInt, `bool` <-> 0/1),
-- **zero host imports** — the module instantiates with `{}`.
+- one exported WASM function per MNCS function,
+- scalars pass directly (`i64` <-> BigInt, `bool`/`byte` <-> 0/1),
+- byte views cross through the host-buffer ABI (`mncs_host_buffer` +
+  packed `offset | len << 32` descriptors); records return as pointers
+  to 8-byte-slot canonical cells,
+- **zero host imports** — every module instantiates with `{}`.
 
-Replay: `scripts/mncs-evidence.sh`. It runs source-study, executes
-`mncs/meter-corpus.json` (33 cases) on the portable-WASM and
-research-bytecode backends, checks cross-backend agreement, and performs
-live calls into the compiled WASM module. All green as of this writing.
+Replay: `scripts/mncs-evidence.sh` (source-study + both backends +
+agreement + live calls for all eight modules) and
+`scripts/verify-mncs.sh` (the CI gate: evidence + WASM freshness +
+typecheck + tests + build). All green as of this writing.
 
 ## Boundary rules
 
@@ -82,8 +85,16 @@ live calls into the compiled WASM module. All green as of this writing.
   Byte access and per-sample float scaling stay host-side at the boundary.
 - Pack layout math in `pack.ts`: record sizes, signature checks, central
   entry parsing, and directory walk steps delegate to the MNCS pack
-  projection (`src/mncsPack.ts`). The EOCD backward scan, per-entry
-  loops, CRC32 streaming, and text coding stay host-side (see P-009).
+  projection (`src/mncsPack.ts`). Checksums delegate to the MNCS CRC
+  projection (`src/mncsCrc.ts`, WASM-chunked streaming first). The EOCD
+  backward scan, per-entry loops, and text coding stay host-side
+  (see P-009/P-012).
+- Position parsing in `music.ts`: `parsePosition` runs compiled
+  `parse_position`/`position_ticks` WASM-first with projection fallback
+  (`src/mncsText.ts`). Formatting stays host-side (see P-002).
+- Production execution: `src/mncsWasm.ts` loads `meter.wasm` +
+  `text.wasm` + `crc.wasm` at boot (never throws; per-module readiness;
+  projections are the fallback, never a second authority).
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local

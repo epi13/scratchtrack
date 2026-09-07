@@ -1,0 +1,20 @@
+mncs 0.7;
+
+// REGRESSION PROBE (passes): dynamic sub-view derivation for binary
+// format sniffing. ScratchTrack's WAV/ZIP readers window byte views at
+// runtime-computed offsets; `xs[i]` with a computed index and
+// `xs[start..end]` with dynamic bounds both elaborate and execute
+// correctly on portable-WASM (slice-corpus.json: head=248, mid=147).
+// Guards the closed dynamic-views gap — see ledger.
+// Reproduce: cargo run -q -p mncs-cli -- experiment run
+//   mncs/probes/slice_dynamic_attempt.mncs --backend portable-wasm
+//   --corpus mncs/probes/slice-corpus.json --output-dir /tmp/slice-run
+module scratchtrack.probes.slice_dynamic_attempt;
+
+fn window_sum(view: [byte; up_to 64], start: u64, len: u64) -> (result: u64) {
+    let window: [byte; up_to 64] = view[start..start +% len];
+    iterate i over window carrying acc: u64 = 0 {
+        next acc = acc +% (window[i] as u64);
+    }
+    return acc;
+}

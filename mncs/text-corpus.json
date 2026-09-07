@@ -1,0 +1,1709 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-text-kernels",
+ "cases": [
+  {
+   "id": "full",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "bar-only",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 55
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "bar-beat",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 56
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 11,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 8,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "empty",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": []
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "empty-middle",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "zeros",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 48
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "leading-zeros",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 48
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 48
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 48
+         }
+        },
+        {
+         "byte": {
+          "value": 49
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "letter",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 97
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "letter-tail",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "four-parts",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "space",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "negative",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "parse_position"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 45
+         }
+        },
+        {
+         "byte": {
+          "value": 49
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.text.v1::Position::bar%3Au64%3Bbeat%3Au64%3Bsixth%3Au64%3Bvalid%3Abool%3B",
+      "name": "Position",
+      "fields": [
+       [
+        "bar",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "beat",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "sixth",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "is-digit-7",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "is_digit"
+    },
+    "arguments": [
+     {
+      "byte": {
+       "value": 55
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "is-digit-dot",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "is_digit"
+    },
+    "arguments": [
+     {
+      "byte": {
+       "value": 46
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-7-3-2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 636,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-origin",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-5-3",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 432,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-odd-meter",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 84,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 84,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-sixteenth",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 42,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-bar-floor",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 18,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-beat-range",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 99,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-total-range",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 999,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ticks-cap",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.text.v1",
+     "function": "position_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 17,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1536,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

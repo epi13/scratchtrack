@@ -6,11 +6,11 @@ mncs 0.7;
 // layout (local headers, central directory, end-of-central-directory).
 // Fixed-field offsets, sizes, signatures, and entry-walk arithmetic live
 // here; byte access stays host-side. Iteration over dynamic structures
-// (backward EOCD scan, per-entry directory walk, CRC32 streaming) stays
-// host-side too: counted loops and bulk byte views are not expressible
-// yet, and u32 shifts/XOR needed for CRC32 are refused by the type
-// checker — see docs/mncs-pressure.md P-009. The CRC32 table in pack.ts
-// is therefore untouched by this slice.
+// (backward EOCD scan, per-entry directory walk) stays host-side too:
+// dynamic-trip-count and nested iteration are not expressible yet — see
+// docs/mncs-pressure.md P-009/P-012. Integrity checksums moved to the
+// MNCS CRC model (`mncs/crc.mncs`), which the pack writer delegates to
+// through `src/mncsCrc.ts`.
 //
 // Windows are fixed: local headers parse from `[byte; 46]` (only the
 // first 30 bytes are read), central entries from `[byte; 46]`, EOCD from

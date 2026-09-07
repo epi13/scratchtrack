@@ -1,0 +1,24 @@
+{
+  "schema_version": "mncs-fabric.job-plan.v0.1",
+  "job_id": "scratchtrack:text-boundary-audit:0.1",
+  "candidate_identity": "sha256:3dd11b91fff40a0877d103af1b06e7ed3f7c30dd87138961e5af0c79dc588430",
+  "artifact_manifest_identity": "sha256:5fcf3f95cd42fbcdffb44041cf4285fb2028ed6229c88827dbb8c8d695fe4103",
+  "argv": [
+    "@python",
+    "task.py"
+  ],
+  "working_directory": ".",
+  "timeout_seconds": 120,
+  "output_limit_bytes": 65536,
+  "environment": {
+    "SCRATCHTRACK_ROOT": "/home/epi13/Documents/Projects/scratchtrack",
+    "PYTHONHASHSEED": "0"
+  },
+  "required_capabilities": [
+    "python"
+  ],
+  "result_paths": [
+    "result.json"
+  ],
+  "network_policy": "DECLARED_OFFLINE"
+}

@@ -1,0 +1,87 @@
+name: MNCS pressure-boundary verification
+
+# Required MNCS evidence: a PR cannot go green while the MNCS modules,
+# corpora, production WASM artifacts, app tests, or the build are broken.
+# Uses epi13/mncs-actions/actions/verify (pinned SHA, never @main) around
+# the repository verifier scripts/verify-mncs.sh, which writes
+# .mncs/verification-result.json (schema mncs.verification-result/1).
+# The badge is rendered from the established verdict output — never
+# hardcoded — with the tested commit bound in the sidecar.
+#
+# The mncs-language checkout is pinned to the exact compiler revision the
+# checked-in evidence binds to (see scripts/verify-mncs.sh PINNED_REV).
+# Moving the pin requires re-running evidence + wasm build and committing
+# the refreshed manifest.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MNCS_LANGUAGE_REV: 8d79250d54d4e4241c0bb0ae6f5c632345848a6d
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ScratchTrack
+        uses: actions/checkout@v4
+
+      - name: Check out pinned mncs-language toolchain
+        uses: actions/checkout@v4
+        with:
+          repository: epi13/mncs-language
+          ref: ${{ env.MNCS_LANGUAGE_REV }}
+          path: mncs-language
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run MNCS pressure-boundary verification
+        id: mncs-verify
+        uses: epi13/mncs-actions/actions/verify@9eb2a0d6144807edbd38b369941deb1b4014e5ff
+        with:
+          command: ./scripts/verify-mncs.sh
+          result-file: .mncs/verification-result.json
+          evidence-directory: .mncs/evidence
+          fail-on-unknown: "true"
+          artifact-name: mncs-pressure-evidence
+        env:
+          MNCS_LANGUAGE_DIR: ${{ github.workspace }}/mncs-language
+          MNCS_LANGUAGE_REV: ${{ env.MNCS_LANGUAGE_REV }}
+
+      - name: Render pressure-boundary badge from the established verdict
+        if: always()
+        uses: epi13/mncs-actions/actions/render-badge@9eb2a0d6144807edbd38b369941deb1b4014e5ff
+        with:
+          verdict: ${{ steps.mncs-verify.outputs.verdict }}
+          label: MNCS pressure boundary
+          output-file: .mncs/mncs-badge.svg
+          sidecar-file: .mncs/mncs-badge.json
+          repository: epi13/scratchtrack
+          subject-commit: ${{ github.sha }}
+          boundary: mncs-pressure-boundary
+
+      - name: Upload badge files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mncs-pressure-badge
+          path: |
+            .mncs/mncs-badge.svg
+            .mncs/mncs-badge.json

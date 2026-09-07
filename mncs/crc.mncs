@@ -1,0 +1,99 @@
+mncs 0.7;
+
+// scratchtrack.crc.v1 — IEEE 802.3 CRC32 over bounded byte windows.
+//
+// CRC32 needs integer XOR, which MNCS refuses (`^`/`&`/`|` on integers
+// do not elaborate — see mncs/probes/crc_u32_attempt.mncs and
+// crc_u64_attempt.mncs). This module routes around that hole three ways,
+// all verified by probes before the module was written:
+//   - full 32-bit XOR via per-bit arithmetic in a literal-counted loop
+//     (`xor32`; mncs/probes/bitwise_u64_attempt.mncs, 6/6 on WASM);
+//   - the 256-entry byte table (over the 64-element sequence bound,
+//     mncs_model MAX_SEQUENCE_BOUND) replaced by a 16-entry nibble
+//     table, indexed dynamically (mncs/probes/dynidx_attempt.mncs;
+//     out-of-bounds indexes trap cleanly, so callers mask first);
+//   - nested bounded iteration is refused (MNE147), so the 8 bit-steps
+//     per byte are two 4-bit nibble stages, and multi-window streams
+//     thread state through the host (`crc_update` per window).
+//
+// Streaming shape: `crc_init` once, `crc_update` per <=64-byte window,
+// `crc_finalize` at the end. Windows longer than 64 bytes chunk
+// host-side (see src/mncsCrc.ts); the mathematics is chunk-associative.
+module scratchtrack.crc.v1;
+
+// Reflected nibble table for polynomial 0xEDB88320: entry i is i run
+// through 4 reflected bit-steps. Generated once, pinned by corpus.
+fn nibble_table() -> (result: [u64; 16]) {
+    return [
+        0, 498536548, 997073096, 651767980,
+        1994146192, 1802195444, 1303535960, 1342533948,
+        3988292384, 4027552580, 3604390888, 3412177804,
+        2607071920, 2262029012, 2685067896, 3183342108,
+    ];
+}
+
+record XS { aa: u64, bb: u64, acc: u64, pow: u64 }
+
+// Full 32-bit XOR via per-bit add-mod-2 in a counted loop. The counted
+// index is not bound in the body, so shifting copies thread through
+// the carried record instead.
+fn xor32(a: u64, b: u64) -> (result: u64) {
+    iterate step up_to 32 carrying st: XS = XS { aa: a, bb: b, acc: 0, pow: 1 } {
+        let abit: u64 = st.aa % 2;
+        let bbit: u64 = st.bb % 2;
+        let xbit: u64 = (abit +% bbit) % 2;
+        next st = XS {
+            aa: st.aa / 2,
+            bb: st.bb / 2,
+            acc: st.acc +% xbit *% st.pow,
+            pow: st.pow *% 2,
+        };
+    }
+    return st.acc;
+}
+
+// 4-bit XOR for sub-16 values, fully unrolled (no loop needed).
+fn xor_nibble(a: u64, b: u64) -> (result: u64) {
+    let a0: u64 = a % 2;
+    let a1: u64 = (a / 2) % 2;
+    let a2: u64 = (a / 4) % 2;
+    let a3: u64 = (a / 8) % 2;
+    let b0: u64 = b % 2;
+    let b1: u64 = (b / 2) % 2;
+    let b2: u64 = (b / 4) % 2;
+    let b3: u64 = (b / 8) % 2;
+    return ((a0 +% b0) % 2) +% (((a1 +% b1) % 2) *% 2) +% (((a2 +% b2) % 2) *% 4) +% (((a3 +% b3) % 2) *% 8);
+}
+
+// One reflected nibble stage: crc = table[(crc_low4 ^ nib)] ^ (crc >> 4).
+fn nibble_step(crc: u64, nib: u64, table: [u64; 16]) -> (result: u64) {
+    let idx: u64 = xor_nibble(crc % 16, nib);
+    return xor32(table[idx], crc >> 4);
+}
+
+// One reflected byte stage, low nibble first.
+fn byte_step(crc: u64, byte: u64, table: [u64; 16]) -> (result: u64) {
+    return nibble_step(nibble_step(crc, byte % 16, table), byte / 16, table);
+}
+
+fn crc_init() -> (result: u64) {
+    return 4294967295;
+}
+
+fn crc_finalize(crc: u64) -> (result: u64) {
+    return xor32(crc, 4294967295);
+}
+
+// Fold one window (up to 64 bytes) into a running CRC state.
+fn crc_update(crc: u64, window: [byte; up_to 64]) -> (result: u64) {
+    let table: [u64; 16] = nibble_table();
+    iterate i over window carrying acc: u64 = crc {
+        next acc = byte_step(acc, window[i] as u64, table);
+    }
+    return acc;
+}
+
+// Single-window CRC32 (windows of 64 bytes or fewer).
+fn crc_of(window: [byte; up_to 64]) -> (result: u64) {
+    return crc_finalize(crc_update(crc_init(), window));
+}

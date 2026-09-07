@@ -1,0 +1,13 @@
+mncs 0.10;
+
+module scratchtrack.probes.doc_keys;
+
+use mncs.std.json_projection.v1;
+
+fn version_key_hits(document: [byte; up_to 64]) -> (result: i64) {
+    let key: [byte; 32] = [
+        118, 101, 114, 115, 105, 111, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ];
+    return count_key(document, key, 7);
+}

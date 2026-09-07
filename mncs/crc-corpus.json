@@ -1,0 +1,1490 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-crc-kernels",
+ "cases": [
+  {
+   "id": "crc-empty",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": []
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-single-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3523407757,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-single-ff",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 255
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4278190080,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-digits",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 53
+         }
+        },
+        {
+         "byte": {
+          "value": 54
+         }
+        },
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 56
+         }
+        },
+        {
+         "byte": {
+          "value": 57
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3421780262,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-hello",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 104
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 108
+         }
+        },
+        {
+         "byte": {
+          "value": 108
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 907060870,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-quick-fox",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 84
+         }
+        },
+        {
+         "byte": {
+          "value": 104
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 113
+         }
+        },
+        {
+         "byte": {
+          "value": 117
+         }
+        },
+        {
+         "byte": {
+          "value": 105
+         }
+        },
+        {
+         "byte": {
+          "value": 99
+         }
+        },
+        {
+         "byte": {
+          "value": 107
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 98
+         }
+        },
+        {
+         "byte": {
+          "value": 114
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 119
+         }
+        },
+        {
+         "byte": {
+          "value": 110
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 102
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 106
+         }
+        },
+        {
+         "byte": {
+          "value": 117
+         }
+        },
+        {
+         "byte": {
+          "value": 109
+         }
+        },
+        {
+         "byte": {
+          "value": 112
+         }
+        },
+        {
+         "byte": {
+          "value": 115
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 118
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 114
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 104
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 108
+         }
+        },
+        {
+         "byte": {
+          "value": 97
+         }
+        },
+        {
+         "byte": {
+          "value": 122
+         }
+        },
+        {
+         "byte": {
+          "value": 121
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 103
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1095738169,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-binary",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 7
+         }
+        },
+        {
+         "byte": {
+          "value": 8
+         }
+        },
+        {
+         "byte": {
+          "value": 9
+         }
+        },
+        {
+         "byte": {
+          "value": 10
+         }
+        },
+        {
+         "byte": {
+          "value": 11
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 13
+         }
+        },
+        {
+         "byte": {
+          "value": 14
+         }
+        },
+        {
+         "byte": {
+          "value": 15
+         }
+        },
+        {
+         "byte": {
+          "value": 16
+         }
+        },
+        {
+         "byte": {
+          "value": 17
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 19
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 21
+         }
+        },
+        {
+         "byte": {
+          "value": 22
+         }
+        },
+        {
+         "byte": {
+          "value": 23
+         }
+        },
+        {
+         "byte": {
+          "value": 24
+         }
+        },
+        {
+         "byte": {
+          "value": 25
+         }
+        },
+        {
+         "byte": {
+          "value": 26
+         }
+        },
+        {
+         "byte": {
+          "value": 27
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 29
+         }
+        },
+        {
+         "byte": {
+          "value": 30
+         }
+        },
+        {
+         "byte": {
+          "value": 31
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 33
+         }
+        },
+        {
+         "byte": {
+          "value": 34
+         }
+        },
+        {
+         "byte": {
+          "value": 35
+         }
+        },
+        {
+         "byte": {
+          "value": 36
+         }
+        },
+        {
+         "byte": {
+          "value": 37
+         }
+        },
+        {
+         "byte": {
+          "value": 38
+         }
+        },
+        {
+         "byte": {
+          "value": 39
+         }
+        },
+        {
+         "byte": {
+          "value": 40
+         }
+        },
+        {
+         "byte": {
+          "value": 41
+         }
+        },
+        {
+         "byte": {
+          "value": 42
+         }
+        },
+        {
+         "byte": {
+          "value": 43
+         }
+        },
+        {
+         "byte": {
+          "value": 44
+         }
+        },
+        {
+         "byte": {
+          "value": 45
+         }
+        },
+        {
+         "byte": {
+          "value": 46
+         }
+        },
+        {
+         "byte": {
+          "value": 47
+         }
+        },
+        {
+         "byte": {
+          "value": 48
+         }
+        },
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 53
+         }
+        },
+        {
+         "byte": {
+          "value": 54
+         }
+        },
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 56
+         }
+        },
+        {
+         "byte": {
+          "value": 57
+         }
+        },
+        {
+         "byte": {
+          "value": 58
+         }
+        },
+        {
+         "byte": {
+          "value": 59
+         }
+        },
+        {
+         "byte": {
+          "value": 60
+         }
+        },
+        {
+         "byte": {
+          "value": 61
+         }
+        },
+        {
+         "byte": {
+          "value": 62
+         }
+        },
+        {
+         "byte": {
+          "value": 63
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 269405836,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "crc-eocd-window",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_of"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3620455694,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream0-update1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_update"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 4294967295,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 49
+         }
+        },
+        {
+         "byte": {
+          "value": 50
+         }
+        },
+        {
+         "byte": {
+          "value": 51
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 53
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 873121251,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream0-update2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_update"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 873121251,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 54
+         }
+        },
+        {
+         "byte": {
+          "value": 55
+         }
+        },
+        {
+         "byte": {
+          "value": 56
+         }
+        },
+        {
+         "byte": {
+          "value": 57
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 873187033,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream0-final",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_finalize"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 873187033,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3421780262,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream1-update1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_update"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 4294967295,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 84
+         }
+        },
+        {
+         "byte": {
+          "value": 104
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 113
+         }
+        },
+        {
+         "byte": {
+          "value": 117
+         }
+        },
+        {
+         "byte": {
+          "value": 105
+         }
+        },
+        {
+         "byte": {
+          "value": 99
+         }
+        },
+        {
+         "byte": {
+          "value": 107
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 98
+         }
+        },
+        {
+         "byte": {
+          "value": 114
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 119
+         }
+        },
+        {
+         "byte": {
+          "value": 110
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 102
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2001701405,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream1-update2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_update"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2001701405,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 106
+         }
+        },
+        {
+         "byte": {
+          "value": 117
+         }
+        },
+        {
+         "byte": {
+          "value": 109
+         }
+        },
+        {
+         "byte": {
+          "value": 112
+         }
+        },
+        {
+         "byte": {
+          "value": 115
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 118
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 114
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 104
+         }
+        },
+        {
+         "byte": {
+          "value": 101
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 108
+         }
+        },
+        {
+         "byte": {
+          "value": 97
+         }
+        },
+        {
+         "byte": {
+          "value": 122
+         }
+        },
+        {
+         "byte": {
+          "value": 121
+         }
+        },
+        {
+         "byte": {
+          "value": 32
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 111
+         }
+        },
+        {
+         "byte": {
+          "value": 103
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3199229126,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stream1-final",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_finalize"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3199229126,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1095738169,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "init",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4000000,
+    "target": {
+     "module": "scratchtrack.crc.v1",
+     "function": "crc_init"
+    },
+    "arguments": []
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4294967295,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

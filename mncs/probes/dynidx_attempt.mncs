@@ -1,0 +1,10 @@
+// REGRESSION PROBE (passes): dynamic indexing into exact sequences
+// with trap-on-out-of-bounds (k=9 → runtime_failure, wasm unreachable).
+// This is what the mncs/crc.mncs nibble table stands on.
+// Corpus: mncs/probes/dynidx-corpus.json (k0/k3 carry expectations;
+// the oob case pins trap semantics and carries none).
+mncs 0.7;
+module scratchtrack.probes.dynidx_attempt;
+fn pick(table: [u64; 4], k: u64) -> (result: u64) {
+    return table[k];
+}

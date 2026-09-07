@@ -1,0 +1,30 @@
+mncs 0.7;
+
+// PRESSURE PROBE (v2): bitwise XOR over u64 via per-bit arithmetic in a
+// counted loop (no ^ & | on integers — those are refused, see
+// crc_u64_attempt). v1 showed the counted-loop index is NOT bound in
+// the body, so this revision threads shifting copies through the
+// carried record instead and never names the counter. If this
+// elaborates AND runs within step budget, CRC32 ports without any
+// language change.
+// Reproduce: cargo run -q -p mncs-cli -- source-study
+//   mncs/probes/bitwise_u64_attempt.mncs
+// Pressure ledger: P-009.
+module scratchtrack.probes.bitwise_u64_attempt;
+
+record XS { aa: u64, bb: u64, acc: u64, pow: u64 }
+
+fn bit_xor(a: u64, b: u64) -> (result: u64) {
+    iterate step up_to 32 carrying st: XS = XS { aa: a, bb: b, acc: 0, pow: 1 } {
+        let abit: u64 = st.aa % 2;
+        let bbit: u64 = st.bb % 2;
+        let xbit: u64 = (abit +% bbit) % 2;
+        next st = XS {
+            aa: st.aa / 2,
+            bb: st.bb / 2,
+            acc: st.acc +% xbit *% st.pow,
+            pow: st.pow *% 2,
+        };
+    }
+    return st.acc;
+}

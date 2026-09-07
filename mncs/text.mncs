@@ -1,0 +1,148 @@
+mncs 0.8;
+
+// scratchtrack.text.v1 — exact integer position-text parsing.
+//
+// Machine-native parse direction for ScratchTrack's `bar.beat.sixteenth`
+// position strings. The host encodes text to bytes (TextEncoder) and owns
+// all text *production* (`formatPosition`, note names, labels): MNCS has
+// no owned/bounded text value type yet, so formatting cannot cross — see
+// docs/mncs-pressure.md P-002. Parsing crosses as `[byte; up_to 64] and
+// returns a `Position` record with an explicit validity flag.
+//
+// The rule mirrors `parsePosition` part-for-part: 1..3 dot-separated
+// parts, empty parts contribute 0 (mirroring `Number('') === 0`), missing
+// trailing parts default (beat 1, sixteenth 0), any non-digit byte or a
+// fourth part invalidates. Two intentional normalizations (evidenced in
+// D-007): surrounding whitespace and `Number()` spellings (`0x10`,
+// `1e3`) are rejected rather than coerced, and digit runs past u64 wrap
+// (total, documented; realistic inputs are tiny).
+module scratchtrack.text.v1;
+
+record PState {
+    dot: u64,
+    current: u64,
+    first: u64,
+    second: u64,
+    seen: bool,
+    valid: bool
+}
+
+record Position { bar: u64, beat: u64, sixth: u64, valid: bool }
+
+// ASCII digit classification for position text (relational comparisons
+// need integer operands, so the byte converts first — stdlib idiom).
+fn is_digit(value: byte) -> (result: bool) {
+    let n: i64 = value as i64;
+    return n >= 48 && n <= 57;
+}
+
+// One input byte folded into the parse state. Dots commit the current
+// part (empty parts contribute 0); digits accumulate; anything else, or
+// a dot past the third part, invalidates while consuming the rest.
+fn parse_step(state: PState, value: byte) -> (result: PState) {
+    if is_digit(value) {
+        let digit: u64 = (value as u64) -% 48;
+        let current: u64 = state.current *% 10 +% digit;
+        return PState {
+            dot: state.dot,
+            current: current,
+            first: state.first,
+            second: state.second,
+            seen: true,
+            valid: state.valid,
+        };
+    }
+    if value == 46 {
+        if state.dot >= 2 {
+            return PState {
+                dot: state.dot,
+                current: state.current,
+                first: state.first,
+                second: state.second,
+                seen: state.seen,
+                valid: false,
+            };
+        }
+        if state.dot == 0 {
+            return PState {
+                dot: 1,
+                current: 0,
+                first: state.current,
+                second: state.second,
+                seen: false,
+                valid: state.valid,
+            };
+        }
+        return PState {
+            dot: 2,
+            current: 0,
+            first: state.first,
+            second: state.current,
+            seen: false,
+            valid: state.valid,
+        };
+    }
+    return PState {
+        dot: state.dot,
+        current: state.current,
+        first: state.first,
+        second: state.second,
+        seen: state.seen,
+        valid: false,
+    };
+}
+
+// Initial parse state: no dots, empty current part, defaults unset.
+fn parse_init() -> (result: PState) {
+    return PState { dot: 0, current: 0, first: 0, second: 0, seen: false, valid: true };
+}
+
+// Whole-view parse: fold every byte, then commit the trailing part with
+// missing-part defaults (beat 1, sixteenth 0).
+fn parse_position(view: [byte; up_to 64]) -> (result: Position) {
+    iterate i over view carrying state: PState = parse_init() {
+        next state = parse_step(state, view[i]);
+    }
+    return finish(state);
+}
+
+// Commit the trailing part. Absent parts take defaults; present-but-empty
+// parts already contributed 0 at their dot.
+fn finish(state: PState) -> (result: Position) {
+    if state.valid {
+        return finish_valid(state);
+    }
+    return Position { bar: 0, beat: 0, sixth: 0, valid: false };
+}
+
+// Whole-timeline position in ticks for strict integer parts under a bar
+// of `bar_ticks` ticks, or -1 when out of range. Mirrors the legacy beat
+// formula `(bar-1)*bar + (whole-1) + sixth*0.25` with bar/whole floored at
+// 1 and sixteenths clamped to 0..3 — all exact in tick space, so the
+// legacy `+ 1e-6` dust guard has no counterpart by construction.
+// Precondition: parts came from `parse_position` (valid).
+fn position_ticks(bar_raw: u64, beat_raw: u64, sixth_raw: u64, bar_ticks: u64) -> (result: i64) {
+    let bar: u64 = select(bar_raw < 1, 1, bar_raw);
+    let whole: u64 = select(beat_raw < 1, 1, beat_raw);
+    let sixth: u64 = select(sixth_raw > 3, 3, sixth_raw);
+    if (whole -% 1) *% 24 >= bar_ticks {
+        return 0 - 1;
+    }
+    let ticks: u64 = (bar -% 1) *% bar_ticks +% (whole -% 1) *% 24 +% sixth *% 6;
+    let cap: u64 = (64 as u64) *% 24 +% bar_ticks;
+    if ticks > cap {
+        return 0 - 1;
+    }
+    let total: u64 = (64 as u64) *% 24;
+    return select(ticks > total, total, ticks) as i64;
+}
+
+fn finish_valid(state: PState) -> (result: Position) {
+    if state.dot == 0 {
+        return Position { bar: state.current, beat: 1, sixth: 0, valid: true };
+    }
+    if state.dot == 1 {
+        return Position { bar: state.first, beat: state.current, sixth: 0, valid: true };
+    }
+    return Position { bar: state.first, beat: state.second, sixth: state.current, valid: true };
+}
