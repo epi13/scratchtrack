@@ -34,7 +34,7 @@ import {
   stepsPerBar,
 } from './music';
 import { mncsBarTicks } from './mncsMeter';
-import { mncsSwingApplies } from './mncsGeometry';
+import { mncsIsBeatStep, mncsSwingApplies } from './mncsGeometry';
 import {
   mncsClampMotifBars,
   mncsClipActive,
@@ -475,7 +475,8 @@ export default function App() {
       ?? Math.round(barBeats(current.timeSignature) * TICKS_PER_BEAT);
     if (metronome && barTicksValue > 0) {
       const posInBar = mncsWrapTick(tick, barTicksValue);
-      if (posInBar % 6 === 0) playMetronome(posInBar === 0);
+      // Metronome clicks quarter-ticks; the bar start gets the accent.
+      if (mncsIsBeatStep(posInBar, 6)) playMetronome(posInBar === 0);
     }
     const anySolo = current.tracks.some((track) => track.solo);
     for (const track of current.tracks) {

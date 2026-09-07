@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Replay the MNCS evidence for the ScratchTrack MNCS modules.
 #
-# For each module (meter, arrange, migrate, geometry) runs: source-study
+# For each module (meter, arrange, migrate, geometry, wav) runs: source-study
 # (elaboration + obligation report), experiment runs on the portable-WASM
 # and research-bytecode backends over the checked-in corpus, a
 # cross-backend agreement check, and live calls into the compiled WASM
@@ -61,6 +61,7 @@ check_module "meter" "$ROOT/mncs/meter.mncs" "$ROOT/mncs/meter-corpus.json"
 check_module "arrange" "$ROOT/mncs/arrange.mncs" "$ROOT/mncs/arrange-corpus.json"
 check_module "migrate" "$ROOT/mncs/migrate.mncs" "$ROOT/mncs/migrate-corpus.json"
 check_module "geometry" "$ROOT/mncs/geometry.mncs" "$ROOT/mncs/geometry-corpus.json"
+check_module "wav" "$ROOT/mncs/wav.mncs" "$ROOT/mncs/wav-corpus.json"
 
 echo "== live WASM calls: meter =="
 node -e '
@@ -144,6 +145,25 @@ WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
     ["tap_cancelled", [7n, 0n], 1], ["clamp_motif_midi", [11n], 12n],
     ["shift_motif_midi", [100n, 12n], 108n], ["pick_row_midi", [72n, 99n, 25n], 48n],
     ["half_beatline_count", [96n], 8n], ["bucket_stride", [0n, 441n], 4n],
+  ];
+  let pass = 0;
+  for (const [name, args, exp] of checks) {
+    if (e[name](...args) !== exp) { console.error("MISMATCH", name); process.exit(1); }
+    pass++;
+  }
+  console.log(pass + "/" + checks.length + " live-WASM calls agree");
+});' "$WORK"
+
+echo "== live WASM calls: wav =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/wav-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  const checks = [
+    ["wav_sample_count", [960], 480], ["wav_riff_chunk_size", [960], 996],
+    ["wav_data_size_for_samples", [480], 960], ["wav_byte_rate", [44100], 88200],
+    ["bits_supported", [16], 1], ["bits_supported", [8], 0],
   ];
   let pass = 0;
   for (const [name, args, exp] of checks) {
