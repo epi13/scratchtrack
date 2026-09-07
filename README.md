@@ -2,6 +2,8 @@
 
 **A shared musical scratchpad for ideas worth keeping.**
 
+[![MNCS pressure boundary](docs/mncs-badge.svg)](docs/mncs-pressure.md)
+
 Scratchtrack is a lightweight, browser-based 8-track workspace for quickly capturing, arranging, looping, and exchanging beats, MIDI motifs, bass lines, rough recordings, and song ideas.
 
 > **Core principle: capture an idea in under thirty seconds.**
@@ -209,6 +211,19 @@ The Drive implementation creates a `Scratchtrack` folder, one subfolder per proj
 - Musical data stays editable; audio is stored once and referenced.
 - Local work must survive a network or OAuth failure.
 - Scratchtrack is **not a DAW**.
+
+## MNCS pressure boundary
+
+The rhythmic, arrangement, migration, geometry, container, text, and
+checksum kernels live in MNCS (`mncs/*.mncs`) as the semantic
+authority, execute in production as compiled zero-import WASM
+(`public/mncs/`, loaded at boot with conformance-pinned TypeScript
+fallback), and are proven by corpus on two backends. The badge above
+is rendered by `mncs-actions` from the `mncs-verify` workflow verdict
+— never hand-edited. Details: [`docs/mncs-pressure.md`](docs/mncs-pressure.md)
+(pressure log, ownership, unlock graph),
+[`docs/mncs-boundary.md`](docs/mncs-boundary.md) (boundary claim),
+[`docs/fabric-log.md`](docs/fabric-log.md) (Fabric cross-checks).
 
 ## Documentation
 

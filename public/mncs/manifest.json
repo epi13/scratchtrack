@@ -1,0 +1,74 @@
+{
+ "schema_version": "scratchtrack.mncs-wasm-manifest/1",
+ "compiler": {
+  "repository": "epi13/mncs-language",
+  "revision": "8d79250d54d4e4241c0bb0ae6f5c632345848a6d",
+  "backend": "portable-wasm"
+ },
+ "artifacts": [
+  {
+   "module": "scratchtrack.meter.v1",
+   "source": "mncs/meter.mncs",
+   "source_sha256": "45c00cc8be705050668ad7f312847f65330aa14b55a79b03c41d66667813e524",
+   "artifact": "public/mncs/meter.wasm",
+   "artifact_sha256": "c17bee4d48fc62550857a8db383bb7d36bb7fc126cae30da6a04b468f51d9acb",
+   "artifact_bytes": 2983
+  },
+  {
+   "module": "scratchtrack.arrange.v1",
+   "source": "mncs/arrange.mncs",
+   "source_sha256": "c81f27aa77872b10fbd7c12ac0bab364ba9a236434111446a3f61a0b030168ea",
+   "artifact": "public/mncs/arrange.wasm",
+   "artifact_sha256": "13e4a74d8aa7a3e959482ea7cd6234ba029691d76e85a393a15603e8f6eefa8f",
+   "artifact_bytes": 2702
+  },
+  {
+   "module": "scratchtrack.migrate.v1",
+   "source": "mncs/migrate.mncs",
+   "source_sha256": "01b1fe73ccff0b46b68bb011006bd58e363266362f22ca44a04f9276bfa468e7",
+   "artifact": "public/mncs/migrate.wasm",
+   "artifact_sha256": "c6be6c59d98725073e7609ae7bf583d2c43d34a273bbc916e60f1a400193a4e1",
+   "artifact_bytes": 1260
+  },
+  {
+   "module": "scratchtrack.geometry.v1",
+   "source": "mncs/geometry.mncs",
+   "source_sha256": "5bed1ccc00966727184feb700867d8515494a88b99847d1c5ee080a69583871f",
+   "artifact": "public/mncs/geometry.wasm",
+   "artifact_sha256": "6315876e2760ad238e8d7a6ffba40ccea374f30b6d0b0bd1ba200e5276f7e2de",
+   "artifact_bytes": 2647
+  },
+  {
+   "module": "scratchtrack.wav.v1",
+   "source": "mncs/wav.mncs",
+   "source_sha256": "78bd6f5a69a81c4964f2493c683a1cd06d08da2f8296877280aedc7b12b7f73a",
+   "artifact": "public/mncs/wav.wasm",
+   "artifact_sha256": "9763a4afdefbe614baf3d1c7b07a7bf1a6f24a38e23d9147c87b200e9aaafe36",
+   "artifact_bytes": 3251
+  },
+  {
+   "module": "scratchtrack.pack.v1",
+   "source": "mncs/pack.mncs",
+   "source_sha256": "774834946314071831a8d33bf34f0e6fcd43d498cd1289a5224d2455c5e0cc8d",
+   "artifact": "public/mncs/pack.wasm",
+   "artifact_sha256": "0524a15871a42fec2eb9f54b22f542209ff837b98b2c5757e9212541530560fe",
+   "artifact_bytes": 2667
+  },
+  {
+   "module": "scratchtrack.text.v1",
+   "source": "mncs/text.mncs",
+   "source_sha256": "f84304ce8c2f9611d459d545eddca9b8872d6bdcea4116580e959236e6b2587e",
+   "artifact": "public/mncs/text.wasm",
+   "artifact_sha256": "5f76ee547b8dabad4394d927de8f578dadf332ebfe44ad7c4993aa97b64dd973",
+   "artifact_bytes": 2878
+  },
+  {
+   "module": "scratchtrack.crc.v1",
+   "source": "mncs/crc.mncs",
+   "source_sha256": "ebdef6acfcbe06dd83931025bdee1ee4d902bc4ada186eb5e274e5ce6453db14",
+   "artifact": "public/mncs/crc.wasm",
+   "artifact_sha256": "7d3865c262b97935e262ff0ace4d81098ab43d1913177b91eec2e81373ac5af9",
+   "artifact_bytes": 2547
+  }
+ ]
+}

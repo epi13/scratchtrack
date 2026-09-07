@@ -1,0 +1,18 @@
+mncs 0.7;
+
+// PRESSURE PROBE: are shifts/XOR available on 64-bit integers?
+// The CRC32 refusal (crc32_u32_attempt.mncs) is u32-specific; if u64
+// carries >> and ^, the IEEE 802.3 core ports with explicit masking.
+// Reproduce: cargo run -q -p mncs-cli -- source-study
+//   mncs/probes/crc_u64_attempt.mncs
+// Pressure ledger: P-009.
+module scratchtrack.probes.crc_u64_attempt;
+
+fn crc_step(crc: u64, bit: u64) -> (result: u64) {
+    let mixed: u64 = crc ^ bit;
+    let shifted: u64 = mixed >> 1;
+    if mixed % 2 == 1 {
+        return 3988292384 ^ shifted;
+    }
+    return shifted;
+}

@@ -1,0 +1,17 @@
+// PRESSURE PROBE (expected failure): exact sequences do not coerce to
+// bounded views — `[byte; 44]` cannot satisfy a `[byte; up_to 64]`
+// parameter (MNE133). This blocks sharing one LE-reader module across
+// the 44/46/22-byte windows of wav.mncs and pack.mncs.
+// Reproduce: cargo run -q -p mncs-cli -- source-study
+//   mncs/probes/subtype_attempt.mncs
+// Pressure ledger: P-010 (sequence/view subtyping).
+mncs 0.7;
+module scratchtrack.probes.subtype_attempt;
+fn read16(window: [byte; up_to 64], offset: u64) -> (result: u16) {
+    let lo: u64 = window[offset] as u64;
+    let hi: u64 = window[offset +% 1] as u64;
+    return (lo +% hi *% 256) as u16;
+}
+fn probe44(header: [byte; 44]) -> (result: u16) {
+    return read16(header, 20);
+}

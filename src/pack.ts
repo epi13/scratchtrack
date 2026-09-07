@@ -1,3 +1,4 @@
+import { mncsCrc32 } from './mncsCrc';
 import {
   ZIP_CENTRAL_HEADER_SIZE,
   ZIP_EOCD_SIZE,
@@ -15,17 +16,10 @@ import {
   mncsLocalRecordSize,
 } from './mncsPack';
 
-const CRC_TABLE = new Uint32Array(256);
-for (let byte = 0; byte < 256; byte += 1) {
-  let crc = byte;
-  for (let bit = 0; bit < 8; bit += 1) crc = crc & 1 ? (0xedb88320 ^ (crc >>> 1)) : crc >>> 1;
-  CRC_TABLE[byte] = crc >>> 0;
-}
-
 function crc32(data: Uint8Array) {
-  let crc = 0xffffffff;
-  for (let index = 0; index < data.length; index += 1) crc = CRC_TABLE[(crc ^ data[index]!) & 0xff]! ^ (crc >>> 8);
-  return (crc ^ 0xffffffff) >>> 0;
+  // IEEE 802.3 owned by the MNCS CRC model (`scratchtrack.crc.v1` /
+  // `mncsCrc.ts`): WASM-chunked streaming first, table engine fallback.
+  return mncsCrc32(data);
 }
 
 function putAscii(target: Uint8Array, offset: number, text: string) {
@@ -46,8 +40,8 @@ export function writeZipStore(files: PackFile[]): Uint8Array {
   for (const file of files) {
     const nameBytes = new TextEncoder().encode(file.name);
     const checksum = crc32(file.data);
-    // Record sizes owned by the MNCS pack model; CRC32 streaming stays
-    // host-side (u32 shifts/XOR and bulk views are not expressible — P-009).
+    // Record sizes owned by the MNCS pack model; checksums by the MNCS
+    // CRC model (streamed 64-byte windows — see mncsCrc.ts).
     const local = new Uint8Array(mncsLocalRecordSize(nameBytes.length, file.data.length));
     const localView = new DataView(local.buffer);
     putAscii(local, 0, 'PK\u0003\u0004');

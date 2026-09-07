@@ -1,0 +1,14 @@
+mncs 0.6;
+
+// PRESSURE PROBE (expected failure): representative ScratchTrack DSP needs
+// float scalars, but the largest scalar type is u64. `midiToFrequency`
+// (audio.ts) requires pow/division over reals; the compression-stage
+// policy (compressionRouteStages) would need only f64 arithmetic and
+// comparisons. Neither parses today.
+// Reproduce: mncs-cli source-study mncs/probes/dsp_float_attempt.mncs
+// Pressure ledger: P-001 (float scalars).
+module scratchtrack.probes.dsp_float_attempt;
+
+fn midi_to_frequency(midi: i64) -> (result: f64) {
+    return 440.0 * pow(2.0, (midi - 69) / 12);
+}

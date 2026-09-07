@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Replay the MNCS evidence for the ScratchTrack MNCS modules.
 #
-# For each module (meter, arrange, migrate, geometry, wav, pack) runs: source-study
+# For each module (meter, arrange, migrate, geometry, wav, pack, text, crc) runs: source-study
 # (elaboration + obligation report), experiment runs on the portable-WASM
 # and research-bytecode backends over the checked-in corpus, a
 # cross-backend agreement check, and live calls into the compiled WASM
@@ -57,12 +57,54 @@ print(f"{len(runs['portable-wasm'])}/{len(corpus['cases'])} cases agree across b
 EOF
 }
 
+check_module_record() {
+  local name="$1" module="$2" corpus="$3"
+  echo "== [$name] source-study =="
+  cargo run -q -p mncs-cli --manifest-path "$MNCS_DIR/Cargo.toml" -- \
+    source-study "$module" --node-id "scratchtrack-$name-evidence" > "$WORK/$name-study.json"
+  python3 - "$WORK/$name-study.json" <<'EOF'
+import json, sys
+d = json.load(open(sys.argv[1]))
+print("semantic_fingerprint:", d["semantic_fingerprint"])
+bad = [x for x in d.get("diagnostics", []) if x.get("code") != "CMP301"]
+assert not bad, f"unexpected diagnostic codes: {bad}"
+print("diagnostics: all CMP301 (integer division/modulo, documented)")
+EOF
+
+  for backend in portable-wasm research-bytecode; do
+    echo "== [$name] experiment run: $backend =="
+    (cd "$MNCS_DIR" && cargo run -q -p mncs-cli -- experiment run \
+      "$module" --backend "$backend" --corpus "$corpus" \
+      --output-dir "$WORK/$name-$backend" > /dev/null)
+  done
+
+  echo "== [$name] cross-backend agreement (record payloads) =="
+  python3 - "$WORK" "$corpus" "$name" <<'EOF'
+import json, sys
+work, corpus_path, name = sys.argv[1], sys.argv[2], sys.argv[3]
+runs = {}
+for be in ("portable-wasm", "research-bytecode"):
+    r = json.load(open(f"{work}/{name}-{be}/result.json"))
+    runs[be] = {c["case_id"]: (json.dumps(c.get("returned"), sort_keys=True),
+        c.get("status"), c.get("expectation_met")) for c in r["cases"]}
+corpus = json.load(open(corpus_path))
+assert len(runs["portable-wasm"]) == len(corpus["cases"]) == len(runs["research-bytecode"]), "case count drift"
+bad = [k for k in runs["portable-wasm"] if runs["portable-wasm"][k] != runs["research-bytecode"][k]
+       or runs["portable-wasm"][k][1] != "returned" or runs["portable-wasm"][k][2] is not True]
+if bad:
+    print("MISMATCH:", bad); sys.exit(1)
+print(f"{len(runs['portable-wasm'])}/{len(corpus['cases'])} cases agree across backends, all returned with expectations met")
+EOF
+}
+
 check_module "meter" "$ROOT/mncs/meter.mncs" "$ROOT/mncs/meter-corpus.json"
 check_module "arrange" "$ROOT/mncs/arrange.mncs" "$ROOT/mncs/arrange-corpus.json"
 check_module "migrate" "$ROOT/mncs/migrate.mncs" "$ROOT/mncs/migrate-corpus.json"
 check_module "geometry" "$ROOT/mncs/geometry.mncs" "$ROOT/mncs/geometry-corpus.json"
 check_module "wav" "$ROOT/mncs/wav.mncs" "$ROOT/mncs/wav-corpus.json"
 check_module "pack" "$ROOT/mncs/pack.mncs" "$ROOT/mncs/pack-corpus.json"
+check_module_record "text" "$ROOT/mncs/text.mncs" "$ROOT/mncs/text-corpus.json"
+check_module "crc" "$ROOT/mncs/crc.mncs" "$ROOT/mncs/crc-corpus.json"
 
 echo "== live WASM calls: meter =="
 node -e '
@@ -191,6 +233,68 @@ WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
     pass++;
   }
   console.log(pass + "/" + checks.length + " live-WASM calls agree");
+});' "$WORK"
+
+echo "== live WASM calls: text (host-buffer view ABI) =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/text-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  // Byte views cross as packed i64 descriptors (offset | len << 32) over
+  // bytes staged through mncs_host_buffer; records return as pointers to
+  // 8-byte-slot canonical cells (bar u64, beat u64, sixth u64, valid i32).
+  function parsePosition(text) {
+    const input = Buffer.from(text, "utf8");
+    if (input.length > 64) return null;
+    e.mncs_host_buffer_reset();
+    const offset = Number(e.mncs_host_buffer(input.length) & 0xffffffffn);
+    new Uint8Array(e.memory.buffer).set(input, offset);
+    const ptr = Number(e.parse_position((BigInt(input.length) << 32n) | BigInt(offset)));
+    const v = new DataView(e.memory.buffer);
+    const out = [v.getBigUint64(ptr, true), v.getBigUint64(ptr + 8, true), v.getBigUint64(ptr + 16, true)];
+    return v.getInt32(ptr + 24, true) === 1 ? out : null;
+  }
+  const checks = [
+    ["7.3.2", [7n, 3n, 2n]], ["7", [7n, 1n, 0n]], ["", [0n, 1n, 0n]],
+    ["a", null], ["1.2.3.4", null],
+  ];
+  let pass = 0;
+  const norm = (v) => v === null ? "null" : v.map(Number).join(",");
+  for (const [text, exp] of checks) {
+    if (norm(parsePosition(text)) !== norm(exp)) { console.error("MISMATCH", JSON.stringify(text)); process.exit(1); }
+    pass++;
+  }
+  if (e.is_digit(55) !== 1 || e.is_digit(97) !== 0) { console.error("MISMATCH is_digit"); process.exit(1); }
+  if (e.position_ticks(7n, 3n, 2n, 96n) !== 636n) { console.error("MISMATCH position_ticks"); process.exit(1); }
+  console.log(pass + "/" + checks.length + " sequence-ABI calls agree (+ is_digit, position_ticks)");
+});' "$WORK"
+
+echo "== live WASM calls: crc (chunked streaming) =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/crc-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  function stage(input) {
+    e.mncs_host_buffer_reset();
+    const offset = Number(e.mncs_host_buffer(input.length) & 0xffffffffn);
+    new Uint8Array(e.memory.buffer).set(input, offset);
+    return (BigInt(input.length) << 32n) | BigInt(offset);
+  }
+  // Single-window reference vector (zlib oracle: 0xCBF43926).
+  const ref = Buffer.from("123456789");
+  if (e.crc_of(stage(ref)) !== 3421780262n) { console.error("MISMATCH crc_of"); process.exit(1); }
+  // Chunked streaming across 4-byte windows agrees with single-window.
+  let st = e.crc_init();
+  for (let o = 0; o < ref.length; o += 4) {
+    st = e.crc_update(st, stage(ref.subarray(o, o + 4)));
+  }
+  if (e.crc_finalize(st) !== 3421780262n) { console.error("MISMATCH stream"); process.exit(1); }
+  if (e.crc_finalize(e.crc_update(e.crc_init(), stage(Buffer.alloc(0)))) !== 0n) {
+    console.error("MISMATCH empty"); process.exit(1);
+  }
+  console.log("3/3 CRC streaming calls agree");
 });' "$WORK"
 
 echo "evidence OK"
