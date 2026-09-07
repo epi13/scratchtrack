@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Replay the MNCS evidence for the ScratchTrack MNCS modules.
 #
-# For each module (mncs/meter.mncs, mncs/arrange.mncs) runs: source-study
+# For each module (mncs/meter.mncs, mncs/arrange.mncs, mncs/migrate.mncs) runs: source-study
 # (elaboration + obligation report), experiment runs on the portable-WASM
 # and research-bytecode backends over the checked-in corpus, a
 # cross-backend agreement check, and live calls into the compiled WASM
@@ -59,6 +59,7 @@ EOF
 
 check_module "meter" "$ROOT/mncs/meter.mncs" "$ROOT/mncs/meter-corpus.json"
 check_module "arrange" "$ROOT/mncs/arrange.mncs" "$ROOT/mncs/arrange-corpus.json"
+check_module "migrate" "$ROOT/mncs/migrate.mncs" "$ROOT/mncs/migrate-corpus.json"
 
 echo "== live WASM calls: meter =="
 node -e '
@@ -97,6 +98,27 @@ WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
     ["step_index", [48n, 6n], 8n], ["step_index", [50n, 6n], -1n],
     ["motif_ticks", [84n, 3n], 252n], ["loop_end_tick", [48n, 10n], 48n],
     ["max_loop_takes", [], 12n], ["max_scratches", [], 36n],
+  ];
+  let pass = 0;
+  for (const [name, args, exp] of checks) {
+    if (e[name](...args) !== exp) { console.error("MISMATCH", name); process.exit(1); }
+    pass++;
+  }
+  console.log(pass + "/" + checks.length + " live-WASM calls agree");
+});' "$WORK"
+
+echo "== live WASM calls: migrate =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/migrate-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  const checks = [
+    ["legacy_numerator", [4n], 4n], ["legacy_numerator", [0n], -1n],
+    ["remap_index", [8n, 16n, 12n], 6n], ["remap_index", [15n, 22n, 11n], 8n],
+    ["remap_cell", [1n, 2n], 2n], ["content_bars", [97n, 96n], 2n],
+    ["normalize_root", [-1n], 11n], ["normalize_octave", [7n], 6n],
+    ["auto_scratch_upgrade", [1, 0], 0], ["auto_scratch_upgrade", [0, 0], 1],
   ];
   let pass = 0;
   for (const [name, args, exp] of checks) {

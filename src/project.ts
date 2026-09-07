@@ -13,7 +13,15 @@ import type {
   Track,
 } from './types';
 import { barBeats, normalizeSubdivision, normalizeTimeSignature, stepsPerBar } from './music';
-import { mncsNormalizeBpm } from './mncsArrange';
+import { mncsClampMotifBars, mncsNormalizeBpm } from './mncsArrange';
+import {
+  mncsAutoScratchUpgrade,
+  mncsLegacyNumerator,
+  mncsNormalizeOctave,
+  mncsNormalizeRoot,
+  mncsRemapCell,
+  mncsRemapIndex,
+} from './mncsMigrate';
 
 export const uid = () => crypto.randomUUID();
 
@@ -304,13 +312,14 @@ function migrateDrumScratch(scratch: Scratch, meter: TimeSignature): Scratch {
 }
 
 function remapRows(rows: DrumCell[][], fromSteps: number, toSteps: number): DrumCell[][] {
+  // Same MNCS-owned rule as music.ts remapPattern (`remap_index` /
+  // `remap_cell`); the two copies now share one proven definition.
   return rows.map((row) => {
     const target = Array.from({ length: toSteps }, () => 0 as DrumCell);
     (row ?? []).forEach((cell, step) => {
       if (!cell) return;
-      const position = (step / Math.max(1, fromSteps)) * toSteps;
-      const index = Math.min(toSteps - 1, Math.max(0, Math.floor(position + 0.5)));
-      target[index] = Math.max(target[index], cell) as DrumCell;
+      const index = mncsRemapIndex(step, fromSteps, toSteps);
+      target[index] = mncsRemapCell(target[index], cell) as DrumCell;
     });
     return target;
   });
@@ -321,13 +330,16 @@ function migrateSynthScratch(scratch: Scratch, meterBeats: number): Scratch {
   const contentEnd = Math.max(0, ...(scratch.synthNotes ?? []).map((note) => note.startBeat + note.lengthBeats));
   const barsFromContent = meterBeats > 0 ? Math.ceil(contentEnd / meterBeats) : 1;
   const requestedBars = scratch.motifBars ?? barsFromContent;
-  const motifBars = Math.min(8, Math.max(1, Math.floor(requestedBars > 0 ? requestedBars : 1)));
+  // Bar-count clamp owned by the MNCS arrangement model (`clamp_motif_bars`).
+  const motifBars = mncsClampMotifBars(Math.floor(requestedBars > 0 ? requestedBars : 1));
   const next: Scratch = {
     ...scratch,
     synthNotes: (scratch.synthNotes ?? []).map((note) => ({ ...note })),
-    scaleRoot: ((Math.round(scratch.scaleRoot ?? 0) % 12) + 12) % 12,
+    // Key normalization owned by the MNCS migration model; rounding stays
+    // host-side at the float edge.
+    scaleRoot: mncsNormalizeRoot(Math.round(scratch.scaleRoot ?? 0)),
     scaleName: typeof scratch.scaleName === 'string' ? scratch.scaleName : 'Major (Ionian)',
-    keyOctave: Math.min(6, Math.max(1, Math.round(scratch.keyOctave ?? 3))),
+    keyOctave: mncsNormalizeOctave(Math.round(scratch.keyOctave ?? 3)),
     motifBars,
     noteLengthBeats: typeof scratch.noteLengthBeats === 'number' ? scratch.noteLengthBeats : 0.5,
   };
@@ -363,11 +375,16 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
     };
 
     // Older projects only had beatsPerBar (quarter-note beats per bar).
+    // Float edge (round) stays host-side; integer validation is MNCS-owned
+    // (`legacy_numerator`).
     const legacyBeatsPerBar = Number(source.beatsPerBar);
+    const legacyNumerator = Number.isFinite(legacyBeatsPerBar) && legacyBeatsPerBar >= 1 && legacyBeatsPerBar <= 32
+      ? mncsLegacyNumerator(Math.round(legacyBeatsPerBar))
+      : -1;
     const meter = source.timeSignature
       ? normalizeTimeSignature(source.timeSignature)
-      : Number.isFinite(legacyBeatsPerBar) && legacyBeatsPerBar >= 1 && legacyBeatsPerBar <= 32
-        ? normalizeTimeSignature({ numerator: Math.round(legacyBeatsPerBar), denominator: 4 })
+      : legacyNumerator >= 0
+        ? normalizeTimeSignature({ numerator: legacyNumerator, denominator: 4 })
         : normalizeTimeSignature(undefined);
     const meterBeats = barBeats(meter);
 
@@ -398,7 +415,8 @@ export function normalizeProject(input: unknown): ScratchtrackProject {
         ? Math.max(sourceLoop.startBeat ?? 0, sourceLoop.endBeat)
         : Math.min(defaultLoopState.endBeat, fallbackEnd),
       // v3 intentionally ships Auto Scratch ON; older prototype projects upgrade to it too.
-      autoScratch: rawVersion >= 3 ? sourceLoop.autoScratch !== false : true,
+      // Upgrade rule owned by the MNCS migration model (`auto_scratch_upgrade`).
+      autoScratch: mncsAutoScratchUpgrade(rawVersion >= 3, sourceLoop.autoScratch !== false),
     };
 
     const clips = (Array.isArray(source.clips) ? source.clips : []).map((clip) => ({
