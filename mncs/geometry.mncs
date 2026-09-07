@@ -1,0 +1,152 @@
+mncs 0.8;
+
+// scratchtrack.geometry.v1 — exact integer visual/interaction kernels.
+//
+// Machine-native representation of ScratchTrack's visual-domain and
+// pointer-interpretation math over whole units (steps, ticks, pixels,
+// MIDI notes). Rendering itself (DOM/SVG layout, colors, text) and trig
+// positioning (drum-orbit cos/sin) stay host-side: MNCS has no float or
+// trig vocabulary yet (see P-001 and docs/mncs-pressure.md P-008). What
+// moves here is everything discrete: beat-step classification, swing-step
+// phase, steps-per-beat markers, DrumCell cycling, pattern-step advance,
+// floor division (MNCS `/` truncates; visual grids need floor), pointer
+// drag/tap thresholds, motif MIDI clamps, piano-roll row picking, grid
+// line counts, and waveform bucket partitioning.
+//
+// `floor_div` is a genuine reusable primitive (truncation is the wrong
+// rounding for negative grid offsets); the rest is product-domain policy
+// over it. Division obligations stay UNKNOWN (guarded divisors, no prover
+// yet — P-003). Multiplication/addition use explicit wrapping intents;
+// product magnitudes keep the wrap path unreachable.
+module scratchtrack.geometry.v1;
+
+record Bounds { start: i64, end: i64 }
+
+// ---- Drum grid geometry ----
+
+// True when `step` carries a beat marker (once per notated beat).
+// Degenerate grids (steps_per_beat <= 0) mark nothing.
+fn is_beat_step(step: i64, steps_per_beat: i64) -> (result: bool) {
+    if steps_per_beat <= 0 {
+        return false;
+    }
+    return step % steps_per_beat == 0;
+}
+
+// Swing delay phase: every second step on binary grids, every third-step
+// landing (index 2 mod 3) on triplet grids. The host maps the subdivision
+// label to `is_triplet` (MNCS has no strings yet — P-002).
+fn swing_applies(is_triplet: bool, step: i64) -> (result: bool) {
+    if is_triplet {
+        return step % 3 == 2;
+    }
+    return step % 2 == 1;
+}
+
+// Beat-marker spacing for the drum views: round-half-up(steps/numerator),
+// at least 1. Precondition: steps >= 0, numerator >= 1 (the host passes a
+// normalized meter numerator).
+fn steps_per_beat(steps: i64, numerator: i64) -> (result: i64) {
+    let denom: i64 = select(numerator < 1, 1, numerator);
+    let spaced: i64 = ((2 *% steps) +% denom) / (2 *% denom);
+    return select(spaced < 1, 1, spaced);
+}
+
+// DrumCell cycle tap → hit → accent → tap: (cell + 1) mod 3.
+// Precondition: 0 <= cell <= 2.
+fn cycle_cell(cell: i64) -> (result: i64) {
+    return (cell +% 1) % 3;
+}
+
+// Pattern preview advance with wraparound. Degenerate patterns
+// (steps <= 0) stay at 0 rather than trapping.
+fn advance_step(step: i64, steps: i64) -> (result: i64) {
+    if steps <= 0 {
+        return 0;
+    }
+    return (step +% 1) % steps;
+}
+
+// ---- Integer division with floor rounding ----
+
+// Floor division for a positive divisor. MNCS `/` truncates toward zero,
+// which misplaces negative grid offsets by one; visual grids (piano-roll
+// rows above the grab point, upward drags) need floor.
+fn floor_div(numerator: i64, denominator: i64) -> (result: i64) {
+    let q: i64 = numerator / denominator;
+    let r: i64 = numerator % denominator;
+    return select(r < 0, q -% 1, q);
+}
+
+// Piano-roll row delta for a vertical pointer drag: Math.round-style
+// row count of dy_px against row_h, exact for all integer pixels
+// (single correctly-rounded division; exact ties are representable).
+// Precondition: row_h > 0.
+fn row_delta(dy_px: i64, row_h: i64) -> (result: i64) {
+    return floor_div(dy_px *% 2 +% row_h, (2 *% row_h));
+}
+
+// ---- Pointer interpretation (pixels) ----
+
+// Drag-start decision: 5px horizontal or a full row vertical movement.
+// Mirrors `!(|dx| < 5 && |dy| < 1)` exactly over integers.
+fn drag_started(dx_px: i64, dy_rows: i64) -> (result: bool) {
+    return dx_px >= 5 || dx_px <= 0 - 5 || dy_rows >= 1 || dy_rows <= 0 - 1;
+}
+
+// Tap-cancellation decision: pointer wandered more than 6px either axis.
+// Mirrors `|dx| > 6 || |dy| > 6` exactly over integers.
+fn tap_cancelled(dx_px: i64, dy_px: i64) -> (result: bool) {
+    return dx_px > 6 || dx_px < 0 - 6 || dy_px > 6 || dy_px < 0 - 6;
+}
+
+// ---- Motif piano-roll policy ----
+
+// Motif MIDI range clamp: C1..C8 (12..108).
+fn clamp_motif_midi(midi: i64) -> (result: i64) {
+    return select(midi < 12, 12, select(midi > 108, 108, midi));
+}
+
+// Shifted motif note (inspector semitone/octave steps, drag pitch), kept
+// in range.
+fn shift_motif_midi(midi: i64, delta: i64) -> (result: i64) {
+    return clamp_motif_midi(midi +% delta);
+}
+
+// MIDI note for a piano-roll row: hi clamped into range, counted down.
+// Precondition: row_count >= 1.
+fn pick_row_midi(hi: i64, row: i64, row_count: i64) -> (result: i64) {
+    let last: i64 = row_count -% 1;
+    let clamped: i64 = select(row < 0, 0, select(row > last, last, row));
+    return hi -% clamped;
+}
+
+// Half-beat grid-line count for a motif span of `motif_ticks` ticks:
+// lines at 0, 0.5, ... below the span end. Empty spans draw nothing.
+fn half_beatline_count(motif_ticks: i64) -> (result: i64) {
+    if motif_ticks <= 0 {
+        return 0;
+    }
+    return (motif_ticks +% 11) / 12;
+}
+
+// ---- Waveform bucket partitioning ----
+
+// Sample window for waveform bucket `bucket` of `count` over a `length`
+// buffer: at least 1-sample buckets, clamped end. The host keeps the float
+// peak loop; index partitioning is owned here.
+fn bucket_bounds(length: i64, bucket: i64, count: i64) -> (result: Bounds) {
+    let size: i64 = length / count;
+    let sized: i64 = select(size < 1, 1, size);
+    let start: i64 = bucket *% sized;
+    let end: i64 = select(start +% sized < length, start +% sized, length);
+    return Bounds { start: start, end: end };
+}
+
+// Stride capping peak sampling at ~90 reads per bucket. Truncation and
+// floor agree on the non-negative span; degenerate (empty) spans yield
+// stride 1, whose loop body never executes.
+fn bucket_stride(start: i64, end: i64) -> (result: i64) {
+    let stride: i64 = (end -% start) / 90;
+    return select(stride < 1, 1, stride);
+}

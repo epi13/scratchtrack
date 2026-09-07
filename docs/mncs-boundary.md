@@ -70,6 +70,12 @@ live calls into the compiled WASM module. All green as of this writing.
   motif-bar clamping, and the Auto Scratch version rule delegate to the
   MNCS migration projection (`src/mncsMigrate.ts`). Exact ties now round
   up deterministically (evidenced normalization, see D-003).
+- Visual/interaction discretes: beat-step classification, swing phase (one
+  MNCS rule replacing the App/DrumEditor copies), grid spacing, cell
+  cycling, step advance, drag/tap thresholds, motif MIDI policy, row
+  picking, grid-line counts, and waveform bucket partitioning delegate to
+  the MNCS geometry projection (`src/mncsGeometry.ts`). Trig positioning,
+  float peaks, and pixel layout stay host-side (see P-008).
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local

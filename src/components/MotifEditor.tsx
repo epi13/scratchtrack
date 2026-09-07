@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { TICKS_PER_BEAT, noteName } from '../music';
+import {
+  mncsClampMotifMidi,
+  mncsDragStarted,
+  mncsHalfBeatlineCount,
+  mncsPickRowMidi,
+  mncsRowDelta,
+  mncsShiftMotifMidi,
+  mncsTapCancelled,
+} from '../mncsGeometry';
 import type { SynthNote, TimeSignature } from '../types';
 import { barBeats } from '../music';
 
@@ -84,7 +93,8 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
   const midiFromEvent = (clientY: number) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     const row = Math.floor((clientY - rect.top) / ROW_H);
-    return pitchRange.hi - Math.max(0, Math.min(rowCount - 1, row));
+    // Row picking owned by the MNCS geometry model (`pick_row_midi`).
+    return mncsPickRowMidi(pitchRange.hi, row, rowCount);
   };
 
   const addNote = (clientX: number, clientY: number) => {
@@ -109,8 +119,10 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
     const grabOffset = mode === 'move' ? beatFromEvent(event.clientX) - note.startBeat : 0;
     let moved = false;
     const applyMove = (pointer: PointerEvent) => {
-      const dyRows = Math.round((pointer.clientY - startY) / ROW_H);
-      if (!moved && Math.abs(pointer.clientX - startX) < 5 && Math.abs(dyRows) < 1) return;
+      // Pointer interpretation owned by the MNCS geometry model
+      // (`row_delta`, `drag_started`, `clamp_motif_midi`).
+      const dyRows = mncsRowDelta(pointer.clientY - startY, ROW_H);
+      if (!moved && !mncsDragStarted(pointer.clientX - startX, dyRows)) return;
       moved = true;
       onChange(notes.map((item) => {
         if (item.id !== note.id) return item;
@@ -120,7 +132,7 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
           return { ...item, lengthBeats: length };
         }
         const startBeat = Math.min(Math.max(0, snapValue(beatFromEvent(pointer.clientX) - grabOffset, snap)), Math.max(0, motifLength - MIN_LENGTH_BEATS));
-        const midi = Math.max(12, Math.min(108, item.midi - dyRows));
+        const midi = mncsClampMotifMidi(item.midi - dyRows);
         return { ...item, startBeat, midi };
       }));
     };
@@ -141,13 +153,14 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
   const backgroundPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const pending = pendingTapRef.current;
     if (!pending) return;
-    if (Math.abs(event.clientX - pending.x) > 6 || Math.abs(event.clientY - pending.y) > 6) pendingTapRef.current = null;
+    // Tap grace owned by the MNCS geometry model (`tap_cancelled`).
+    if (mncsTapCancelled(event.clientX - pending.x, event.clientY - pending.y)) pendingTapRef.current = null;
   };
   const backgroundPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const pending = pendingTapRef.current;
     pendingTapRef.current = null;
     if (!pending) return;
-    if (Math.abs(event.clientX - pending.x) > 6 || Math.abs(event.clientY - pending.y) > 6) return;
+    if (mncsTapCancelled(event.clientX - pending.x, event.clientY - pending.y)) return;
     setSelectedId(null);
     addNote(event.clientX, event.clientY);
   };
@@ -161,8 +174,12 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
 
   const step = snapStepFor(snap);
   const barLines = Array.from({ length: motifBars }, (_, index) => index);
-  const beatLines = [];
-  for (let beat = 0; beat < motifLength; beat += 0.5) beatLines.push(beat);
+  // Grid-line count owned by the MNCS geometry model (`half_beatline_count`);
+  // positions stay host-side (pixel layout is a rendering concern).
+  const beatLines = Array.from(
+    { length: mncsHalfBeatlineCount(Math.round(motifLength * TICKS_PER_BEAT)) },
+    (_, index) => index * 0.5,
+  );
 
   return (
     <div className="motif-composer">
@@ -269,14 +286,14 @@ export default function MotifEditor({ notes, meter, motifBars, cursorBeat, noteL
           <>
             <strong>{noteName(selected.midi)}</strong>
             <div className="inspector-group">
-              <button aria-label="Pitch down one semitone" onClick={() => mutateSelected((note) => ({ ...note, midi: Math.max(12, note.midi - 1) }))}>−</button>
+              <button aria-label="Pitch down one semitone" onClick={() => mutateSelected((note) => ({ ...note, midi: mncsShiftMotifMidi(note.midi, -1) }))}>−</button>
               <span>Pitch</span>
-              <button aria-label="Pitch up one semitone" onClick={() => mutateSelected((note) => ({ ...note, midi: Math.min(108, note.midi + 1) }))}>＋</button>
+              <button aria-label="Pitch up one semitone" onClick={() => mutateSelected((note) => ({ ...note, midi: mncsShiftMotifMidi(note.midi, 1) }))}>＋</button>
             </div>
             <div className="inspector-group">
-              <button aria-label="Octave down" onClick={() => mutateSelected((note) => ({ ...note, midi: Math.max(12, note.midi - 12) }))}>−</button>
+              <button aria-label="Octave down" onClick={() => mutateSelected((note) => ({ ...note, midi: mncsShiftMotifMidi(note.midi, -12) }))}>−</button>
               <span>Oct</span>
-              <button aria-label="Octave up" onClick={() => mutateSelected((note) => ({ ...note, midi: Math.min(108, note.midi + 12) }))}>＋</button>
+              <button aria-label="Octave up" onClick={() => mutateSelected((note) => ({ ...note, midi: mncsShiftMotifMidi(note.midi, 12) }))}>＋</button>
             </div>
             <div className="inspector-group">
               <button aria-label="Start earlier" onClick={() => mutateSelected((note) => ({ ...note, startBeat: Math.max(0, Number((note.startBeat - step).toFixed(4))) }))}>−</button>

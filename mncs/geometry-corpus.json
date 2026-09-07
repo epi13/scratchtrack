@@ -1,0 +1,2176 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-geometry-kernels",
+ "cases": [
+  {
+   "id": "beat-on",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "is_beat_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 8,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "beat-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "is_beat_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "beat-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "is_beat_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "beat-degenerate",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "is_beat_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "swing-binary",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "swing_applies"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": false
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "swing-binary-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "swing_applies"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": false
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "swing-triplet",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "swing_applies"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": true
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "swing-triplet-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "swing_applies"
+    },
+    "arguments": [
+     {
+      "boolean": {
+       "value": true
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "spb-16-4",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "steps_per_beat"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "spb-14-7",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "steps_per_beat"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 14,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "spb-round",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "steps_per_beat"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "spb-min",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "steps_per_beat"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cycle-0",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "cycle_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cycle-1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "cycle_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cycle-2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "cycle_cell"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "advance_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 15,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance-mid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "advance_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 16,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance-degenerate",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "advance_step"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fdiv-pos",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "floor_div"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fdiv-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "floor_div"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fdiv-neg-small",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "floor_div"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 52,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fdiv-exact-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "floor_div"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -52,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 52,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fdiv-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "floor_div"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 52,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-still",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-half-down",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-half-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 13,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-neg-half",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -13,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -14,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-neg-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "row_delta"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -39,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "drag-dx",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "drag_started"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "drag-dy",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "drag_started"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "drag-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "drag_started"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "drag-still",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "drag_started"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "tap-moved",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "tap_cancelled"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "tap-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "tap_cancelled"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": -7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "tap-still",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "tap_cancelled"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "midi-low",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "clamp_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 11,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 12,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "midi-high",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "clamp_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 109,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 108,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "midi-ok",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "clamp_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 60,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 60,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "shift-up",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "shift_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 60,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 72,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "shift-clamped",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "shift_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 108,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "shift-down",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "shift_motif_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 60,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": -12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 48,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-midi",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "pick_row_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 25,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 72,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-midi-low",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "pick_row_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 25,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 48,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "row-midi-clamped",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "pick_row_midi"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 99,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 25,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 48,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "beatlines-4-4",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "half_beatline_count"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 8,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "beatlines-7-8",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "half_beatline_count"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 84,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 7,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "beatlines-empty",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "half_beatline_count"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bucket-first",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "bucket_bounds"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 120,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.geometry.v1::Bounds::end%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Bounds",
+      "fields": [
+       [
+        "end",
+        {
+         "integer": {
+          "value": 8,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "bucket-mid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "bucket_bounds"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 120,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.geometry.v1::Bounds::end%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Bounds",
+      "fields": [
+       [
+        "end",
+        {
+         "integer": {
+          "value": 48,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 40,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "bucket-stride",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "bucket_stride"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 40,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bucket-stride-wide",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.geometry.v1",
+     "function": "bucket_stride"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 441,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

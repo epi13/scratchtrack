@@ -34,6 +34,7 @@ import {
   stepsPerBar,
 } from './music';
 import { mncsBarTicks } from './mncsMeter';
+import { mncsSwingApplies } from './mncsGeometry';
 import {
   mncsClampMotifBars,
   mncsClipActive,
@@ -77,9 +78,12 @@ const SNAP_OPTIONS: Array<{ value: SnapSetting; label: string }> = [
   { value: 'bar', label: 'Whole bar' },
 ];
 
-/** Swing delays every second step (binary grids) or the third step (triplet grids). */
+/**
+ * Swing phase owned by the MNCS geometry model (`swing_applies`); the host
+ * maps the subdivision label to a triplet flag (MNCS has no strings yet).
+ */
 function swingApplies(subdivision: Subdivision, step: number): boolean {
-  return subdivision.includes('t') ? step % 3 === 2 : step % 2 === 1;
+  return mncsSwingApplies(subdivision.includes('t'), step);
 }
 
 function snapStepFor(setting: SnapSetting, meter: TimeSignature): number | null {

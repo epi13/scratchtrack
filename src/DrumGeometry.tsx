@@ -1,4 +1,5 @@
 import type { CSSProperties, PointerEvent } from 'react';
+import { mncsIsBeatStep } from './mncsGeometry';
 import type { DrumCell } from './types';
 
 interface DrumGeometryProps {
@@ -44,8 +45,9 @@ function GeometryLane({ name, row, rowIndex, stepsPerBar, stepsPerBeat, onCycle 
   }
 
   const activeCount = active.length;
+  // Beat-marker classification owned by the MNCS geometry model.
   const beatSteps = Array.from({ length: stepsPerBar }, (_, step) => step)
-    .filter((step) => step % Math.max(1, stepsPerBeat) === 0);
+    .filter((step) => mncsIsBeatStep(step, stepsPerBeat));
 
   const handleStep = (event: PointerEvent<HTMLButtonElement>, step: number) => {
     event.preventDefault();
@@ -83,7 +85,7 @@ function GeometryLane({ name, row, rowIndex, stepsPerBar, stepsPerBeat, onCycle 
             <button
               key={step}
               type="button"
-              className={`geometry-step level-${cell} ${step % Math.max(1, stepsPerBeat) === 0 ? 'quarter' : ''}`}
+              className={`geometry-step level-${cell} ${mncsIsBeatStep(step, stepsPerBeat) ? 'quarter' : ''}`}
               style={{ left: `${(point.x / SIZE) * 100}%`, top: `${(point.y / SIZE) * 100}%` }}
               aria-label={`${name} step ${step + 1}${cell === 2 ? ', accent' : cell === 1 ? ', hit' : ', off'}`}
               aria-pressed={cell > 0}

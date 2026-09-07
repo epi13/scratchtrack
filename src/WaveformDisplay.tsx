@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AudioPlaybackError, decodeAudioBlob } from './audio';
+import { mncsBucketBounds, mncsBucketStride } from './mncsGeometry';
 import { loadAudioBlob } from './store';
 import type { Scratch } from './types';
 
@@ -14,11 +15,11 @@ function durationLabel(seconds?: number) {
 
 function samplePeaks(buffer: AudioBuffer) {
   const channels = Array.from({ length: buffer.numberOfChannels }, (_, index) => buffer.getChannelData(index));
-  const bucketSize = Math.max(1, Math.floor(buffer.length / PEAK_COUNT));
   return Array.from({ length: PEAK_COUNT }, (_, bucket) => {
-    const start = bucket * bucketSize;
-    const end = Math.min(buffer.length, start + bucketSize);
-    const stride = Math.max(1, Math.floor((end - start) / 90));
+    // Bucket partitioning owned by the MNCS geometry model
+    // (`bucket_bounds`, `bucket_stride`); the float peak loop stays host.
+    const { start, end } = mncsBucketBounds(buffer.length, bucket, PEAK_COUNT);
+    const stride = mncsBucketStride(start, end);
     let peak = 0;
     for (let sample = start; sample < end; sample += stride) {
       for (const channel of channels) peak = Math.max(peak, Math.abs(channel[sample] ?? 0));

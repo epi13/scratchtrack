@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { playDrumStep } from '../audio';
 import { DRUM_KITS, defaultDrumSettings } from '../project';
 import { SUBDIVISIONS, stepsPerBar, stepBeats } from '../music';
+import {
+  mncsAdvanceStep,
+  mncsCycleCell,
+  mncsIsBeatStep,
+  mncsStepsPerBeat,
+  mncsSwingApplies,
+} from '../mncsGeometry';
+import { mncsRemapCell, mncsRemapIndex } from '../mncsMigrate';
 import type { DrumCell, DrumSettings, Scratch, Subdivision, TimeSignature, Track } from '../types';
 import { ScratchActionStrip, Control } from './Control';
 import DrumGeometry from '../DrumGeometry';
@@ -12,9 +20,14 @@ function blankRows(steps: number): DrumCell[][] {
   return Array.from({ length: 4 }, () => Array.from({ length: steps }, () => 0 as DrumCell));
 }
 
-/** Swing delays every second step (binary grids) or the third step (triplet grids). */
+/**
+ * Swing delays every second step (binary grids) or the third step
+ * (triplet grids). Phase owned by the MNCS geometry model
+ * (`swing_applies`); the host maps the subdivision label to a triplet
+ * flag (MNCS has no strings yet).
+ */
 function swingApplies(subdivision: Subdivision, step: number): boolean {
-  return subdivision.includes('t') ? step % 3 === 2 : step % 2 === 1;
+  return mncsSwingApplies(subdivision.includes('t'), step);
 }
 
 export default function DrumEditor({ track, updateScratch, meter, bpm, onNewScratch, onDuplicateScratch, onPlaceActive }: {
@@ -56,12 +69,13 @@ export default function DrumEditor({ track, updateScratch, meter, bpm, onNewScra
   const pattern = scratch.drumPattern?.[0]?.length === steps ? scratch.drumPattern : blankRows(steps);
   const settings = scratch.drumSettings ?? defaultDrumSettings;
   // Beat markers land once per notated beat: numerator markers around the ring.
-  const stepsPerBeat = Math.max(1, Math.round(steps / meter.numerator));
+  // Spacing owned by the MNCS geometry model (`steps_per_beat`).
+  const stepsPerBeat = mncsStepsPerBeat(steps, meter.numerator);
 
   const cycle = (row: number, step: number) => updateScratch(track.id, scratch.id, (current) => {
     const source = current.drumPattern?.[0]?.length === steps ? current.drumPattern : blankRows(steps);
     const next = source.map((lane) => [...lane] as DrumCell[]);
-    next[row][step] = ((next[row][step] + 1) % 3) as DrumCell;
+    next[row][step] = mncsCycleCell(next[row][step]) as DrumCell;
     return { ...current, drumPattern: next };
   });
 
@@ -72,14 +86,13 @@ export default function DrumEditor({ track, updateScratch, meter, bpm, onNewScra
     const fromSteps = current.drumPattern?.[0]?.length ?? stepsPerBar(meter, previousSubdivision) ?? 16;
     let drumPattern = current.drumPattern;
     if (drumPattern && fromSteps !== targetSteps) {
-      // Preserve musical timing: move each hit to the closest equivalent position.
+      // Preserve musical timing: the MNCS-owned remap rule (ties round up).
       drumPattern = drumPattern.map((row) => {
         const targetRow = Array.from({ length: targetSteps }, () => 0 as DrumCell);
         row.forEach((cell, index) => {
           if (!cell) return;
-          const position = (index / fromSteps) * targetSteps;
-          const mapped = Math.min(targetSteps - 1, Math.max(0, Math.floor(position + 0.5)));
-          targetRow[mapped] = Math.max(targetRow[mapped], cell) as DrumCell;
+          const mapped = mncsRemapIndex(index, fromSteps, targetSteps);
+          targetRow[mapped] = mncsRemapCell(targetRow[mapped], cell) as DrumCell;
         });
         return targetRow;
       });
@@ -103,7 +116,7 @@ export default function DrumEditor({ track, updateScratch, meter, bpm, onNewScra
     let step = 0;
     playDrumStep(pattern, 0, scratch.drumKit, settings);
     timerRef.current = window.setInterval(() => {
-      step = (step + 1) % steps;
+      step = mncsAdvanceStep(step, steps);
       const baseDelay = swingApplies(subdivision, step) ? msPerStep * 0.48 * settings.swing : 0;
       const humanDelay = settings.humanize * Math.random() * 13;
       window.setTimeout(() => playDrumStep(pattern, step, scratch.drumKit, settings), baseDelay + humanDelay);
@@ -159,7 +172,7 @@ export default function DrumEditor({ track, updateScratch, meter, bpm, onNewScra
                   <button
                     key={step}
                     aria-label={`${name} step ${step + 1}`}
-                    className={`step level-${cell} ${step % stepsPerBeat === 0 ? 'bar-step' : ''}`}
+                    className={`step level-${cell} ${mncsIsBeatStep(step, stepsPerBeat) ? 'bar-step' : ''}`}
                     onPointerDown={(event) => { event.preventDefault(); cycle(row, step); }}
                   ><i /></button>
                 ))}

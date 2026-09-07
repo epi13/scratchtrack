@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Replay the MNCS evidence for the ScratchTrack MNCS modules.
 #
-# For each module (mncs/meter.mncs, mncs/arrange.mncs, mncs/migrate.mncs) runs: source-study
+# For each module (meter, arrange, migrate, geometry) runs: source-study
 # (elaboration + obligation report), experiment runs on the portable-WASM
 # and research-bytecode backends over the checked-in corpus, a
 # cross-backend agreement check, and live calls into the compiled WASM
@@ -60,6 +60,7 @@ EOF
 check_module "meter" "$ROOT/mncs/meter.mncs" "$ROOT/mncs/meter-corpus.json"
 check_module "arrange" "$ROOT/mncs/arrange.mncs" "$ROOT/mncs/arrange-corpus.json"
 check_module "migrate" "$ROOT/mncs/migrate.mncs" "$ROOT/mncs/migrate-corpus.json"
+check_module "geometry" "$ROOT/mncs/geometry.mncs" "$ROOT/mncs/geometry-corpus.json"
 
 echo "== live WASM calls: meter =="
 node -e '
@@ -119,6 +120,30 @@ WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
     ["remap_cell", [1n, 2n], 2n], ["content_bars", [97n, 96n], 2n],
     ["normalize_root", [-1n], 11n], ["normalize_octave", [7n], 6n],
     ["auto_scratch_upgrade", [1, 0], 0], ["auto_scratch_upgrade", [0, 0], 1],
+  ];
+  let pass = 0;
+  for (const [name, args, exp] of checks) {
+    if (e[name](...args) !== exp) { console.error("MISMATCH", name); process.exit(1); }
+    pass++;
+  }
+  console.log(pass + "/" + checks.length + " live-WASM calls agree");
+});' "$WORK"
+
+echo "== live WASM calls: geometry =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/geometry-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  const checks = [
+    ["is_beat_step", [8n, 4n], 1], ["is_beat_step", [6n, 4n], 0],
+    ["swing_applies", [0, 1n], 1], ["swing_applies", [1, 2n], 1],
+    ["steps_per_beat", [16n, 4n], 4n], ["cycle_cell", [2n], 0n],
+    ["advance_step", [15n, 16n], 0n], ["floor_div", [-7n, 2n], -4n],
+    ["row_delta", [-14n, 26n], -1n], ["drag_started", [4n, 0n], 0],
+    ["tap_cancelled", [7n, 0n], 1], ["clamp_motif_midi", [11n], 12n],
+    ["shift_motif_midi", [100n, 12n], 108n], ["pick_row_midi", [72n, 99n, 25n], 48n],
+    ["half_beatline_count", [96n], 8n], ["bucket_stride", [0n, 441n], 4n],
   ];
   let pass = 0;
   for (const [name, args, exp] of checks) {
