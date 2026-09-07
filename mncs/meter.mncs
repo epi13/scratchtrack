@@ -1,0 +1,158 @@
+mncs 0.6;
+
+// scratchtrack.meter.v1 — exact integer musical-time kernels.
+//
+// Machine-native representation of ScratchTrack's rhythmic model: the
+// timeline is a whole-tick grid (24 ticks per quarter-note beat) and every
+// supported subdivision lands exactly on ticks. This module replaces the
+// TypeScript float formulation (`barBeats = numerator * 4 / denominator`,
+// `steps = beats / STEP_BEATS` with an epsilon comparison) with exact
+// integer arithmetic:
+//
+//   bar_ticks = numerator * 96 / denominator   (96 = 24 ticks * 4 quarters)
+//   steps     = bar_ticks / step_ticks         (valid iff divisible)
+//
+// 96 is divisible by every valid denominator (2/4/8/16), so `bar_ticks`
+// is always exact — no rounding, no epsilon. Combinations that cannot
+// align (e.g. 7/8 at 1/8-triplets needs 10.5 steps) are reported with the
+// -1 sentinel rather than silently rounded.
+//
+// Addition/subtraction/multiplication use the explicit wrapping intents
+// (`+%`, `-%`, `*%`), which discharge overflow obligations by semantics.
+// Product ranges (numerators <= 32, MIDI 0..127, ticks <= 1536) keep the
+// wrap path unreachable. Division/modulo obligations (divisor nonzero)
+// stay UNKNOWN: each is guarded by control flow, but no prover discharges
+// them yet — see docs/mncs-pressure.md item P-003.
+//
+// Error model: all fallible kernels return -1 for invalid input. Rich
+// Result payloads are deliberately avoided in this tranche so every
+// function stays executable on all five backends (scalar backends refuse
+// payload sums explicitly). Callers needing the reason use the matching
+// `*_valid` predicate first.
+//
+// Subdivision codes: 0 = 1/4, 1 = 1/8, 2 = 1/8t, 3 = 1/16, 4 = 1/16t,
+// 5 = 1/32. The codes are positional (no string vocabulary yet: MNCS has
+// no string type in Profile 0.6); the host boundary maps codes to the
+// '1/4'..'1/32' labels. See docs/mncs-boundary.md.
+module scratchtrack.meter.v1;
+
+// Ticks per quarter-note beat. Every transport position lands on a tick.
+fn ticks_per_beat() -> (result: i64) {
+    return 24;
+}
+
+// Ticks per whole note (24 * 4). The exact rational basis for bar_ticks.
+fn ticks_per_whole() -> (result: i64) {
+    return 96;
+}
+
+// Valid denominators per the product model: 2/4/8/16 only.
+fn denominator_valid(denominator: i64) -> (result: bool) {
+    return denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16;
+}
+
+// Bar length in ticks, or -1 when numerator/denominator are out of range.
+// Valid numerators are 1..32; valid denominators are 2/4/8/16.
+fn bar_ticks(numerator: i64, denominator: i64) -> (result: i64) {
+    if numerator < 1 || numerator > 32 {
+        return 0 - 1;
+    }
+    if denominator == 2 {
+        return numerator *% 48;
+    }
+    if denominator == 4 {
+        return numerator *% 24;
+    }
+    if denominator == 8 {
+        return numerator *% 12;
+    }
+    if denominator == 16 {
+        return numerator *% 6;
+    }
+    return 0 - 1;
+}
+
+// Ticks per step of a subdivision code, or -1 for an unknown code.
+// Table: 1/4 -> 24, 1/8 -> 12, 1/8t -> 8, 1/16 -> 6, 1/16t -> 4, 1/32 -> 3.
+fn step_ticks(code: i64) -> (result: i64) {
+    if code == 0 {
+        return 24;
+    }
+    if code == 1 {
+        return 12;
+    }
+    if code == 2 {
+        return 8;
+    }
+    if code == 3 {
+        return 6;
+    }
+    if code == 4 {
+        return 4;
+    }
+    if code == 5 {
+        return 3;
+    }
+    return 0 - 1;
+}
+
+// Drum steps per bar, or -1 when the meter/subdivision combination cannot
+// align to whole ticks or falls outside the 2..128 product range.
+fn steps_per_bar(numerator: i64, denominator: i64, code: i64) -> (result: i64) {
+    let bar: i64 = bar_ticks(numerator, denominator);
+    if bar < 0 {
+        return 0 - 1;
+    }
+    let step: i64 = step_ticks(code);
+    if step < 0 {
+        return 0 - 1;
+    }
+    if bar % step != 0 {
+        return 0 - 1;
+    }
+    let steps: i64 = bar / step;
+    if steps < 2 || steps > 128 {
+        return 0 - 1;
+    }
+    return steps;
+}
+
+// Round a tick to the nearest grid multiple (half steps round up).
+// A non-positive step leaves the tick unchanged (snap Off).
+fn quantize_tick(tick: i64, step: i64) -> (result: i64) {
+    if step <= 0 {
+        return tick;
+    }
+    if tick >= 0 {
+        return ((tick +% step / 2) / step) *% step;
+    }
+    return ((tick -% step / 2) / step) *% step;
+}
+
+// Clamp a MIDI note to the 0..127 product range.
+fn clamp_midi(note: i64) -> (result: i64) {
+    if note < 0 {
+        return 0;
+    }
+    if note > 127 {
+        return 127;
+    }
+    return note;
+}
+
+// Pad note from a scale root: root + scale interval + octave displacement,
+// clamped to 0..127. Precondition: 0 <= root_midi <= 127, 0 <= interval <= 11.
+fn pad_midi(root_midi: i64, interval: i64, octave_shift: i64) -> (result: i64) {
+    return clamp_midi(root_midi +% interval +% octave_shift *% 12);
+}
+
+// Pitch class of a MIDI note (0..11). Precondition: 0 <= note <= 127.
+fn pitch_class(note: i64) -> (result: i64) {
+    return note -% (note / 12) *% 12;
+}
+
+// MIDI octave number (C4 = 60 -> 4 in the product's noteName convention
+// `floor(midi/12) - 1`). Precondition: 0 <= note <= 127.
+fn octave_of(note: i64) -> (result: i64) {
+    return note / 12 - 1;
+}

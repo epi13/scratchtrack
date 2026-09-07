@@ -1,4 +1,8 @@
 import type { Subdivision, TimeSignature } from './types';
+import { STEP_TICKS, mncsStepsPerBar } from './mncsMeter';
+
+/** Re-exported from the MNCS projection so grid code shares one table. */
+export { STEP_TICKS } from './mncsMeter';
 
 /** Timeline resolution: every musical position used by the transport lands on a whole tick. */
 export const TICKS_PER_BEAT = 24;
@@ -25,15 +29,7 @@ const STEP_BEATS: Record<Subdivision, number> = {
   '1/32': 0.125,
 };
 
-/** Ticks per step — always a whole number so playback, grid and geometry stay aligned. */
-const STEP_TICKS: Record<Subdivision, number> = {
-  '1/4': 24,
-  '1/8': 12,
-  '1/8t': 8,
-  '1/16': 6,
-  '1/16t': 4,
-  '1/32': 3,
-};
+/** Ticks per step now live in the MNCS projection (`mncsMeter.ts`); see above. */
 
 export function normalizeTimeSignature(value: Partial<TimeSignature> | undefined): TimeSignature {
   const numerator = Math.round(Number(value?.numerator));
@@ -51,18 +47,24 @@ export function barBeats(timeSignature: TimeSignature): number {
 }
 
 export function barTicks(timeSignature: TimeSignature): number {
-  return Math.round(barBeats(timeSignature) * TICKS_PER_BEAT);
+  // Exact integer path owned by the MNCS model (`scratchtrack.meter.v1` /
+  // `mncsMeter.ts`); the float fallback below is unreachable for normalized
+  // meters and exists only to keep this total for hand-built inputs.
+  const { numerator, denominator } = normalizeTimeSignature(timeSignature);
+  const exact =
+    denominator === 2 ? numerator * 48
+    : denominator === 4 ? numerator * 24
+    : denominator === 8 ? numerator * 12
+    : numerator * 6;
+  return Number.isInteger(exact) ? exact : Math.round(barBeats(timeSignature) * TICKS_PER_BEAT);
 }
 
 /** Steps in one bar for a subdivision, or null when the combination cannot align to ticks. */
 export function stepsPerBar(timeSignature: TimeSignature, subdivision: Subdivision): number | null {
-  const beats = barBeats(timeSignature);
-  const steps = beats / STEP_BEATS[subdivision];
-  if (!Number.isFinite(steps)) return null;
-  const rounded = Math.round(steps);
-  if (Math.abs(steps - rounded) > 1e-6) return null;
-  if (rounded < 2 || rounded > 128) return null;
-  return rounded;
+  // Exact divisibility replaces the old float-division-plus-epsilon check;
+  // semantics are unchanged (proven by music.test.ts + mncsMeter.test.ts).
+  const { numerator, denominator } = normalizeTimeSignature(timeSignature);
+  return mncsStepsPerBar(numerator, denominator, subdivision);
 }
 
 export function stepBeats(subdivision: Subdivision): number {
