@@ -1,0 +1,1020 @@
+{
+ "cases": [
+  {
+   "id": "bar-4-4",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-5-4",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 5
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-7-8",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 7
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 8
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-11-8",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 11
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 8
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-13-16",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 13
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 16
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-3-2",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 3
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 2
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-bad-denominator",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 3
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-zero-numerator",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "bar-numerator-33",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 33
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "bar_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "step-quarter",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "step_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "step-8t",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 2
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "step_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "step-16t",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "step_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "step-32",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 5
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "step_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "step-bad-code",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 6
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "step_ticks",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-4-4-16th",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 3
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-7-8-16th",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 7
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 8
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 3
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-4-4-8t",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 2
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-5-8-16t",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 5
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 8
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 4
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-7-8-8t-unalignable",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 7
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 8
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 2
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "steps-13-16-8t-unalignable",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 13
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 16
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 2
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "steps_per_bar",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "quantize-down",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 79
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 6
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "quantize_tick",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "quantize-half-up",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 81
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 6
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "quantize_tick",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "quantize-snap-off",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 3
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "quantize_tick",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "clamp-low",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": -5
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "clamp_midi",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "clamp-high",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 200
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "clamp_midi",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "pad-c3",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 48
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "pad_midi",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "pad-octave-up",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 48
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 1
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "pad_midi",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "pad-clamped-top",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 120
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 0
+      }
+     },
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 1
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "pad_midi",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "pitch-c",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 60
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "pitch_class",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "pitch-below-c",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 59
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "pitch_class",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "octave-c4",
+   "request": {
+    "arguments": [
+     {
+      "integer": {
+       "type": {
+        "bits": 64,
+        "signed": true
+       },
+       "value": 60
+      }
+     }
+    ],
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "function": "octave_of",
+     "module": "scratchtrack.meter.v1"
+    }
+   }
+  },
+  {
+   "id": "quantize-negative",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.meter.v1",
+     "function": "quantize_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "quantize-negative-exact",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.meter.v1",
+     "function": "quantize_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "name": "scratchtrack-meter-kernels",
+ "schema_version": "0.1"
+}
