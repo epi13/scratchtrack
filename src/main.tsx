@@ -8,11 +8,17 @@ import './v03.css';
 import './v04.css';
 import './v05.css';
 
-// Boot the compiled MNCS modules (meter, text, crc) concurrently with
-// render. Never blocks or breaks boot: production call sites use WASM
-// calls when ready and the conformance-pinned projections otherwise
-// (all paths agree by corpus).
+// Boot all eight compiled MNCS modules concurrently with render. Never
+// blocks or breaks boot: production call sites use WASM calls when ready
+// and the conformance-pinned projections otherwise (all paths agree by
+// corpus).
 void initMncsWasm();
+
+// Browser E2E hook: with `?mncs-test=1` only, expose the real production
+// call sites plus path-attribution counters (never in normal use).
+if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('mncs-test')) {
+  void import('./mncsTestHook').then((hook) => hook.installMncsTestHook());
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

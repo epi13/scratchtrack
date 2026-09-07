@@ -1,0 +1,20 @@
+mncs 0.7;
+
+// RECON PROBE (passes): fixed-point wavetable oscillator control.
+// A 64-entry Q15 sine table fits the sequence bound; u64 phase
+// accumulation wraps natively; the 6-bit table index comes from a
+// shift+mask; dynamic indexing reads the sample. What is missing for
+// real DSP is NOT control flow but float VALUES and transcendental
+// FUNCTIONS (sin/tanh/exp/pow to fill such tables and scale output).
+// Corpus: mncs/probes/dsp_fixed_osc-corpus.json (Python oracle).
+// Pressure ledger: bounds P-001 precisely (see dsp_float_ops).
+module scratchtrack.probes.dsp_fixed_osc_attempt;
+
+fn osc_sample(table: [i32; 64], phase: u64) -> (result: i64) {
+    let idx: u64 = (phase >> 26) % 64;
+    return table[idx] as i64;
+}
+
+fn osc_advance(phase: u64, step: u64) -> (result: u64) {
+    return phase +% step;
+}

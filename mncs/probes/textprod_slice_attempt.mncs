@@ -1,0 +1,26 @@
+mncs 0.7;
+// PRESSURE PROBE (backend divergence): returning a view sliced from a
+// LOCALLY-CONSTRUCTED exact sequence loses every element past the first
+// on portable-wasm ([48,55] Florian Vogt [48,0]), while research-bytecode
+// returns the correct bytes. Indexed reads of the same buffer, internal
+// slice consumption, direct sequence returns, and slices of PARAMETER
+// views are all correct on both backends — the defect is narrowly the
+// portable-wasm RETURN path for views over locally-built sequences
+// (canonical 8-byte cells surface as packed bytes: only every 8th byte
+// is real data).
+// Blocks variable-width text production (formatPosition) on the
+// production backend; fixed-width exact returns work around it.
+// Reproduce: cargo run -q -p mncs-cli -- experiment run
+//   mncs/probes/textprod_slice_attempt.mncs --backend portable-wasm
+//   --corpus mncs/probes/textprod_slice-corpus.json --output-dir OUT
+// (expectation_met False on wasm, True on research-bytecode).
+// Pressure ledger: P-013 (backend divergence, view-return marshal).
+module scratchtrack.probes.textprod_slice_attempt;
+fn slice02(bar: u64, beat: u64) -> (result: [byte; up_to 5]) {
+    let buf: [byte; 5] = [(((bar / 10) % 10) +% 48) as byte, ((bar % 10) +% 48) as byte, 46, (((beat / 10) % 10) +% 48) as byte, ((beat % 10) +% 48) as byte];
+    return buf[0..2];
+}
+fn slice13(bar: u64, beat: u64) -> (result: [byte; up_to 5]) {
+    let buf: [byte; 5] = [(((bar / 10) % 10) +% 48) as byte, ((bar % 10) +% 48) as byte, 46, (((beat / 10) % 10) +% 48) as byte, ((beat % 10) +% 48) as byte];
+    return buf[1..3];
+}

@@ -416,6 +416,49 @@ conversion campaign. Each item follows the required shape:
   blocking — but every future nested algorithm pays the flattening
   tax until this lands.
 
+### P-013 — WASM view-return divergence (sequence-returning functions)
+
+- Requirement: text production and any kernel that RETURNS a
+  sequence (`formatPosition` bytes, labels, keys).
+- MNCS limitation (measured, `textprod_slice_attempt.mncs`,
+  `textprod_slice-corpus.json`, `experiment run` status FAIL):
+  the portable-wasm backend returns the first byte correctly and
+  zeroes the rest — case `s02` expected `[48, 55]` (`'0','7'`)
+  got `[48, 0]`; case `s13` expected `[55, 46]` (`'7','.'`)
+  got `[55, 0]`. Scalar/boolean/record returns are exact
+  (events, dsp, doc_keys corpora); only sequence returns diverge,
+  consistent with an incompletely-marshalled view descriptor on
+  the return path (P-011's unpublished ABI).
+- Upstream path: fix the sequence-return marshalling in the
+  portable-wasm backend (or publish the return-side view contract
+  per P-011 so hosts can detect it). Until then, sequence
+  production stays host-side and text production waits on this
+  PLUS the P-002 text tranche.
+- ScratchTrack code unlocked when fixed: `formatPosition` and
+  every byte-producing kernel move into MNCS.
+
+### P-014 — cross-module nominal types unusable
+
+- Requirement: shared event/state vocabularies (one `Transport`
+  machine, one `Phase` enum, shared records) across modules.
+- MNCS limitation (probed, refused at elaboration,
+  `events_import_attempt.mncs`, re-verified this run):
+  `MNE105` ×2 (imported type name not in the profile type list)
+  + `MNE161` ×1 (field projection needs a declared record type);
+  `Os::linux`-style double-colon value paths do not parse
+  (MNP066 cascade). `use` resolves and imported FUNCTIONS over
+  primitive args work (`doc_keys.mncs` + stdlib
+  `json_projection.count_key`, 23/23 on WASM) — only nominal
+  TYPES fail to cross.
+- Workaround in use: every module re-declares its enums/records
+  locally (`events_transport_attempt.mncs` proves the machine
+  itself runs 6/6 PASS on WASM with local declarations).
+- Upstream path: admit imported finite/record identities in
+  signatures, projection, and match scrutinees (with the
+  short-form identity spelling the backend already uses — see
+  this run's ABI findings). Unlocks shared vocabularies and any
+  shared-record architecture.
+
 ## Closed gaps (feared blocked, proven supported this run)
 
 - Whole-view traversal with carried record state (`text.mncs` fold).
@@ -431,6 +474,17 @@ conversion campaign. Each item follows the required shape:
   resolver-configuration fact, not a language hole.
 - Sibling module imports resolve in flat layouts via the
   tail-segment candidate (`mncs/le.mncs` for `use scratchtrack.le;`).
+- Record inputs containing finite-typed fields cross the
+  portable-wasm value contract (`events_transport_attempt.mncs`:
+  `Transport { armed: bool, phase: Phase }` in, `Transport` out,
+  6/6 `returned` with correct values, experiment status PASS).
+  Earlier `InvalidRequest` failures were a corpus-authoring bug
+  (long-form record identities), not a backend gap.
+- Fixed-point DSP advance/sample kernels (`dsp_fixed_osc_attempt`,
+  8/8 `returned` at 13–45 steps/case) and byte-slice/CRC-adjacent
+  integer work execute exactly; both sit at experiment UNKNOWN
+  only because `integer-overflow` obligations are retained
+  (same contract as P-003's guarded divisions).
 
 ## P-006 — direct browser instantiation: DELIVERED as D-009
 
@@ -457,6 +511,24 @@ conversion campaign. Each item follows the required shape:
 | Async capture/storage/Drive/picker | host (P-004) | `store.ts`, `drive.ts`, `capture.ts` |
 | Sub-tick beats editing | host edge (P-007) | transport edge `Math.round` |
 | EOCD backward scan, entry walk | host edge (P-012 shapes) | `pack.ts` |
+| Browser E2E proof (6 specs, all green) | ScratchTrack test | `e2e/mncs-wasm.spec.ts`, `src/mncsTestHook.ts` (`?mncs-test=1` only) |
+| ABI-derived experiment corpora | ScratchTrack tooling | `mncs/probes/abi_corpus.py` + `*-spec.json` (authoritative; supersedes `scripts/mncs-probe-events-corpus.py`, which hardcodes the long-form identities the backend rejects) |
+| In-flight WASM load joining | ScratchTrack loader | `src/mncsWasm.ts` `inFlightLoad` |
+
+## Dependency graph (verified this run)
+
+- The 8 product modules (`meter`, `arrange`, `migrate`,
+  `geometry`, `wav`, `pack`, `text`, `crc`) contain ZERO `use`
+  statements: the product graph is 8 isolated nodes, each
+  self-contained by construction. Sharing is blocked upstream,
+  not by choice: P-010 (no exact→view subtyping for `le.mncs`)
+  and P-014 (no imported nominal types for shared
+  enums/records) are the two edges that cannot be drawn yet.
+- The only cross-module edge in the repo is probe→stdlib:
+  `doc_keys.mncs` → `mncs.std.json_projection.v1.count_key`
+  (functions over primitives cross fine; needs
+  `MNCS_LIBRARY_PATH` exported or the import fails MNE173 —
+  resolver configuration, not a language hole).
 
 ## Unlock graph (language change → app code unlocked)
 
@@ -542,8 +614,10 @@ priority order. Each entry follows the required shape.
 
 - **Change →** `f32`/`f64` type + intent family + backend facts,
   then a trig decision (intrinsics vs host callbacks).
-- **Evidence/reproducer →** `mncs/probes/dsp_float_attempt.mncs`
-  (parse-level refusal, MNP064); P-001/P-008.
+- **Evidence/reproducer →** `mncs/probes/dsp_float_ops.mncs`
+  (parse-level refusal, MNP064; inventories midi-freq, exp,
+  tanh, pan-trig, sqrt workloads with precision needs);
+  P-001/P-008.
 - **ScratchTrack code unlocked →** `audio.ts` DSP, compressor,
   waveform peaks, drum orbits — the largest remaining host-only
   surface.
@@ -580,3 +654,227 @@ priority order. Each entry follows the required shape.
   changes.
 - **Other ecosystem benefits →** every arithmetic-heavy module
   gets cleaner verification status.
+
+# FINAL RECON RUN (this run, toolchain 8d79250d54d4e4241c0bb0ae6f5c632345848a6d)
+
+No `mncs-language` sources were modified. All pressure went
+through the public CLI (`source-study`, `abi`, `experiment
+plan/run`, `execute-backend` surface) plus ScratchTrack-side
+loader/spec/tooling fixes.
+
+## Audio/graphics/async/events/persistence recon
+
+- Events: `events_transport_attempt.mncs` (local `Phase`/`Evt`
+  finites + `Transport` record, `is_playing` predicate,
+  `transport_step` transition) — 6/6 `returned`, status PASS.
+  The transport state machine is expressible and exact today;
+  only SHARING it across modules waits (P-014).
+- DSP: `dsp_fixed_osc_attempt.mncs` (fixed-point advance/sample)
+  — 8/8 `returned` at 13–45 steps/case, status UNKNOWN on
+  retained `integer-overflow` obligations. Integer DSP
+  skeletons run; float DSP waits (P-001) and trig waits
+  (P-008); float refusal re-pinned via `dsp_float_ops.mncs`.
+- Graphics-adjacent integer policy (thresholds, partitioning,
+  counts) stays MNCS-owned per D-004; continuous geometry
+  stays host-side (P-001/P-008).
+- Async/persistence: no new surface — P-004 stands unchanged
+  (`capability/` reserved-empty; `store.ts`/`drive.ts`/
+  `capture.ts` waiting). Nothing async was wrapped in
+  promise-shaped glue.
+- Text production: parse direction proven (D-007/D-009);
+  production direction newly P-013-pinned (view-return
+  zeroes bytes after the first).
+
+## Execution fallbacks remaining
+
+- Every production call site stays WASM-first with the
+  conformance-pinned pure-TS projection as fallback; all
+  paths agree by corpus. Fallback is load-bearing in exactly
+  three proven cases: WASM blocked (route-abort E2E),
+  digest mismatch (tamper E2E → per-module `failed` with
+  isolation), and sequence-returning kernels (P-013, always).
+- `initMncsWasm()` still returns only the meter-module bit
+  (documented: meter is the original authority path); all 8
+  states remain individually observable via
+  `mncsModuleState`.
+
+## Loader changes (this run)
+
+- `initMncsModule`/`initModuleFromBytes` now join in-flight
+  loads (`inFlightLoad`): a readiness probe racing boot
+  awaits the real outcome instead of reporting `false` for a
+  module whose state is `loading`. Fixes the post-reload
+  `ready() === false` flake the SW E2E exposed. Failure
+  semantics unchanged (`failed` without `retry` still
+  returns `false` immediately; terminal states untouched).
+
+## WASM ABI findings (this run)
+
+- Record identities are SHORT-form: field types use the
+  source spelling (`...Transport::armed%3Abool%3Bphase%3APhase%3B`),
+  NOT fully-qualified finite identities. Long-form corpora
+  fail with `InvalidRequest: backend request violates the
+  language-owned value contract`. Discriminants are
+  declaration order (verified against `mncs abi` composites).
+- Experiment corpus schema (all required):
+  top-level `name`; per-case `id` + `request`; request needs
+  `schema_version`, `target.module` + `target.function`,
+  `arguments`, `step_budget`. `ExecutionValue::Record` needs
+  `name`; `Integer`'s `type` is `{bits, signed}`, not a
+  string. `expect` is not a field (use `expected` /
+  `expected_status`).
+- `mncs abi` output is the correct corpus authoring source;
+  `mncs/probes/abi_corpus.py` derives corpora from it
+  (spec DSL: `B`/`I`/`F`/`R`), replacing hand-authored
+  identities.
+
+## Memory-growth findings
+
+- Prior-run result stands (unchanged this run): repeated
+  `execute-backend` stress showed linear allocator growth
+  without the reset discipline; the loader's
+  allocate→stage→call→reset protocol is load-bearing and
+  covered by the byte-path unit tests (114 green). No new
+  growth signal observed in this run's corpora.
+
+## Performance observations
+
+- Step counts (`experiment run`, portable-wasm):
+  events predicate 55–140 steps, transitions similar;
+  fixed-osc advance 13, sample 45; doc_keys
+  `version_key_hits` up to 61023 steps (fold over a 64-byte
+  window with per-byte overflow checks — the obligation
+  burden is visible as steps, not just status);
+  streamed CRC32 ≈14k steps/byte (P-009 quantifies the
+  native-bitwise prize at ~100x).
+- Browser: 8 modules instantiate concurrently at boot with
+  no render block; full 6-spec Playwright suite runs in
+  ~3–9s against the production build.
+
+## Fabric findings
+
+- `scripts/verify-mncs.sh` verdict PASS (6/6: toolchain pin,
+  evidence replay both backends, WASM byte-freshness,
+  tsc, vitest, vite build) at pinned rev `8d79250`; the
+  `mncs-verify.yml` workflow gates PRs/pushes on it via the
+  pinned `mncs-actions` SHA, plus badge rendering from the
+  verdict output. `docs/fabric-log.md` cross-check stands.
+- Gap noted: the verifier does NOT run the Playwright E2E
+  (needs a browser + served dist). The 6-spec suite is green
+  locally but is not a merge gate — promoting it (or a
+  headless subset) into CI is ScratchTrack-side follow-up,
+  not a language item.
+
+## New pressure probes (this run)
+
+- `events_transport_attempt.mncs` + `events_transport-spec.json`
+  + ABI-derived `events_transport-corpus.json` (PASS 6/6).
+- `events_import_attempt.mncs` (P-014 refusal, MNE105×2/MNE161).
+- `dsp_fixed_osc_attempt.mncs` + corpus (8/8 returned).
+- `dsp_float_ops.mncs` (P-001 refusal inventory, replaces
+  deleted `dsp_float_attempt.mncs`).
+- `textprod_slice_attempt.mncs` + corpus (P-013 FAIL evidence).
+- `mncs/probes/abi_corpus.py` + `mncs abi` authoring flow.
+
+## Exact diagnostics (new this run)
+
+- `InvalidRequest: backend request violates the
+  language-owned value contract` ← long-form record identity
+  in corpus (authoring bug, fixed via ABI derivation).
+- `missing field 'module'` / `'name'` / `'type_identity'` /
+  `schema_version` ← corpus shape gaps (see ABI findings).
+- P-014: `MNE105` (elaboration, imported type not in profile
+  list) ×2, `MNE161` (projection needs declared record) ×1,
+  `MNP066` cascade (double-colon value paths unparseable).
+- E2E: `waitForFunction __mncs` timeout ← absolute-path
+  `goto('/?…')` dropping the `/scratchtrack/` base (spec
+  bug); `h.ready is not a function` ← functions do not
+  survive `evaluate` structured-clone (spec helper now
+  call-through); post-reload `ready() === false` ←
+  `loading → false` early-return (loader fix above).
+
+## Newly closed false assumptions
+
+- Long-form type identities belong in corpora (they don't;
+  short-form wins — verified byte-for-byte against `mncs abi`).
+- The `__mncs` hook object can cross `evaluate` (it can't;
+  only serializable values cross).
+- `page.goto('/?…')` keeps the baseURL path (it doesn't;
+  absolute paths reset it — use relative).
+- A second `initMncsWasm()` during boot load returns the
+  true outcome (it returned `false`; now joins in-flight).
+- The loop-point E2E failure was an app/WASM bug (it was
+  two spec bugs: fixture Out-point clamp + sixteenth
+  round-trip expectation; the app clamped correctly).
+- `experiment UNKNOWN` means "didn't run" (it ran exactly —
+  values are verified observations; only the universal
+  obligation discharge is missing).
+
+## Remaining blockers (map to ledger below)
+
+P-001 float, P-002 text values, P-004 effects, P-005
+buffer views, P-003/P-008/overflow obligations, P-007
+snap policy, P-009 bitwise, P-010 subtyping, P-011 host
+ABI, P-012 nesting/index, P-013 view returns, P-014
+nominal imports. Nothing else was found this run.
+
+# FINAL PRESSURE LEDGER
+
+| # | ScratchTrack workload | Minimal reproducer | Observed compiler/runtime result | Classification | Generic MNCS capability required | ScratchTrack code unlocked | Broader ecosystem value |
+|---|---|---|---|---|---|---|---|
+| P-001 | `audio.ts` DSP, MIDI freq, compressor, peaks | `probes/dsp_float_ops.mncs` | parse refusal MNP064 (`f64`/float literals) | missing type tranche | float scalars + explicit intents + backend facts | all audio DSP in MNCS | every DSP/sim consumer |
+| P-002 | `formatPosition`, note/scale labels, JSON keys | P-013 probe + D-007/D-009 | parse crosses; production has no values | missing type tranche | bounded owned text values above `text_view.v1` | text production in MNCS | any human-facing-text consumer |
+| P-003 | guarded divisions (`steps_per_bar`, `quantize`, `pitch_class`) | every module corpus | UNKNOWN: `integer-overflow` obligations retained; values verified | prover gap | range/provenance discharge of guarded divisors | stronger evidence, zero app change | all arithmetic modules |
+| P-004 | `store.ts`/`drive.ts`/`capture.ts`, mic capture | (no probe possible) | `capability/` reserved-empty | missing effect model | capability/effect-shape declarations | async under MNCS boundaries | entire async-host story |
+| P-005 | waveform/drum/timeline packed buffers | D-009 byte path | bytes proven JS-host only by reading codegen | unpublished contract | published host-view/record ABI + browser vector | zero-copy geometry | non-JS hosts |
+| P-007 | clip/loop beats editing at 1/32 grids | tick-kernel specs | kernels proven; edits not whole-tick-exact | product/language policy | tick-exact grids or blessed round-at-edit rule | beats editing in MNCS | — (product-local) |
+| P-008 | drum orbits, peaks, pixels, colors | `dsp_float_ops` trig inventory | no float, no trig vocabulary | missing type tranche | trig decision inside float tranche | continuous geometry in MNCS | graphics consumers |
+| P-009 | CRC32 native speed, WAV RIFF assembly | `crc32_u32_attempt` (MNE115/103), `crc_u64_attempt` (MNE115/117/119) | combinators refused all int types; shifts/`%` exist | missing intent family | native integer bitwise intents + realization | ~100x CRC collapse; RIFF math | checksums/hashes/ciphers everywhere |
+| P-010 | shared `le.mncs` readers (44/46/22-byte windows) | `subtype_attempt.mncs` | MNE133: `[byte;44]` ≠ `[byte;up_to 64]` | missing subtyping | exact→bounded-view coercion or length generics | dedup six LE readers | all multi-format consumers |
+| P-011 | every JS host marshalling call | `src/mncsWasm.ts` reverse-map | works; drifts silently with codegen | unpublished contract | versioned host ABI + per-shape conformance vectors | hardened browser path; sequence returns detectable | third-party hosts |
+| P-012 | 8×N CRC shape, position-counted loops | `bitwise_u64_attempt` v1→v2 | MNE147 (no nesting); MNE102 (index unbound) | missing iteration shape | nested bounded iteration + bound counted index | natural multi-level algorithms | removes flattening tax |
+| P-013 | `formatPosition`, any sequence-returning kernel | `textprod_slice_attempt` + corpus | FAIL: `[48,55]→[48,0]`, `[55,46]→[55,0]` (first byte exact, rest zeroed) | backend codegen bug | sequence-return view marshalling fix (or P-011 return contract) | byte production in MNCS | any sequence-returning module |
+| P-014 | shared transport/state vocabularies, shared records | `events_import_attempt.mncs` | MNE105×2 + MNE161 at elaboration; MNP066 on `::` paths | missing nominal import | imported finite/record identities in signatures, projection, match | shared enums/records; kills local re-declaration | any multi-module architecture |
+
+# NEXT RUN: MNCS-LANGUAGE
+
+Exact recommended implementation order for the Spark 1.3
+Extra High campaign. Do not implement here.
+
+1. Native integer bitwise (`^`/`&`/`|` + shifts, all int
+   types) — P-009. Largest expressibility cliff; precise
+   isolation already done; ~100x measured prize.
+2. Sequence-return view marshalling — P-013. Smallest
+   scoped codegen fix; unblocks the whole
+   sequence-production class; verify with the pinned
+   `textprod_slice` corpus (must flip FAIL→PASS with
+   `[48,55]`/`[55,46]` exact).
+3. Imported nominal types in signatures/projection/match —
+   P-014. Unlocks shared vocabularies; the backend already
+   speaks short-form identities, so align elaboration to
+   them; verify with `events_import_attempt` (must
+   elaborate) plus a cross-module `transport_step` call.
+4. Exact→bounded-view subtyping (or length generics) —
+   P-010. Unlocks `le.mncs`; verify with
+   `subtype_attempt` + deduped wav/pack readers.
+5. Nested bounded iteration + bound counted index — P-012.
+   Verify with the natural 8×N CRC shape at equal-or-better
+   steps than the flattened D-008.
+6. Publish the host view/record ABI — P-011. Versioned
+   contract + per-shape vectors (bytes in, record out,
+   sequence out to lock P-013); verify by regenerating
+   `src/mncsWasm.ts` marshalling from the document.
+7. Float scalars + intents, then trig decision — P-001/P-008.
+   Verify with `dsp_float_ops` inventory + a fixed→float
+   equivalence corpus for the osc kernels.
+8. Bounded owned text values — P-002 (needs P-013 green
+   first, else values cannot return). Verify with a
+   `formatPosition` round-trip corpus (`7.3.2`→26.5→`7.3.2`).
+9. Capability/effect declarations — P-004. Verify with
+   typechecking `storage.read`-shaped imports against
+   stub hosts.
+10. Range/provenance obligation discharge — P-003 (last:
+    evidence-only, zero app impact; needs the corpus of
+    guarded divisions this campaign banked). Verify by
+    flipping the banked UNKNOWNs to PASS with no source
+    changes.

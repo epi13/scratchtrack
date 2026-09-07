@@ -1,0 +1,270 @@
+{
+ "schema_version": "0.1",
+ "name": "probe",
+ "cases": [
+  {
+   "id": "idle-not-playing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "is_playing"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::stopped",
+           "discriminant": 0,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  },
+  {
+   "id": "playing-is-playing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "is_playing"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::playing",
+           "discriminant": 1,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  },
+  {
+   "id": "paused-not-playing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "is_playing"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": false
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::paused",
+           "discriminant": 2,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  },
+  {
+   "id": "play-from-stop",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "transport_step"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::stopped",
+           "discriminant": 0,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Evt",
+       "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Evt::play",
+       "discriminant": 0,
+       "payload": []
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  },
+  {
+   "id": "pause-from-playing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "transport_step"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::playing",
+           "discriminant": 1,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Evt",
+       "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Evt::pause",
+       "discriminant": 1,
+       "payload": []
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  },
+  {
+   "id": "stop-from-pause",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "scratchtrack.probes.events_transport_attempt",
+     "function": "transport_step"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.probes.events_transport_attempt::Transport::armed%3Abool%3Bphase%3APhase%3B",
+       "name": "Transport",
+       "fields": [
+        [
+         "armed",
+         {
+          "boolean": {
+           "value": false
+          }
+         }
+        ],
+        [
+         "phase",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Phase",
+           "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Phase::paused",
+           "discriminant": 2,
+           "payload": []
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:scratchtrack.probes.events_transport_attempt::Evt",
+       "variant_identity": "mncs:0.2:finite-variant:scratchtrack.probes.events_transport_attempt::Evt::stop",
+       "discriminant": 2,
+       "payload": []
+      }
+     }
+    ],
+    "step_budget": 10000
+   }
+  }
+ ]
+}

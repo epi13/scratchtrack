@@ -21,6 +21,8 @@
  * digit/dot inputs behave identically, exactly.
  */
 
+import { wasmFirst, wasmTextParsePosition, wasmTextPositionTicks } from './mncsWasm';
+
 /** Strict position parts: mirrors MNCS record `Position` (valid only). */
 export interface PositionParts {
   bar: number;
@@ -41,36 +43,38 @@ function isDigit(byte: number): boolean {
  * non-digit/non-dot byte, a fourth part, or over-long input.
  */
 export function mncsParsePositionText(text: string): PositionParts | null {
-  const bytes = new TextEncoder().encode(text);
-  if (bytes.length > 64) return null;
-  let dot = 0;
-  let current = 0;
-  let first = 0;
-  let second = 0;
-  let valid = true;
-  for (const value of bytes) {
-    if (isDigit(value)) {
-      current = current * 10 + (value - ASCII_0);
-    } else if (value === ASCII_DOT) {
-      if (dot >= 2) {
-        valid = false;
-      } else if (dot === 0) {
-        first = current;
-        dot = 1;
+  return wasmFirst('parse_position', wasmTextParsePosition(text), () => {
+    const bytes = new TextEncoder().encode(text);
+    if (bytes.length > 64) return null;
+    let dot = 0;
+    let current = 0;
+    let first = 0;
+    let second = 0;
+    let valid = true;
+    for (const value of bytes) {
+      if (isDigit(value)) {
+        current = current * 10 + (value - ASCII_0);
+      } else if (value === ASCII_DOT) {
+        if (dot >= 2) {
+          valid = false;
+        } else if (dot === 0) {
+          first = current;
+          dot = 1;
+        } else {
+          second = current;
+          dot = 2;
+        }
+        current = 0;
       } else {
-        second = current;
-        dot = 2;
+        valid = false;
       }
-      current = 0;
-    } else {
-      valid = false;
+      // No early exit: MNCS folds the whole view before judging validity.
     }
-    // No early exit: MNCS folds the whole view before judging validity.
-  }
-  if (!valid) return null;
-  if (dot === 0) return { bar: current, beat: 1, sixth: 0 };
-  if (dot === 1) return { bar: first, beat: current, sixth: 0 };
-  return { bar: first, beat: second, sixth: current };
+    if (!valid) return null;
+    if (dot === 0) return { bar: current, beat: 1, sixth: 0 };
+    if (dot === 1) return { bar: first, beat: current, sixth: 0 };
+    return { bar: first, beat: second, sixth: current };
+  });
 }
 
 /**
@@ -79,12 +83,15 @@ export function mncsParsePositionText(text: string): PositionParts | null {
  * 1, sixteenths clamped to 0..3, TOTAL_BEATS cap).
  */
 export function mncsPositionTicks(bar: number, beat: number, sixth: number, barTicks: number): number {
-  const wholeBar = bar < 1 ? 1 : Math.trunc(bar);
-  const wholeBeat = beat < 1 ? 1 : Math.trunc(beat);
-  const clampedSixth = sixth > 3 ? 3 : Math.trunc(sixth);
-  if ((wholeBeat - 1) * 24 >= barTicks) return -1;
-  const ticks = (wholeBar - 1) * barTicks + (wholeBeat - 1) * 24 + clampedSixth * 6;
-  const cap = 64 * 24 + barTicks;
-  if (ticks > cap) return -1;
-  return Math.min(64 * 24, ticks);
+  // WASM answers null on the -1 sentinel; the fallback owns the -1.
+  return wasmFirst('position_ticks', wasmTextPositionTicks(bar, beat, sixth, barTicks), () => {
+    const wholeBar = bar < 1 ? 1 : Math.trunc(bar);
+    const wholeBeat = beat < 1 ? 1 : Math.trunc(beat);
+    const clampedSixth = sixth > 3 ? 3 : Math.trunc(sixth);
+    if ((wholeBeat - 1) * 24 >= barTicks) return -1;
+    const ticks = (wholeBar - 1) * barTicks + (wholeBeat - 1) * 24 + clampedSixth * 6;
+    const cap = 64 * 24 + barTicks;
+    if (ticks > cap) return -1;
+    return Math.min(64 * 24, ticks);
+  });
 }

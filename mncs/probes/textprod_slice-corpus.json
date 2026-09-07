@@ -1,0 +1,106 @@
+{
+ "schema_version": "0.1",
+ "name": "textprod-slice-divergence",
+ "cases": [
+  {
+   "id": "s02",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.textprod_slice_attempt",
+     "function": "slice02"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "sequence": {
+      "values": [
+       {
+        "byte": {
+         "value": 48
+        }
+       },
+       {
+        "byte": {
+         "value": 55
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.textprod_slice_attempt",
+     "function": "slice13"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "sequence": {
+      "values": [
+       {
+        "byte": {
+         "value": 55
+        }
+       },
+       {
+        "byte": {
+         "value": 46
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

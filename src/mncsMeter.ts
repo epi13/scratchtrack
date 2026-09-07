@@ -24,6 +24,17 @@
  */
 
 import type { Subdivision } from './types';
+import {
+  wasmFirst,
+  wasmMeterBarTicks,
+  wasmMeterClampMidi,
+  wasmMeterOctaveOf,
+  wasmMeterPadMidi,
+  wasmMeterPitchClass,
+  wasmMeterQuantizeTick,
+  wasmMeterStepTicks,
+  wasmMeterStepsPerBar,
+} from './mncsWasm';
 
 /** One step of each subdivision expressed in transport ticks. */
 export const STEP_TICKS: Record<Subdivision, number> = {
@@ -53,18 +64,22 @@ export const MNCS_TICKS_PER_BEAT = 24;
 
 /** MNCS `bar_ticks`: bar length in ticks, or null when out of range. */
 export function mncsBarTicks(numerator: number, denominator: number): number | null {
-  if (!Number.isInteger(numerator) || numerator < 1 || numerator > 32) return null;
-  if (denominator === 2) return numerator * 48;
-  if (denominator === 4) return numerator * 24;
-  if (denominator === 8) return numerator * 12;
-  if (denominator === 16) return numerator * 6;
-  return null;
+  return wasmFirst('bar_ticks', wasmMeterBarTicks(numerator, denominator), () => {
+    if (!Number.isInteger(numerator) || numerator < 1 || numerator > 32) return null;
+    if (denominator === 2) return numerator * 48;
+    if (denominator === 4) return numerator * 24;
+    if (denominator === 8) return numerator * 12;
+    if (denominator === 16) return numerator * 6;
+    return null;
+  });
 }
 
 /** MNCS `step_ticks`: ticks per step for a subdivision code, or null. */
 export function mncsStepTicks(code: number): number | null {
-  const subdivision = codeToSubdivision(code);
-  return subdivision === null ? null : STEP_TICKS[subdivision];
+  return wasmFirst('step_ticks', wasmMeterStepTicks(code), () => {
+    const subdivision = codeToSubdivision(code);
+    return subdivision === null ? null : STEP_TICKS[subdivision];
+  });
 }
 
 /**
@@ -77,40 +92,53 @@ export function mncsStepsPerBar(
   denominator: number,
   subdivision: Subdivision,
 ): number | null {
-  const bar = mncsBarTicks(numerator, denominator);
-  if (bar === null) return null;
-  const step = STEP_TICKS[subdivision];
-  if (step === undefined || bar % step !== 0) return null;
-  const steps = bar / step;
-  if (steps < 2 || steps > 128) return null;
-  return steps;
+  return wasmFirst(
+    'steps_per_bar',
+    wasmMeterStepsPerBar(numerator, denominator, subdivisionToCode(subdivision)),
+    () => {
+      const bar = mncsBarTicks(numerator, denominator);
+      if (bar === null) return null;
+      const step = STEP_TICKS[subdivision];
+      if (step === undefined || bar % step !== 0) return null;
+      const steps = bar / step;
+      if (steps < 2 || steps > 128) return null;
+      return steps;
+    },
+  );
 }
 
 /** MNCS `quantize_tick`: round a tick to the grid (half steps up); step <= 0 passes through. */
 export function mncsQuantizeTick(tick: number, step: number): number {
-  if (!Number.isFinite(tick) || !Number.isFinite(step) || step <= 0) return tick;
-  const half = Math.floor(step / 2);
-  if (tick >= 0) return Math.floor((tick + half) / step) * step;
-  return Math.ceil((tick - half) / step) * step;
+  return wasmFirst('quantize_tick', wasmMeterQuantizeTick(tick, step), () => {
+    if (!Number.isFinite(tick) || !Number.isFinite(step) || step <= 0) return tick;
+    const half = Math.floor(step / 2);
+    if (tick >= 0) return Math.floor((tick + half) / step) * step;
+    return Math.ceil((tick - half) / step) * step;
+  });
 }
 
 /** MNCS `clamp_midi`. */
 export function mncsClampMidi(note: number): number {
-  if (!Number.isFinite(note)) return 0;
-  return Math.max(0, Math.min(127, Math.trunc(note)));
+  return wasmFirst('clamp_midi', wasmMeterClampMidi(note), () => {
+    if (!Number.isFinite(note)) return 0;
+    return Math.max(0, Math.min(127, Math.trunc(note)));
+  });
 }
 
 /** MNCS `pad_midi`: root + interval + 12 x octaveShift, clamped to 0..127. */
 export function mncsPadMidi(rootMidi: number, interval: number, octaveShift: number): number {
-  return mncsClampMidi(rootMidi + interval + octaveShift * 12);
+  return wasmFirst('pad_midi', wasmMeterPadMidi(rootMidi, interval, octaveShift), () => {
+    const direct = mncsClampMidi(rootMidi + interval + octaveShift * 12);
+    return direct;
+  });
 }
 
 /** MNCS `pitch_class`. Precondition: 0 <= note <= 127. */
 export function mncsPitchClass(note: number): number {
-  return note - Math.floor(note / 12) * 12;
+  return wasmFirst('pitch_class', wasmMeterPitchClass(note), () => note - Math.floor(note / 12) * 12);
 }
 
 /** MNCS `octave_of`. Precondition: 0 <= note <= 127. */
 export function mncsOctaveOf(note: number): number {
-  return Math.floor(note / 12) - 1;
+  return wasmFirst('octave_of', wasmMeterOctaveOf(note), () => Math.floor(note / 12) - 1);
 }

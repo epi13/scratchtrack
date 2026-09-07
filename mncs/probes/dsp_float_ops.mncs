@@ -1,0 +1,43 @@
+mncs 0.6;
+
+// PRESSURE PROBE (expected failure): representative ScratchTrack DSP
+// needs float scalars and transcendental functions. The largest scalar
+// type is u64 and float literals do not parse, so every function below
+// is refused at parse level — including workloads whose CONTROL flow
+// is already proven expressible in fixed point
+// (dsp_fixed_osc_attempt.mncs).
+//
+// Workload inventory (desired types / ops / precision):
+// - midi_to_frequency: u7 in, Hz out; pow + division; f64 needed for
+//   tuning tables (f32 ~7 digits is marginal across 8 octaves).
+// - exp_coeff: compressor/limiter time-constant coefficients; exp.
+// - soft_clip: tanh waveshaper (audio.ts softClipCurve); tanh.
+// - pan_gains: sin/cos constant-power pan; trig.
+// - rms_level: sqrt of mean squares; sqrt + f32 enough for metering.
+// - mixdown: f32 multiply-add is enough (determinism: bit-exact per
+//   backend required for render-compare tests; NaN/inf must trap or
+//   propagate deterministically — TBD by the language run).
+// Reproduce: cargo run -q -p mncs-cli -- source-study
+//   mncs/probes/dsp_float_ops.mncs
+// Pressure ledger: P-001 (float tranche), P-008 (trig).
+module scratchtrack.probes.dsp_float_ops;
+
+fn midi_to_frequency(midi: i64) -> (result: f64) {
+    return 440.0 * pow(2.0, (midi - 69) / 12);
+}
+
+fn exp_coeff(time_ms: f64, sample_rate: f64) -> (result: f64) {
+    return exp(-1.0 / (time_ms * sample_rate / 1000.0));
+}
+
+fn soft_clip(x: f64, drive: f64) -> (result: f64) {
+    return tanh(drive * x) / tanh(drive);
+}
+
+fn pan_gains(pan: f64) -> (result: f64) {
+    return cos((pan + 1.0) * 0.7853981633974483);
+}
+
+fn rms_level(sum_squares: f64, count: f64) -> (result: f64) {
+    return sqrt(sum_squares / count);
+}

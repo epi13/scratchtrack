@@ -1,0 +1,26 @@
+mncs 0.6;
+
+// PRESSURE PROBE (expected failure): imported nominal types are
+// unusable across modules. `use` resolves, and calling imported
+// FUNCTIONS over primitive args works (doc_keys.mncs), but naming an
+// imported enum/record type in a signature or projecting its fields is
+// refused (MNE105: profile type list; MNE161: field projection needs a
+// declared record type). Double-colon value paths (`Os::linux`) do not
+// parse at all (MNP066 cascade).
+// This blocks shared event/state vocabularies (a transport machine can
+// only use LOCALLY-declared enums — see events_transport_attempt) and
+// any shared-record architecture.
+// Reproduce: MNCS_LIBRARY_PATH=<mncs-language>/library \
+//   cargo run -q -p mncs-cli -- source-study \
+//   mncs/probes/events_import_attempt.mncs
+// Pressure ledger: P-014 (cross-module nominal types).
+module scratchtrack.probes.events_import_attempt;
+
+use mncs.std.platform.v1;
+
+fn domain_is_transport(event: PlatformEvent) -> (result: bool) {
+    return match event.domain {
+        transport => true,
+        _ => false,
+    };
+}

@@ -1,8 +1,7 @@
 import type { Subdivision, TimeSignature } from './types';
-import { STEP_TICKS, mncsBarTicks, mncsStepsPerBar } from './mncsMeter';
+import { STEP_TICKS, mncsBarTicks, mncsStepTicks, mncsStepsPerBar, subdivisionToCode } from './mncsMeter';
 import { mncsRemapCell, mncsRemapIndex } from './mncsMigrate';
 import { mncsParsePositionText, mncsPositionTicks } from './mncsText';
-import { wasmMeterBarTicks, wasmTextParsePosition, wasmTextPositionTicks } from './mncsWasm';
 
 /** Re-exported from the MNCS projection so grid code shares one table. */
 export { STEP_TICKS } from './mncsMeter';
@@ -51,20 +50,11 @@ export function barBeats(timeSignature: TimeSignature): number {
 
 export function barTicks(timeSignature: TimeSignature): number {
   const { numerator, denominator } = normalizeTimeSignature(timeSignature);
-  // Production MNCS execution first: compiled `bar_ticks` from
-  // `mncs/meter.mncs`, instantiated at boot by `initMncsWasm`. Falls back
-  // to the conformance-pinned projection below (both agree by corpus).
-  const wasm = wasmMeterBarTicks(numerator, denominator);
-  if (wasm !== null) return wasm;
-  // Exact integer path owned by the MNCS model (`scratchtrack.meter.v1` /
-  // `mncsMeter.ts`); the float fallback below is unreachable for normalized
-  // meters and exists only to keep this total for hand-built inputs.
-  const exact =
-    denominator === 2 ? numerator * 48
-    : denominator === 4 ? numerator * 24
-    : denominator === 8 ? numerator * 12
-    : numerator * 6;
-  return Number.isInteger(exact) ? exact : Math.round(barBeats(timeSignature) * TICKS_PER_BEAT);
+  // Single delegation: `mncsBarTicks` runs compiled `bar_ticks` WASM-first
+  // with the conformance-pinned projection as fallback (both agree by
+  // corpus). The float tail below is unreachable for normalized meters
+  // and exists only to keep this total for hand-built inputs.
+  return mncsBarTicks(numerator, denominator) ?? Math.round(barBeats(timeSignature) * TICKS_PER_BEAT);
 }
 
 /** Steps in one bar for a subdivision, or null when the combination cannot align to ticks. */
@@ -80,7 +70,8 @@ export function stepBeats(subdivision: Subdivision): number {
 }
 
 export function stepTicks(subdivision: Subdivision): number {
-  return STEP_TICKS[subdivision];
+  // WASM-first through the projection; the table is the fallback.
+  return mncsStepTicks(subdivisionToCode(subdivision)) ?? STEP_TICKS[subdivision];
 }
 
 export function normalizeSubdivision(value: unknown): Subdivision {
@@ -135,18 +126,15 @@ export function parsePosition(input: string, meter: TimeSignature): number | nul
   // Strict position grammar owned by the MNCS text model (`parse_position`
   // + `position_ticks`); legacy Number() leniency is intentionally not
   // reproduced — see mncsText.ts and D-007.
-  // Production MNCS execution first: compiled `parse_position` /
-  // `position_ticks` from `mncs/text.mncs`, instantiated at boot by
-  // `initMncsWasm`. Each WASM call falls back to the conformance-pinned
-  // projection below (all paths agree by corpus).
-  const parts = wasmTextParsePosition(text) ?? mncsParsePositionText(text);
+  // Single delegation per kernel: each `mncs*` projection runs its
+  // compiled MNCS function WASM-first with the conformance-pinned pure
+  // body as fallback (all paths agree by corpus).
+  const parts = mncsParsePositionText(text);
   if (!parts) return null;
   const { numerator, denominator } = normalizeTimeSignature(meter);
   const barTicksValue =
     mncsBarTicks(numerator, denominator) ?? Math.round(barBeats(meter) * TICKS_PER_BEAT);
-  const ticks =
-    wasmTextPositionTicks(parts.bar, parts.beat, parts.sixth, barTicksValue) ??
-    mncsPositionTicks(parts.bar, parts.beat, parts.sixth, barTicksValue);
+  const ticks = mncsPositionTicks(parts.bar, parts.beat, parts.sixth, barTicksValue);
   if (ticks < 0) return null;
   return ticks / TICKS_PER_BEAT;
 }

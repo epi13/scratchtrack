@@ -1,0 +1,2642 @@
+{
+ "schema_version": "0.1",
+ "name": "dsp-fixed-osc",
+ "cases": [
+  {
+   "id": "sample0",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_sample"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance0",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_advance"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 67108864,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 67108864,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "sample1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_sample"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 67108864,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3212,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance1",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_advance"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 67108864,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 67108864,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 134217728,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "sample2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_sample"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 1073741824,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 32767,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance2",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_advance"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 1073741824,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 67108864,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1140850688,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "sample3",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_sample"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32767,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32609,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -32137,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -31356,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -30273,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -28898,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -27245,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -25329,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -23170,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -20787,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -18204,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -15446,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -12539,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -9512,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -6393,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        },
+        {
+         "integer": {
+          "value": -3212,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 3221225472,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -32767,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "advance3",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 2048,
+    "target": {
+     "module": "scratchtrack.probes.dsp_fixed_osc_attempt",
+     "function": "osc_advance"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3221225472,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3221225472,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

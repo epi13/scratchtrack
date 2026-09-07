@@ -22,7 +22,7 @@ and the real ScratchTrack module it unlocks can be written for real.
 
 | Probe | Refusal stage (observed) | Ledger | ScratchTrack code unlocked |
 |---|---|---|---|
-| `dsp_float_attempt.mncs` | parse: `f64` type / float literals rejected (`MNP064` etc.) | P-001 | `midiToFrequency`, compressor DSP |
+| `dsp_float_ops.mncs` | parse: `f64` type / float literals rejected (`MNP064` etc.); inventories midi-freq, exp, tanh, pan-trig, sqrt workloads with precision needs | P-001 (+P-008 trig) | `audio.ts` DSP, compressor, waveform peaks, drum orbits |
 | `crc32_u32_attempt.mncs` | type-check: u32 shift/XOR refused (`MNE115`, `MNE103`) | P-009 | native-speed CRC32, WAV RIFF math |
 | `crc_u64_attempt.mncs` | type-check: `^` on u64 refused (`MNE115/117/119`); `>>` and `%` on u64 are fine — the gap is exactly integer XOR/AND/OR | P-009 | same as above; routed around by `mncs/crc.mncs` per-bit arithmetic |
 | `subtype_attempt.mncs` | type-check: `[byte; 44]` does not coerce to `[byte; up_to 64]` (`MNE133`) | P-010 | shared `le.mncs` readers across wav/pack windows |
@@ -41,6 +41,7 @@ is built on, not a hole.
 | `doc_keys.mncs` + `doc_keys-corpus.json` | stdlib `json_projection.count_key` end-to-end on portable-WASM (23/23 returned) | `python3 scripts/mncs-probe-corpus.py` regenerates deterministically from `mncs/text-corpus.json` | key-scanning over bounded docs works — closed gap, probe kept as guard |
 | `slice_dynamic_attempt.mncs` | dynamic `xs[start..end]` view derivation + computed indexing execute correctly on portable-WASM | `slice-corpus.json` (checked in; `head`→248, `mid`→147, both `expectation_met`) | dynamic views supported — closed gap, probe kept as guard |
 | `dynidx_attempt.mncs` | dynamic index into exact sequences + trap-on-OOB | `dynidx-corpus.json` (checked in; k0/k3 `expectation_met`, oob pins `runtime_failure`) | stands under `mncs/crc.mncs` nibble table |
+| `dsp_fixed_osc_attempt.mncs` | fixed-point wavetable osc (Q15 table, u64 phase, shift-index) executes 8/8 on WASM | `dsp_fixed_osc-corpus.json` (checked in; Python sine oracle incl. peak/trough/wrap) | bounds P-001: control flow expressible, only float values/functions missing |
 
 Run a regression probe end to end with:
 

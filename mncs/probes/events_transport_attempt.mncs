@@ -1,0 +1,35 @@
+mncs 0.6;
+
+// RECON PROBE (passes): finite event/state machines express cleanly.
+// Transport play/pause/stop over a record + two enums, using the same
+// dot-construction the stdlib vocabulary implies (double-colon paths do
+// NOT parse; bare variants resolve only as match patterns, not values).
+// What does NOT cross modules: naming an IMPORTED enum/record type in a
+// signature or projection (MNE105/MNE161 — see events_import_attempt).
+// Corpus: mncs/probes/events_transport-corpus.json (finite-discriminant
+// enum encoding, mirroring the platform-capability corpus).
+// Pressure ledger: events/state expressible locally; shared vocabularies
+// blocked on cross-module nominal types.
+module scratchtrack.probes.events_transport_attempt;
+
+enum Phase { stopped, playing, paused }
+enum Evt { play, pause, stop }
+
+record Transport { phase: Phase, armed: bool }
+
+fn transport_step(state: Transport, event: Evt) -> (result: Transport) {
+    return match event {
+        play => Transport { phase: Phase.playing, armed: state.armed },
+        pause => Transport { phase: Phase.paused, armed: state.armed },
+        stop => Transport { phase: Phase.stopped, armed: false },
+    };
+}
+
+fn is_playing(state: Transport) -> (result: bool) {
+    // No wildcard arms: matches must enumerate every variant (MNE140).
+    return match state.phase {
+        playing => true,
+        stopped => false,
+        paused => false,
+    };
+}

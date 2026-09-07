@@ -16,7 +16,7 @@
  * file, never in MNCS source.
  */
 
-import { wasmCrcFinalize, wasmCrcInit, wasmCrcReady, wasmCrcUpdate } from './mncsWasm';
+import { wasmCrcFinalize, wasmCrcInit, wasmCrcReady, wasmCrcUpdate, wasmFirst } from './mncsWasm';
 
 /** MNCS window bound: `crc_update` takes `[byte; up_to 64]`. */
 export const MNCS_CRC_WINDOW = 64;
@@ -69,5 +69,5 @@ export function mncsCrc32(data: Uint8Array): number {
       }
     }
   }
-  return mncsCrcFinalize(mncsCrc32Table(data));
+  return wasmFirst('crc32_table', null, () => mncsCrcFinalize(mncsCrc32Table(data)));
 }
