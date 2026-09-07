@@ -1,0 +1,122 @@
+mncs 0.7;
+
+// scratchtrack.wav.v1 — exact integer WAV/PCM-container kernels.
+//
+// Machine-native representation of ScratchTrack's media-container layer:
+// 16-bit mono PCM WAV headers and leading-magic media classification.
+// All offsets and sizes are integers; little-endian decoding is explicit
+// multiplication by powers of two (no host endianness folklore), in the
+// style of `mncs.std.encoding.v1` (which is big-endian; WAV is
+// little-endian, hence a product-local module rather than stdlib reuse).
+//
+// Byte access (`DataView`, `Uint8Array`) and float sample scaling stay
+// host-side: the host reads bytes at MNCS-owned offsets and applies
+// MNCS-owned validity and size laws. Magic-code table (1 = WAV, 2 = WebM,
+// 3 = MP4, 4 = Ogg, 0 = unknown) crosses as integers; the host combines
+// codes with length/mime rules it already owns (MNCS has no strings yet —
+// P-002).
+//
+// Bounds: header functions take the fixed 44-byte WAV header (`[byte;
+// 44]`); out-of-range dynamic offsets are runtime-checked by semantics.
+// Division obligations stay UNKNOWN (guarded divisors, no prover yet —
+// P-003). Widening arithmetic uses explicit intent; product magnitudes
+// keep wrap paths unreachable.
+module scratchtrack.wav.v1;
+
+// Little-endian u16 at a dynamic offset of the 44-byte header.
+fn le_u16_at(header: [byte; 44], offset: u64) -> (result: u16) {
+    let lo: u64 = header[offset] as u64;
+    let hi: u64 = header[offset + 1] as u64;
+    return (lo +% hi *% 256) as u16;
+}
+
+// Little-endian u32 at a dynamic offset of the 44-byte header.
+fn le_u32_at(header: [byte; 44], offset: u64) -> (result: u32) {
+    let b0: u64 = header[offset] as u64;
+    let b1: u64 = header[offset + 1] as u64;
+    let b2: u64 = header[offset + 2] as u64;
+    let b3: u64 = header[offset + 3] as u64;
+    return (b0 +% b1 *% 256 +% b2 *% 65536 +% b3 *% 16777216) as u32;
+}
+
+// Canonical 16-bit mono PCM WAV field offsets.
+fn wav_format_tag(header: [byte; 44]) -> (result: u16) {
+    return le_u16_at(header, 20);
+}
+
+fn wav_channels(header: [byte; 44]) -> (result: u16) {
+    return le_u16_at(header, 22);
+}
+
+fn wav_sample_rate(header: [byte; 44]) -> (result: u32) {
+    return le_u32_at(header, 24);
+}
+
+fn wav_bits_per_sample(header: [byte; 44]) -> (result: u16) {
+    return le_u16_at(header, 34);
+}
+
+fn wav_data_size(header: [byte; 44]) -> (result: u32) {
+    return le_u32_at(header, 40);
+}
+
+// RIFF/WAVE magic: 'RIFF' at 0..3 and 'WAVE' at 8..11.
+fn header_magic_ok(header: [byte; 44]) -> (result: bool) {
+    let riff: bool = header[0] == 82 && header[1] == 73 && header[2] == 70 && header[3] == 70;
+    let wave: bool = header[8] == 87 && header[9] == 65 && header[10] == 86 && header[11] == 69;
+    return riff && wave;
+}
+
+// Full decodability policy for the app's WAV path: real container,
+// PCM format tag 1, mono, 16-bit. (Sample rate is read, not gated —
+// mirroring the legacy decoder, which never gated it.)
+fn header_decodable(header: [byte; 44]) -> (result: bool) {
+    return header_magic_ok(header) && wav_format_tag(header) == 1
+        && wav_channels(header) == 1 && wav_bits_per_sample(header) == 16;
+}
+
+// 16-bit support gate (the decoder's second error arm).
+fn bits_supported(bits: u16) -> (result: bool) {
+    return bits == 16;
+}
+
+// Sample count for a data chunk: 2 bytes per mono sample.
+fn wav_sample_count(data_size: u32) -> (result: u32) {
+    return data_size / 2;
+}
+
+// RIFF chunk-size field for a data chunk: 36 header bytes after the size
+// field itself plus the data.
+fn wav_riff_chunk_size(data_size: u32) -> (result: u32) {
+    return (36 as u32) +% data_size;
+}
+
+// Data-chunk size for a sample count.
+fn wav_data_size_for_samples(samples: u32) -> (result: u32) {
+    return samples *% 2;
+}
+
+// Byte rate for 16-bit mono: 2 bytes per sample.
+fn wav_byte_rate(sample_rate: u32) -> (result: u32) {
+    return sample_rate *% 2;
+}
+
+// Leading-magic classification over the first 12 bytes:
+// 1 = WAV ('RIFF' at 0, 'WAVE' at 8), 2 = WebM (EBML magic at 0),
+// 3 = MP4 ('ftyp' at 4), 4 = Ogg ('OggS' at 0), 0 = unknown.
+fn magic_code(window: [byte; 12]) -> (result: i64) {
+    if window[0] == 82 && window[1] == 73 && window[2] == 70 && window[3] == 70
+        && window[8] == 87 && window[9] == 65 && window[10] == 86 && window[11] == 69 {
+        return 1;
+    }
+    if window[0] == 26 && window[1] == 69 && window[2] == 223 && window[3] == 163 {
+        return 2;
+    }
+    if window[4] == 102 && window[5] == 116 && window[6] == 121 && window[7] == 112 {
+        return 3;
+    }
+    if window[0] == 79 && window[1] == 103 && window[2] == 103 && window[3] == 83 {
+        return 4;
+    }
+    return 0;
+}

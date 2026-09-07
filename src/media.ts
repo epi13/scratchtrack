@@ -1,27 +1,39 @@
+import {
+  WavMagic,
+  mncsMagicCode,
+  mncsWavBitsPerSample,
+  mncsWavBitsSupported,
+  mncsWavByteRate,
+  mncsWavDataSize,
+  mncsWavDataSizeForSamples,
+  mncsWavRiffChunkSize,
+  mncsWavSampleCount,
+  mncsWavSampleRate,
+} from './mncsWav';
+
 /** Inspect a media blob's leading bytes for a real container, not a recorder fragment. */
 export type MediaKind = 'wav' | 'webm' | 'mp4' | 'ogg' | 'unknown' | 'empty' | 'fragment';
 
-const EBML_MAGIC = [0x1a, 0x45, 0xdf, 0xa3];
 const WEBM_CLUSTER = [0x1f, 0x43, 0xb6, 0x75];
 const WEBM_SEGMENT = [0x18, 0x53, 0x80, 0x67];
-const OGG_MAGIC = [0x4f, 0x67, 0x67, 0x53];
 
 function startsWith(bytes: Uint8Array, magic: number[], offset = 0) {
   if (bytes.length < offset + magic.length) return false;
   return magic.every((value, index) => bytes[offset + index] === value);
 }
 
-function asciiAt(bytes: Uint8Array, offset: number, length: number) {
-  return String.fromCharCode(...bytes.subarray(offset, offset + length));
-}
-
 export function inspectMediaBytes(bytes: Uint8Array, mimeType = ''): MediaKind {
   if (!bytes.length) return 'empty';
 
-  if (asciiAt(bytes, 0, 4) === 'RIFF' && bytes.length >= 12 && asciiAt(bytes, 8, 4) === 'WAVE') return 'wav';
-  if (startsWith(bytes, EBML_MAGIC)) return 'webm';
-  if (bytes.length >= 8 && asciiAt(bytes, 4, 4) === 'ftyp') return 'mp4';
-  if (startsWith(bytes, OGG_MAGIC)) return 'ogg';
+  // Leading-magic classification owned by the MNCS container model
+  // (`magic_code`); length/mime fragment rules stay host-side.
+  switch (mncsMagicCode(bytes)) {
+    case WavMagic.Wav: return 'wav';
+    case WavMagic.Webm: return 'webm';
+    case WavMagic.Mp4: return 'mp4';
+    case WavMagic.Ogg: return 'ogg';
+    default: break;
+  }
 
   const mime = mimeType.toLowerCase();
   const looksLikeChunk = startsWith(bytes, WEBM_CLUSTER) || startsWith(bytes, WEBM_SEGMENT);
@@ -51,18 +63,20 @@ function writeAscii(view: DataView, offset: number, text: string) {
 /** 16-bit mono PCM WAV — independently decodable on Chromium and Safari. */
 export function encodeWavPcm16(samples: Float32Array, sampleRate: number): Blob {
   const rate = Math.max(8000, Math.round(sampleRate));
-  const dataSize = samples.length * 2;
+  // Container size laws owned by the MNCS container model; byte writes and
+  // float sample scaling stay host-side at the boundary.
+  const dataSize = mncsWavDataSizeForSamples(samples.length);
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
   writeAscii(view, 0, 'RIFF');
-  view.setUint32(4, 36 + dataSize, true);
+  view.setUint32(4, mncsWavRiffChunkSize(dataSize), true);
   writeAscii(view, 8, 'WAVE');
   writeAscii(view, 12, 'fmt ');
   view.setUint32(16, 16, true);
   view.setUint16(20, 1, true);
   view.setUint16(22, 1, true);
   view.setUint32(24, rate, true);
-  view.setUint32(28, rate * 2, true);
+  view.setUint32(28, mncsWavByteRate(rate), true);
   view.setUint16(32, 2, true);
   view.setUint16(34, 16, true);
   writeAscii(view, 36, 'data');
@@ -79,11 +93,12 @@ export function encodeWavPcm16(samples: Float32Array, sampleRate: number): Blob 
 export function decodeWavPcm16(bytes: Uint8Array): { sampleRate: number; samples: Float32Array } {
   if (inspectMediaBytes(bytes) !== 'wav') throw new Error('Not a WAV file.');
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const sampleRate = view.getUint32(24, true);
-  const bits = view.getUint16(34, true);
-  if (bits !== 16) throw new Error('Only 16-bit PCM WAV is supported in this helper.');
-  const dataSize = view.getUint32(40, true);
-  const sampleCount = Math.floor(dataSize / 2);
+  // Header field reads at MNCS-owned offsets; validity policy is MNCS-owned.
+  const sampleRate = mncsWavSampleRate(view);
+  const bits = mncsWavBitsPerSample(view);
+  if (!mncsWavBitsSupported(bits)) throw new Error('Only 16-bit PCM WAV is supported in this helper.');
+  const dataSize = mncsWavDataSize(view);
+  const sampleCount = mncsWavSampleCount(dataSize);
   const samples = new Float32Array(sampleCount);
   for (let index = 0; index < sampleCount; index += 1) {
     samples[index] = view.getInt16(44 + index * 2, true) / 0x8000;

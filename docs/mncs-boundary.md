@@ -76,6 +76,10 @@ live calls into the compiled WASM module. All green as of this writing.
   picking, grid-line counts, and waveform bucket partitioning delegate to
   the MNCS geometry projection (`src/mncsGeometry.ts`). Trig positioning,
   float peaks, and pixel layout stay host-side (see P-008).
+- Media container math in `media.ts`: leading-magic classification, WAV
+  header field reads at MNCS-owned offsets, decodability gates, and encode
+  size laws delegate to the MNCS container projection (`src/mncsWav.ts`).
+  Byte access and per-sample float scaling stay host-side at the boundary.
 - Any new TypeScript "helper" that hides work MNCS should express. When
   MNCS cannot express something, file it in `docs/mncs-pressure.md` and
   push the capability upstream — do not build a ScratchTrack-local
