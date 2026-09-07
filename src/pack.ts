@@ -1,3 +1,20 @@
+import {
+  ZIP_CENTRAL_HEADER_SIZE,
+  ZIP_EOCD_SIZE,
+  mncsCentralEntry,
+  mncsCentralNext,
+  mncsCentralRecordSize,
+  mncsCentralSignatureOk,
+  mncsEocdCentralOffset,
+  mncsEocdCount,
+  mncsEocdSignatureOk,
+  mncsLocalDataSize,
+  mncsLocalDataStart,
+  mncsLocalExtraLen,
+  mncsLocalNameLen,
+  mncsLocalRecordSize,
+} from './mncsPack';
+
 const CRC_TABLE = new Uint32Array(256);
 for (let byte = 0; byte < 256; byte += 1) {
   let crc = byte;
@@ -29,7 +46,9 @@ export function writeZipStore(files: PackFile[]): Uint8Array {
   for (const file of files) {
     const nameBytes = new TextEncoder().encode(file.name);
     const checksum = crc32(file.data);
-    const local = new Uint8Array(30 + nameBytes.length + file.data.length);
+    // Record sizes owned by the MNCS pack model; CRC32 streaming stays
+    // host-side (u32 shifts/XOR and bulk views are not expressible — P-009).
+    const local = new Uint8Array(mncsLocalRecordSize(nameBytes.length, file.data.length));
     const localView = new DataView(local.buffer);
     putAscii(local, 0, 'PK\u0003\u0004');
     localView.setUint16(4, 20, true);
@@ -46,7 +65,7 @@ export function writeZipStore(files: PackFile[]): Uint8Array {
     local.set(file.data, 30 + nameBytes.length);
     localParts.push(local);
 
-    const central = new Uint8Array(46 + nameBytes.length);
+    const central = new Uint8Array(mncsCentralRecordSize(nameBytes.length));
     const centralView = new DataView(central.buffer);
     putAscii(central, 0, 'PK\u0001\u0002');
     centralView.setUint16(4, 20, true);
@@ -62,7 +81,7 @@ export function writeZipStore(files: PackFile[]): Uint8Array {
   }
 
   const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
-  const end = new Uint8Array(22);
+  const end = new Uint8Array(ZIP_EOCD_SIZE);
   const endView = new DataView(end.buffer);
   putAscii(end, 0, 'PK\u0005\u0006');
   endView.setUint16(8, files.length, true);
@@ -81,28 +100,29 @@ export function writeZipStore(files: PackFile[]): Uint8Array {
 
 export function readZipStore(bytes: Uint8Array): PackFile[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  let end = bytes.length - 22;
+  // Backward EOCD scan stays host-side (dynamic search loop); signature
+  // and field layout are MNCS-owned.
+  let end = bytes.length - ZIP_EOCD_SIZE;
   while (end >= 0) {
-    if (view.getUint32(end, true) === 0x06054b50) break;
+    if (mncsEocdSignatureOk(view, end)) break;
     end -= 1;
   }
   if (end < 0) throw new Error('Not a Scratchtrack project pack.');
-  const count = view.getUint16(end + 10, true);
-  let central = view.getUint32(end + 16, true);
+  const count = mncsEocdCount(view, end);
+  let central = mncsEocdCentralOffset(view, end);
   const files: PackFile[] = [];
   for (let index = 0; index < count; index += 1) {
-    if (view.getUint32(central, true) !== 0x02014b50) throw new Error('Project pack is damaged.');
-    const nameLength = view.getUint16(central + 28, true);
-    const extra = view.getUint16(central + 30, true);
-    const comment = view.getUint16(central + 32, true);
-    const localOffset = view.getUint32(central + 42, true);
-    const name = new TextDecoder().decode(bytes.subarray(central + 46, central + 46 + nameLength));
-    const localNameLength = view.getUint16(localOffset + 26, true);
-    const localExtra = view.getUint16(localOffset + 28, true);
-    const dataStart = localOffset + 30 + localNameLength + localExtra;
-    const dataSize = view.getUint32(localOffset + 22, true);
+    if (!mncsCentralSignatureOk(view, central)) throw new Error('Project pack is damaged.');
+    const entry = mncsCentralEntry(view, central);
+    const name = new TextDecoder().decode(
+      bytes.subarray(central + ZIP_CENTRAL_HEADER_SIZE, central + ZIP_CENTRAL_HEADER_SIZE + entry.nameLen),
+    );
+    const localNameLength = mncsLocalNameLen(view, entry.localOffset);
+    const localExtra = mncsLocalExtraLen(view, entry.localOffset);
+    const dataStart = mncsLocalDataStart(entry.localOffset, localNameLength, localExtra);
+    const dataSize = mncsLocalDataSize(view, entry.localOffset);
     files.push({ name, data: bytes.subarray(dataStart, dataStart + dataSize) });
-    central += 46 + nameLength + extra + comment;
+    central = mncsCentralNext(central, entry.nameLen, entry.extraLen, entry.commentLen);
   }
   return files;
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Replay the MNCS evidence for the ScratchTrack MNCS modules.
 #
-# For each module (meter, arrange, migrate, geometry, wav) runs: source-study
+# For each module (meter, arrange, migrate, geometry, wav, pack) runs: source-study
 # (elaboration + obligation report), experiment runs on the portable-WASM
 # and research-bytecode backends over the checked-in corpus, a
 # cross-backend agreement check, and live calls into the compiled WASM
@@ -62,6 +62,7 @@ check_module "arrange" "$ROOT/mncs/arrange.mncs" "$ROOT/mncs/arrange-corpus.json
 check_module "migrate" "$ROOT/mncs/migrate.mncs" "$ROOT/mncs/migrate-corpus.json"
 check_module "geometry" "$ROOT/mncs/geometry.mncs" "$ROOT/mncs/geometry-corpus.json"
 check_module "wav" "$ROOT/mncs/wav.mncs" "$ROOT/mncs/wav-corpus.json"
+check_module "pack" "$ROOT/mncs/pack.mncs" "$ROOT/mncs/pack-corpus.json"
 
 echo "== live WASM calls: meter =="
 node -e '
@@ -164,6 +165,25 @@ WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
     ["wav_sample_count", [960], 480], ["wav_riff_chunk_size", [960], 996],
     ["wav_data_size_for_samples", [480], 960], ["wav_byte_rate", [44100], 88200],
     ["bits_supported", [16], 1], ["bits_supported", [8], 0],
+  ];
+  let pass = 0;
+  for (const [name, args, exp] of checks) {
+    if (e[name](...args) !== exp) { console.error("MISMATCH", name); process.exit(1); }
+    pass++;
+  }
+  console.log(pass + "/" + checks.length + " live-WASM calls agree");
+});' "$WORK"
+
+echo "== live WASM calls: pack =="
+node -e '
+const fs = require("fs");
+const bytes = fs.readFileSync(process.argv[1] + "/pack-portable-wasm/artifact.wasm_module");
+WebAssembly.instantiate(bytes, {}).then(({ instance }) => {
+  const e = instance.exports;
+  const checks = [
+    ["local_data_start", [0n, 12n, 0n], 42n], ["local_record_size", [12n, 100n], 142n],
+    ["central_next", [284n, 12n, 0n, 0n], 342n], ["central_record_size", [12n], 58n],
+    ["eocd_size", [], 22n],
   ];
   let pass = 0;
   for (const [name, args, exp] of checks) {

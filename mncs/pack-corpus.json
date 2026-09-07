@@ -1,0 +1,4013 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-pack-kernels",
+ "cases": [
+  {
+   "id": "local-sig",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-sig-bad",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-name",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_name_len"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 12,
+      "type": {
+       "bits": 16,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-extra",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_extra_len"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 16,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-size",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_data_size"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 100,
+      "type": {
+       "bits": 32,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-start",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_data_start"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 42,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-start-extra",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_data_start"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 142,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "local-record",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "local_record_size"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 142,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-sig",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-sig-bad",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-entry",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_entry"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.pack.v1::Entry::comment_len%3Au64%3Bcrc%3Au32%3Bdata_size%3Au64%3Bextra_len%3Au64%3Blocal_offset%3Au64%3Bname_len%3Au64%3B",
+      "name": "Entry",
+      "fields": [
+       [
+        "comment_len",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "crc",
+        {
+         "integer": {
+          "value": 305419896,
+          "type": {
+           "bits": 32,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "data_size",
+        {
+         "integer": {
+          "value": 100,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "extra_len",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "local_offset",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ],
+       [
+        "name_len",
+        {
+         "integer": {
+          "value": 12,
+          "type": {
+           "bits": 64,
+           "signed": false
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-next",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_next"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 284,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 342,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-next-runs",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_next"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 68,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "central-record",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "central_record_size"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 58,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-sig",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-sig-bad",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_signature_ok"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-count",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_count"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 16,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-size",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_central_size"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 116,
+      "type": {
+       "bits": 32,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-offset",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_central_offset"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 284,
+      "type": {
+       "bits": 32,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "eocd-fixed",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "eocd_size"
+    },
+    "arguments": []
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 22,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "le16",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "le16_46"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 26,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 12,
+      "type": {
+       "bits": 16,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "le32",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "le32_46"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 3
+         }
+        },
+        {
+         "byte": {
+          "value": 4
+         }
+        },
+        {
+         "byte": {
+          "value": 20
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 120
+         }
+        },
+        {
+         "byte": {
+          "value": 86
+         }
+        },
+        {
+         "byte": {
+          "value": 52
+         }
+        },
+        {
+         "byte": {
+          "value": 18
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 100
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 12
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 22,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 100,
+      "type": {
+       "bits": 32,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "le16-eocd",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "le16_22"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 2,
+      "type": {
+       "bits": 16,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "le32-eocd",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 4096,
+    "target": {
+     "module": "scratchtrack.pack.v1",
+     "function": "le32_22"
+    },
+    "arguments": [
+     {
+      "sequence": {
+       "values": [
+        {
+         "byte": {
+          "value": 80
+         }
+        },
+        {
+         "byte": {
+          "value": 75
+         }
+        },
+        {
+         "byte": {
+          "value": 5
+         }
+        },
+        {
+         "byte": {
+          "value": 6
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 2
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 116
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 28
+         }
+        },
+        {
+         "byte": {
+          "value": 1
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        },
+        {
+         "byte": {
+          "value": 0
+         }
+        }
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 116,
+      "type": {
+       "bits": 32,
+       "signed": false
+      }
+     }
+    }
+   ]
+  }
+ ]
+}
