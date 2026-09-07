@@ -1,0 +1,198 @@
+mncs 0.8;
+
+// scratchtrack.arrange.v1 — exact integer arrangement/state kernels.
+// Profile 0.8 for scalar branchless `select` (clamp shapes); everything
+// else stays within the Profile 0.6 scalar/boolean/intent envelope.
+//
+// Machine-native representation of ScratchTrack's project/arrangement
+// model in whole transport ticks (24 per quarter-note beat). Beats cross
+// into this module only after the host rounds them to ticks — the same
+// rounding the transport already performs before scheduling — so every
+// kernel here is total over i64 with no float vocabulary.
+//
+// Records carry product structure: `Clip` is a lightweight reference
+// (start/length/source-offset in ticks), `Loop` is an arrangement loop
+// range. Identity (project/track/scratch ids, names, audio blob keys)
+// stays host-side: MNCS has no string type yet, so references cross the
+// boundary as host-held ids while positions and policy live here.
+//
+// Error model: sentinel `-1` for inapplicable-index answers
+// (`step_index`), pass-through for degenerate moduli (`wrap_tick` with
+// modulus <= 0 returns the tick unchanged), clamped ranges for
+// move/resize/loop ends. Session policy (`loop_take_allowed`,
+// `scratch_allowed`) mirrors the product caps exactly: 12 takes per Auto
+// Scratch loop session, 36 Scratches per track.
+//
+// Division/modulo obligations (divisor nonzero) stay UNKNOWN: each is
+// guarded by control flow, but no prover discharges them yet — see
+// docs/mncs-pressure.md item P-003. Addition uses the explicit wrapping
+// intent (`+%`, `*%`); product tick ranges keep the wrap path
+// unreachable.
+module scratchtrack.arrange.v1;
+
+record Clip { start: i64, length: i64, offset: i64 }
+
+record Loop { start: i64, end: i64 }
+
+// ---- Session policy (product caps) ----
+
+// Maximum takes per Auto Scratch loop recording session.
+fn max_loop_takes() -> (result: i64) {
+    return 12;
+}
+
+// True while another loop take may be saved (saved counts completed takes).
+fn loop_take_allowed(saved: i64) -> (result: bool) {
+    return saved < 12;
+}
+
+// Maximum Scratches per track.
+fn max_scratches() -> (result: i64) {
+    return 36;
+}
+
+// True while another Scratch may be added to a track holding `count`.
+fn scratch_allowed(count: i64) -> (result: bool) {
+    return count < 36;
+}
+
+// ---- Project header ----
+
+// Valid project tempo, or the 104 bpm product default when out of range.
+// Precondition: integer bpm (fractional tempi cannot cross the boundary
+// yet; the host projection keeps them on the float path — see P-001).
+fn normalize_bpm(bpm: i64) -> (result: i64) {
+    if bpm >= 20 && bpm <= 300 {
+        return bpm;
+    }
+    return 104;
+}
+
+// ---- Clip kernels (ticks) ----
+
+// Clamp a clip into range: negative starts to 0, non-positive lengths to
+// `min_length`. The source offset is preserved untouched — snipping audio
+// is non-destructive by construction.
+fn sanitize_clip(start: i64, length: i64, offset: i64, min_length: i64) -> (result: Clip) {
+    let s: i64 = select(start < 0, 0, start);
+    let l: i64 = select(length <= 0, min_length, length);
+    return Clip { start: s, length: l, offset: offset };
+}
+
+// Exclusive end tick of a clip.
+fn clip_end(clip: Clip) -> (result: i64) {
+    return clip.start +% clip.length;
+}
+
+// Transport activation test: local tick inside [0, length).
+fn clip_active(local_tick: i64, length_ticks: i64) -> (result: bool) {
+    return local_tick >= 0 && local_tick < length_ticks;
+}
+
+// Transport clip length: at least one tick so zero-length clips still
+// schedule deterministically instead of vanishing.
+fn clip_length_ticks(length_ticks: i64) -> (result: i64) {
+    if length_ticks < 1 {
+        return 1;
+    }
+    return length_ticks;
+}
+
+// Moved clip start, clamped to [0, upper]. The caller passes
+// upper = total_ticks - clip_length_ticks.
+fn move_start(start: i64, delta: i64, upper: i64) -> (result: i64) {
+    let moved: i64 = start +% delta;
+    return select(moved < 0, 0, select(moved > upper, upper, moved));
+}
+
+// Resized clip length, clamped to [min_length, max_length].
+fn resize_length(length: i64, delta: i64, min_length: i64, max_length: i64) -> (result: i64) {
+    let sized: i64 = length +% delta;
+    return select(sized < min_length, min_length, select(sized > max_length, max_length, sized));
+}
+
+// True when `split` lies strictly inside the clip (a real snip, not a noop).
+fn snip_valid(start: i64, length: i64, split: i64) -> (result: bool) {
+    return split > start && split < (start +% length);
+}
+
+// Left half of a snip: same start/offset, ends at the split.
+// Precondition: snip_valid(start, length, split).
+fn snip_left(start: i64, length: i64, offset: i64, split: i64) -> (result: Clip) {
+    let left: i64 = split -% start;
+    return Clip { start: start, length: left, offset: offset };
+}
+
+// Right half of a snip: starts at the split, source offset advanced past
+// the left half so both halves play the correct portion of the take.
+// Precondition: snip_valid(start, length, split).
+fn snip_right(start: i64, length: i64, offset: i64, split: i64) -> (result: Clip) {
+    let left: i64 = split -% start;
+    return Clip { start: split, length: length -% left, offset: offset +% left };
+}
+
+// ---- Position kernels (ticks) ----
+
+// Positive-modulo wrap into [0, modulus). Degenerate modulus (<= 0)
+// returns the tick unchanged rather than trapping: bar, pattern, and
+// motif positions share this one kernel.
+fn wrap_tick(tick: i64, modulus: i64) -> (result: i64) {
+    if modulus <= 0 {
+        return tick;
+    }
+    return ((tick % modulus) +% modulus) % modulus;
+}
+
+// Step index of a grid-aligned position, or -1 when the position falls
+// between steps (the transport skips it).
+fn step_index(position: i64, step_ticks: i64) -> (result: i64) {
+    if step_ticks <= 0 {
+        return 0 - 1;
+    }
+    if position % step_ticks != 0 {
+        return 0 - 1;
+    }
+    return position / step_ticks;
+}
+
+// ---- Motif kernels ----
+
+// Motif length clamp: 1..8 bars.
+fn clamp_motif_bars(bars: i64) -> (result: i64) {
+    if bars < 1 {
+        return 1;
+    }
+    if bars > 8 {
+        return 8;
+    }
+    return bars;
+}
+
+// Motif pattern length in ticks: bars * bar_ticks, at least one tick.
+// Precondition: 1 <= bars <= 8 (see clamp_motif_bars), bar_ticks >= 0.
+fn motif_ticks(bar_ticks: i64, bars: i64) -> (result: i64) {
+    let ticks: i64 = bars *% bar_ticks;
+    if ticks < 1 {
+        return 1;
+    }
+    return ticks;
+}
+
+// ---- Loop kernels (ticks) ----
+
+// Loop start clamped to >= 0.
+fn loop_start_tick(start: i64) -> (result: i64) {
+    if start < 0 {
+        return 0;
+    }
+    return start;
+}
+
+// Loop end: never before the (unclamped) start, mirroring project
+// normalization where the end floor uses the raw start value.
+fn loop_end_tick(start: i64, end: i64) -> (result: i64) {
+    if end < start {
+        return start;
+    }
+    return end;
+}

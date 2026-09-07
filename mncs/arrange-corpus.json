@@ -1,0 +1,2489 @@
+{
+ "schema_version": "0.1",
+ "name": "scratchtrack-arrange-kernels",
+ "cases": [
+  {
+   "id": "max-loop-takes",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "max_loop_takes"
+    },
+    "arguments": []
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 12,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "take-allowed-0",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_take_allowed"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "take-allowed-11",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_take_allowed"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 11,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "take-blocked-12",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_take_allowed"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "max-scratches",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "max_scratches"
+    },
+    "arguments": []
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 36,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "scratch-allowed-35",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "scratch_allowed"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 35,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "scratch-blocked-36",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "scratch_allowed"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 36,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "bpm-ok",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "normalize_bpm"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 104,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 104,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bpm-low",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "normalize_bpm"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 20,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 20,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bpm-high",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "normalize_bpm"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 300,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 300,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bpm-under",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "normalize_bpm"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 19,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 104,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "bpm-over",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "normalize_bpm"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 301,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 104,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "sanitize-clean",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "sanitize_clip"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 96,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 48,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "sanitize-neg-start",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "sanitize_clip"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 96,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 12,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "sanitize-zero-len",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "sanitize_clip"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 24,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 12,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 48,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "sanitize-neg-len",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "sanitize_clip"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": -3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 24,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 48,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "clip-end",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_end"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+       "name": "Clip",
+       "fields": [
+        [
+         "length",
+         {
+          "integer": {
+           "value": 96,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "offset",
+         {
+          "integer": {
+           "value": 12,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "start",
+         {
+          "integer": {
+           "value": 48,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 144,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "active-inside",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_active"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "active-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_active"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "active-end",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_active"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "active-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_active"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "cliplen",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_length_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 96,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cliplen-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_length_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cliplen-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clip_length_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "move",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "move_start"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 124,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "move-floor",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "move_start"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": -200,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "move-ceil",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "move_start"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 990,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1000,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "resize",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "resize_length"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 120,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "resize-floor",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "resize_length"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": -200,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 24,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "resize-ceil",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "resize_length"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 990,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 24,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1000,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1000,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "snip-valid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "snip_valid"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "snip-at-start",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "snip_valid"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "snip-at-end",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "snip_valid"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 144,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "snip-left",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "snip_left"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 24,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 12,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 48,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "snip-right",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "snip_right"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 12,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 72,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:scratchtrack.arrange.v1::Clip::length%3Ai64%3Boffset%3Ai64%3Bstart%3Ai64%3B",
+      "name": "Clip",
+      "fields": [
+       [
+        "length",
+        {
+         "integer": {
+          "value": 72,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "offset",
+        {
+         "integer": {
+          "value": 36,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "start",
+        {
+         "integer": {
+          "value": 72,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrap",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "wrap_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 100,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 4,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrap-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "wrap_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 95,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrap-exact",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "wrap_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrap-degenerate",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "wrap_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 5,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stepidx",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "step_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 8,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stepidx-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "step_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stepidx-off",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "step_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 50,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 6,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stepidx-degenerate",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "step_index"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": -1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motifbars-low",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clamp_motif_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motifbars-mid",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clamp_motif_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 3,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motifbars-high",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "clamp_motif_bars"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 8,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motif-ticks",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "motif_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 192,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motif-ticks-odd",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "motif_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 84,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 3,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 252,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "motif-ticks-zero",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "motif_ticks"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 96,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "loopstart-neg",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_start_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": -5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 0,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "loopstart-ok",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_start_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 48,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "loopend",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_end_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 200,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 200,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "loopend-floor",
+   "request": {
+    "schema_version": "0.1",
+    "step_budget": 256,
+    "target": {
+     "module": "scratchtrack.arrange.v1",
+     "function": "loop_end_tick"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ]
+   },
+   "expected_status": "returned",
+   "expected": [
+    {
+     "integer": {
+      "value": 48,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  }
+ ]
+}
